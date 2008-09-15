@@ -86,6 +86,13 @@ class MainFrame(wx.Frame):
 					("Run\tF7", "Run", self.OnRun, True, self.runIcon, self.runIconOff),
 					("Terminate\tF8", "Terminate", self.OnTerminate, False, self.terminateIcon, self.terminateIconOff),
 					)),
+				("&View", 
+					(
+					("Record\tCtrl+1", "Record", self.OnRecordViewSelected),
+					("Design\tCtrl+2", "Design", self.OnDesignViewSelected),
+					("Runtime\tCtrl+3", "Runtime", self.OnRuntimeViewSelected),
+					("Result\tCtrl+4", "Result", self.OnResultViewSelected),
+					)),
 				("&Help", (
 					("&About", "", self.OnAll),
 					)),
@@ -199,6 +206,19 @@ class MainFrame(wx.Frame):
 		menu = self.GetMenuBar().GetMenu(1)
 		menu.FindItemByPosition(3).Enable(True)
 		menu.FindItemByPosition(4).Enable(False)
+
+
+	def OnRecordViewSelected(self, event):
+		self.nb.SetSelection(0)
+
+	def OnDesignViewSelected(self, event):
+		self.nb.SetSelection(1)
+
+	def OnRuntimeViewSelected(self, event):
+		self.nb.SetSelection(2)
+
+	def OnResultViewSelected(self, event):
+		self.nb.SetSelection(3)
 
 	def OnAll(self, event):
 		print event
