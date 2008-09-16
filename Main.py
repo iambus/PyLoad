@@ -6,6 +6,7 @@ import RecordPanel
 
 import Record
 
+import proxy
 
 class ColoredPanel(wx.Window):
 	def __init__(self, parent, color):
@@ -54,6 +55,8 @@ class MainFrame(wx.Frame):
 		self.InitIcons()
 		self.UseMenuBar()
 		self.UseToolBar()
+
+		self.proxy = None
 
 	def InitIcons(self):
 		self.startIcon = IconImages.getStartBitmap()
@@ -184,6 +187,11 @@ class MainFrame(wx.Frame):
 		record = Record.Record()
 		self.nb.recordTab.AppendNewRecord(record)
 
+		if self.proxy == None:
+			self.proxy = True
+			proxy.thread_start()
+
+		proxy.begin_catch(self.nb.recordTab.AppendNewHit)
 
 	def OnStop(self, evt):
 		self.toolbar.EnableTool(self.toolStart.GetId(), 1)
@@ -191,6 +199,8 @@ class MainFrame(wx.Frame):
 		menu = self.GetMenuBar().GetMenu(1)
 		menu.FindItemByPosition(0).Enable(True)
 		menu.FindItemByPosition(1).Enable(False)
+
+		proxy.end_catch()
 
 
 	def OnRun(self, evt):

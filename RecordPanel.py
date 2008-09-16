@@ -282,10 +282,6 @@ class RecordPanel(wx.Panel):
 		if record.add_hit(hit):
 			# Page already exits
 			pageItem = self.tree.GetLastChild(recordItem)
-			hitItem = self.tree.AppendItem(pageItem, hit.label)
-			self.tree.SetPyData(hitItem, hit)
-			self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Normal)
-			self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Selected)
 		else:
 			# New page
 			page = record.last_page()
@@ -294,10 +290,14 @@ class RecordPanel(wx.Panel):
 			self.tree.SetItemImage(pageItem, self.recordIcon, wx.TreeItemIcon_Normal)
 			self.tree.SetItemImage(pageItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
 
-			hitItem = self.tree.AppendItem(pageItem, hit.label)
-			self.tree.SetPyData(hitItem, hit)
-			self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Normal)
-			self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Selected)
+		hitItem = self.tree.AppendItem(pageItem, hit.label)
+		self.tree.SetPyData(hitItem, hit)
+		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Selected)
+
+		self.tree.Expand(recordItem)
+		self.tree.Expand(pageItem)
+		self.tree.Expand(hitItem)
 
 	def UpdateHit(self, hit):
 		print 'TODO: update hit'

@@ -6,8 +6,6 @@ import cStringIO
 import Logger
 log = Logger.getLogger()
 
-log.info('Started')
-
 import Record
 
 respfilter = lambda x: False
@@ -194,6 +192,8 @@ class ThreadingHTTPServer (SocketServer.ThreadingMixIn,
 
 
 def start(port=8008):
+    log.info('Started')
+
     HandlerClass = ProxyHandler
     ServerClass = ThreadingHTTPServer
     protocol = "HTTP/1.0"
