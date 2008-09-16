@@ -43,6 +43,8 @@ class Hit(PropertyMixin):
 	def __init__(self, page, root = '.'):
 		PropertyMixin.__init__(self)
 		self.page = page
+		self.reqstr = None
+		self.respstr = None
 
 	def save(self):
 		#TODO: save the correct content

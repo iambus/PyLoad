@@ -1,16 +1,4 @@
 
-__doc__ = """Tiny HTTP Proxy.
-
-This module implements GET, HEAD, POST, PUT and DELETE methods
-on BaseHTTPServer, and behaves as an HTTP proxy.  The CONNECT
-method is also implemented experimentally, but has not been
-tested yet.
-
-Any help will be greatly appreciated.		SUZUKI Hisao
-"""
-
-__version__ = "0.2.1"
-
 import BaseHTTPServer, select, socket, SocketServer, urlparse
 
 import cStringIO
@@ -20,35 +8,37 @@ log = Logger.getLogger()
 
 log.info('Started')
 
-hits = []
+import Record
+
 respfilter = lambda x: False
+respcallback = lambda x: False
 
 class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
     __base = BaseHTTPServer.BaseHTTPRequestHandler
     __base_handle = __base.handle
 
-    server_version = "TinyHTTPProxy/" + __version__
     rbufsize = 0                        # self.rfile Be unbuffered
 
 
     def init(self):
         log.debug('init:%s' % self)
-        self.hit = { 'reqstr' : None, 'respstr' : None }
+        self.hit = Record.Hit(self.path)
         #TODO: thread-safe
-        hits.append(self.hit)
 
         self.reqstr = cStringIO.StringIO()
         self.respstr = None
 
     def end(self):
         log.debug('end:%s' % self)
-        self.hit['reqstr'] = self.reqstr.getvalue()
+        self.hit.reqstr = self.reqstr.getvalue()
         self.reqstr.close()
         if self.respstr:
-            self.hit['respstr'] = self.respstr.getvalue()
+            self.hit.respstr = self.respstr.getvalue()
             self.respstr.close()
         else:
-            self.hit['respstr'] = None
+            self.hit.respstr = None
+        global respcallback
+        respcallback(self.hit)
 
     def req(self, data):
         self.reqstr.write(data)
@@ -62,12 +52,12 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
             self.respstr.write(data)
 
     def reqinfo(self, host, port):
-        self.hit['reqhost'] = host
-        self.hit['reqport'] = port
+        self.hit.reqhost = host
+        self.hit.reqport = port
 
     def respinfo(self, host, port):
-        self.hit['resphost'] = host
-        self.hit['respport'] = port
+        self.hit.resphost = host
+        self.hit.respport = port
 
 
     def handle(self):
@@ -203,7 +193,7 @@ class ThreadingHTTPServer (SocketServer.ThreadingMixIn,
     pass
 
 
-def start(port=8000):
+def start(port=8008):
     HandlerClass = ProxyHandler
     ServerClass = ThreadingHTTPServer
     protocol = "HTTP/1.0"
@@ -217,7 +207,7 @@ def start(port=8000):
     log.info("Serving HTTP on %s port %s ..." % (sa[0], sa[1]))
     httpd.serve_forever()
 
-def thread_start(port=8000):
+def thread_start(port=8008):
     import threading
     class ProxyThread(threading.Thread):
         def __init__(self, name='ListenThread'):
@@ -227,20 +217,17 @@ def thread_start(port=8000):
     thread = ProxyThread() 
     thread.start()
 
-def begin_catch(filter = None):
-    global hits
+def begin_catch(callback = None, filter = None):
+    global respcallback, respfilter
+    if callback:
+        respcallback = callback
     if filter:
-        global respfilter
         respfilter = filter
-    hits = []
-    pass
 
 def end_catch():
-    global hits, respfilter
-    h = hits
-    hits = []
+    global respcallback, respfilter
     respfilter = lambda x: False
-    return h
+    respcallback = lambda x: False
 
 def WebFilter(data):
     import re
@@ -252,14 +239,16 @@ def WebFilter(data):
 
 
 def test():
-    start(8000)
+    start(8008)
 
-if __name__ == '__main__':
-    #test()
+def test_thread():
     thread_start()
     begin_catch(WebFilter)
     import time
     time.sleep(10)
     h = end_catch()
+
+if __name__ == '__main__':
+    test()
 
 # vim:expandtab:shiftwidth=4
