@@ -89,6 +89,10 @@ class DetailsPanel(wx.Panel):
 	def LoadHit(self, hit):
 		self.GiveAllTabs()
 		self.infoTab.Load(hit)
+		if hit.reqstr:
+			self.requestTab.Load(hit.get_relative_path(hit.reqfilename))
+		if hit.respstr:
+			self.responseTab.Load(hit.get_relative_path(hit.respfilename))
 	
 #
 ##################################################
@@ -246,6 +250,7 @@ class RecordPanel(wx.Panel):
 	########################################
 
 	def AppendRecord(self, record):
+		assert False, "Don't use it right now"
 		recordItem = self.tree.AppendItem(self.root, "%s" % record.label)
 		self.tree.SetPyData(recordItem, record)
 		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
@@ -264,6 +269,9 @@ class RecordPanel(wx.Panel):
 				self.tree.SetItemImage(item, self.actionIcon, wx.TreeItemIcon_Selected)
 	
 	def AppendNewRecord(self, record):
+		self.project.add_record(record)
+		record.make_folder()
+
 		recordItem = self.tree.AppendItem(self.root, "%s" % record.label)
 		self.tree.SetPyData(recordItem, record)
 		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
@@ -299,9 +307,11 @@ class RecordPanel(wx.Panel):
 		self.tree.Expand(pageItem)
 		self.tree.Expand(hitItem)
 
+		hit.save()
+
 	def UpdateHit(self, hit):
+		assert False, 'Not implemented...'
 		print 'TODO: update hit'
-		pass
 
 	def PostHit(self, hit, updated = False):
 		event = HitEvent(hit = hit, isNewHit = updated)

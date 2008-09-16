@@ -62,7 +62,9 @@ class EditorPanel(wx.Panel):
 	def OnSearch(self, event):
 		print 'search'
 
-	def Load(self):
+	def Load(self, path = None):
+		if path:
+			self.path = path
 		if not self.path:
 			return
 		fp = open(self.path, 'rb')

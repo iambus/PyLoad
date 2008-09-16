@@ -11,6 +11,8 @@ import Record
 respfilter = lambda x: False
 respcallback = lambda x: False
 
+running = 1
+
 class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
     __base = BaseHTTPServer.BaseHTTPRequestHandler
     __base_handle = __base.handle
@@ -205,7 +207,8 @@ def start(port=8008):
 
     sa = httpd.socket.getsockname()
     log.info("Serving HTTP on %s port %s ..." % (sa[0], sa[1]))
-    httpd.serve_forever()
+    while running:
+        httpd.handle_request()
 
 def thread_start(port=8008):
     import threading
@@ -216,6 +219,10 @@ def thread_start(port=8008):
             start(port)
     thread = ProxyThread() 
     thread.start()
+
+def stop():
+    global running
+    running = 0
 
 def begin_catch(callback = None, filter = None):
     global respcallback, respfilter

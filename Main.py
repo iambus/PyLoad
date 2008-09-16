@@ -5,6 +5,7 @@ import IconImages
 import RecordPanel
 
 import Record
+import Project
 
 import proxy
 
@@ -56,6 +57,10 @@ class MainFrame(wx.Frame):
 		self.UseMenuBar()
 		self.UseToolBar()
 
+		self.Bind(wx.EVT_CLOSE, self.OnClose)
+
+		self.project = Project.Project('.load')
+		self.nb.recordTab.project = self.project
 		self.proxy = None
 
 	def InitIcons(self):
@@ -238,6 +243,12 @@ class MainFrame(wx.Frame):
 
 	def OnExit(self, event):
 		self.Close()
+
+	def OnClose(self, event):
+		if self.proxy:
+			self.proxy = None
+			proxy.stop()
+		self.Destroy()
 
 
 
