@@ -23,14 +23,14 @@ class Scope:
 	
 	def assign(self, name, value = None):
 		assert type(name) == str or type(name) == unicode
-		if self.assignExisted(name, value):
+		if self.assign_existed(name, value):
 			return
-		elif self.base and self.base.assignExisted(name, value):
+		elif self.base and self.base.assign_existed(name, value):
 			return
 		else:
 			self.variables[name] = value
 
-	def assignExisted(self, name, value):
+	def assign_existed(self, name, value):
 		if self.variables.has_key(name):
 			self.variables[name] = value
 			return True
