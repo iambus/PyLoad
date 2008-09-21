@@ -208,7 +208,11 @@ def start(port=8008):
     sa = httpd.socket.getsockname()
     log.info("Serving HTTP on %s port %s ..." % (sa[0], sa[1]))
     while running:
+        log.debug('while running')
         httpd.handle_request()
+        if not running:
+            break
+    #log.info('Stopped')
 
 def thread_start(port=8008):
     import threading
@@ -223,6 +227,10 @@ def thread_start(port=8008):
 def stop():
     global running
     running = 0
+    log.info('Stopping')
+    import urllib
+    proxies = {'http': 'http://localhost:8008'}
+    urllib.urlopen('http://localhost:8000/', proxies=proxies)
 
 def begin_catch(callback = None, filter = None):
     global respcallback, respfilter

@@ -8,6 +8,9 @@ import EditorPanel
 
 import Record
 
+import Logger
+log = Logger.getLogger()
+
 class ColoredPanel(wx.Window):
 	def __init__(self, parent, color = 'red'):
 		wx.Window.__init__(self, parent, -1, style = wx.SIMPLE_BORDER)
@@ -38,32 +41,39 @@ class DetailsPanel(wx.Panel):
 				wx.lib.layoutf.Layoutf('t_10#2;l=l10#1;h*;w*',(self,self.nb)))
 		self.testButton.Hide()
 
+
+		#self.Bind(wx.EVT_BUTTON, self.testButton, self.OnPlay)
+
 	def RemoveAllPages(self):
 		self.nb.DeleteAllPages()
 	
-	def GiveInfoTab(self):
+	def GiveCommonTabs(self):
 		if not self.infoTab:
 			self.infoTab = InfoPanel.InfoPanel(self.nb)
 			self.nb.AddPage(self.infoTab, 'Info')
-		elif self.beforeTab:
-			self.nb.DeletePage(4)
+			self.beforeTab = EditorPanel.EditorPanel(self.nb)
+			self.nb.AddPage(self.beforeTab, 'Before')
+			self.afterTab = EditorPanel.EditorPanel(self.nb)
+			self.nb.AddPage(self.afterTab, 'After')
+		elif self.requestTab:
 			self.nb.DeletePage(3)
 			self.nb.DeletePage(2)
-			self.nb.DeletePage(1)
+			self.requestTab = None
+			self.responseTab = None
 
 	def GiveAllTabs(self):
 		if not self.infoTab:
 			self.infoTab = InfoPanel.InfoPanel(self.nb)
 			self.nb.AddPage(self.infoTab, 'Info')
-		if not self.beforeTab:
-			self.beforeTab = ColoredPanel(self.nb)
+			self.beforeTab = EditorPanel.EditorPanel(self.nb)
+			self.nb.AddPage(self.beforeTab, 'Before')
+			self.afterTab = EditorPanel.EditorPanel(self.nb)
+			self.nb.AddPage(self.afterTab, 'After')
+		if not self.requestTab:
 			self.requestTab = EditorPanel.EditorPanel(self.nb)
 			self.responseTab = EditorPanel.EditorPanel(self.nb)
-			self.afterTab = ColoredPanel(self.nb)
-			self.nb.AddPage(self.beforeTab, 'Before')
-			self.nb.AddPage(self.requestTab, 'Request')
-			self.nb.AddPage(self.responseTab, 'Reponse')
-			self.nb.AddPage(self.afterTab, 'After')
+			self.nb.InsertPage(2, self.requestTab, 'Request')
+			self.nb.InsertPage(3, self.responseTab, 'Reponse')
 
 	def Load(self, data):
 		t = type(data)
@@ -79,19 +89,34 @@ class DetailsPanel(wx.Panel):
 		self.testButton.Show()
 
 	def LoadRecord(self, record):
-		self.GiveInfoTab()
+		self.GiveCommonTabs()
 		self.infoTab.Load(record)
+		if record.beforescript:
+			self.beforeTab.BindTo(record.beforescript, 'script')
+		if record.afterscript:
+			self.afterTab.BindTo(record.afterscript, 'script')
 
 	def LoadPage(self, page):
-		self.GiveInfoTab()
+		self.GiveCommonTabs()
 		self.infoTab.Load(page)
+		if page.beforescript:
+			self.beforeTab.BindTo(page.beforescript, 'script')
+		if page.afterscript:
+			self.afterTab.BindTo(page.afterscript, 'script')
 
 	def LoadHit(self, hit):
+		assert hit.beforescript.script != None
 		self.GiveAllTabs()
 		self.infoTab.Load(hit)
+		if hit.beforescript:
+			self.beforeTab.BindTo(hit.beforescript, 'script')
+		if hit.afterscript:
+			self.afterTab.BindTo(hit.afterscript, 'script')
 		if hit.reqstr:
+			self.requestTab.BindTo(hit, 'reqstr')
 			self.requestTab.Load(hit.get_relative_path(hit.reqfilename))
 		if hit.respstr:
+			self.responseTab.BindTo(hit, 'respstr')
 			self.responseTab.Load(hit.get_relative_path(hit.respfilename))
 	
 #
@@ -108,6 +133,8 @@ class RecordTree(wx.TreeCtrl):
 				| wx.TR_HIDE_ROOT
 				| wx.TR_HAS_VARIABLE_ROW_HEIGHT
 				)
+	def SelectedData(self):
+		return self.GetPyData(self.GetSelection())
 
 
 from wx.lib.mixins.treemixin import ExpansionState
@@ -167,6 +194,8 @@ class RecordPanel(wx.Panel):
 
 		self.Bind(EVT_HIT_UPDATED, self.OnHit)
 
+		self.Bind(wx.EVT_BUTTON, self.OnPlay, self.detailPanel.testButton)
+
 	########################################
 
 	def InitializeRoot(self):
@@ -189,6 +218,9 @@ class RecordPanel(wx.Panel):
 		self.tree.SetItemImage(self.root, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
 
 
+
+	def ResetSize(self):
+		self.splitter.SetSashPosition(170)
 
 
 	########################################
@@ -238,8 +270,12 @@ class RecordPanel(wx.Panel):
 	def OnExit(self):
 		self.tree.DeleteAllItems()
 
+
 	def OnHit(self, event):
 		self.AppendHit(event.hit, event.isNewHit)
+
+	def OnPlay(self, event):
+		self.Play()
 
 	########################################
 
@@ -316,10 +352,10 @@ class RecordPanel(wx.Panel):
 	def PostHit(self, hit, updated = False):
 		event = HitEvent(hit = hit, isNewHit = updated)
 		wx.PostEvent(self, event)
-	
-	def ResetSize(self):
-		self.splitter.SetSashPosition(170)
 
+	def Play(self):
+		self.tree.SelectedData().play()
+	
 	########################################
 
 # }}}

@@ -4,6 +4,8 @@ import os.path
 import time
 import datetime
 
+from Player import Player
+
 #TODO: thread-safe
 def uuid():
 	i = 0
@@ -47,9 +49,10 @@ class PropertyMixin:
 		fp.close()
 
 
-class Hit(PropertyMixin):
+class Hit(PropertyMixin, Player):
 	def __init__(self, page, root = '.'):
 		PropertyMixin.__init__(self)
+		Player.__init__(self)
 		self.oreqfilename = self.foldername + '_original.txt'
 		self.oresqfilename = self.foldername + '_response_original.txt'
 		self.reqfilename = self.foldername + '.txt'
@@ -67,13 +70,15 @@ class Hit(PropertyMixin):
 			self.save_relative_file(self.oresqfilename, self.resqstr)
 			self.save_relative_file(self.respfilename, self.resqstr)
 
-class Page():
+class Page(Player):
 	def __init__(self, path):
+		Player.__init__(self)
 		self.uuid = guuid.next()
 		self.time = None
 		self.path = path
 		self.label = path
 		self.hits = []
+		self.childern = self.hits
 
 	def add_hit(self, hit):
 		# Return True if this hit is in page
@@ -86,11 +91,13 @@ class Page():
 		else:
 			return False
 
-class Record(PropertyMixin):
+class Record(PropertyMixin, Player):
 	def __init__(self, root = '.'):
 		PropertyMixin.__init__(self, root)
+		Player.__init__(self)
 		self.hits = []
 		self.pages = []
+		self.childern = self.pages
 	
 	def add_hit(self, hit):
 		# Return True if page alread exists

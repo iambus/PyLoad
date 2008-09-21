@@ -44,6 +44,14 @@ class Scope:
 			d = self.base.get_variables()
 			d.update(self.variables)
 			return d
+	
+	# For debug usage, don't return built names
+	def get_names(self):
+		names = self.get_variables().keys()
+		names.sort()
+		if '__builtins__' in names:
+			names.remove('__builtins__')
+		return names
 
 	def execute(self, script):
 		variables = self.get_variables()
