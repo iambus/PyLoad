@@ -46,6 +46,10 @@ class TestScript(unittest.TestCase):
 		script = Script('i = k')
 		self.assertRaises(NameError, script.execute)
 
+	def testEval(self):
+		self.script.script = '2'
+		self.assertEqual(self.script.eval(), 2)
+
 ##################################################
 
 class B(Player):

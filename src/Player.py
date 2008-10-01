@@ -15,8 +15,12 @@ class Script(Playable.Playable):
 			scope = self.scope
 		scope.execute(self.script)
 
-	def eval(self):
-		raise NotImplementedError()
+	def eval(self, scope = None):
+		if scope == None:
+			if self.scope == None:
+				self.scope = Scope.Scope()
+			scope = self.scope
+		return scope.eval(self.script)
 
 	def play(self, scope):
 		self.execute(scope)
@@ -33,17 +37,21 @@ class Player(Playable.Playable):
 		self.afterscript = Script('')
 
 	def add_script(self, script):
+		assert isinstance(script, Script)
 		self.scripts.append(script)
 	
 	def add_childern(self, child):
+		assert isinstance(child, Playable.Playable)
 		childern.append(child)
 	
 	def execute_script(self, script, base = None):
+		assert isinstance(script, Script)
 		if base == None:
 			base = self.scope
 		script.execute(base)
 
 	def execute_child(self, child, base = None):
+		assert isinstance(child, Playable.Playable)
 		if base == None:
 			base = self.scope
 		child.play(Scope.Scope(base))
@@ -67,9 +75,6 @@ class Player(Playable.Playable):
 	def after(self, basescope = None):
 		self.execute_script(self.afterscript, basescope)
 
-
-class Controller:
-	pass
 
 
 if __name__ == '__main__':

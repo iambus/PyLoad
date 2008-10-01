@@ -6,7 +6,7 @@ import unittest
 
 def warning():
 	marked = ['__init__.py', 'RunAllTests.py', 'LoadTestEnv.py']
-	goodpatterns = ['Test*.py', '*.pyc', '*.log']
+	goodpatterns = ['Test*.py', '*.pyc', '*.log', '*.bat']
 	files = [i for j in map(glob.glob, goodpatterns) for i in j] + marked
 	files = set(files)
 	allfiles = set(glob.glob('*'))

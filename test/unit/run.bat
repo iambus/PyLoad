@@ -1,0 +1,2 @@
+python RunAllTests.py
+pause
