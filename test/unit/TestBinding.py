@@ -2,7 +2,7 @@
 import unittest
 import LoadTestEnv
 
-from EditorPanel import Binding
+from Binding import *
 
 class TestBinding(unittest.TestCase):
 
@@ -27,6 +27,9 @@ class TestBinding(unittest.TestCase):
 	def testGet(self):
 		pass
 
+class TestFuncBinding(unittest.TestCase):
+	#TODO: test me
+	pass
 
 if __name__ == '__main__':
 	unittest.main()
