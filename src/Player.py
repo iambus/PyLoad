@@ -1,15 +1,51 @@
 
 import Playable
-import Evalable
+import Scope
 
-class Player(Playable.Playable, Evalable.Scoped):
+class Script():
+	def __init__(self, script = '', scope = None):
+		self.script = script
+		self.scope = scope
+
+	def execute(self, scope = None):
+		if scope == None:
+			if self.scope == None:
+				self.scope = Scope.Scope()
+			scope = self.scope
+		scope.execute(self.script)
+
+	def eval(self):
+		raise NotImplementedError()
+
+	def play(self, scope):
+		self.execute(scope)
+
+class Player(Playable.Playable):
 	def __init__(self):
 		Playable.Playable.__init__(self)
-		Evalable.Scoped.__init__(self)
 
-		self.beforescript = Evalable.Script('')
-		self.afterscript = Evalable.Script('')
+		self.scope = Scope.Scope()
+		self.scripts = []
+		self.childern = []
 
+		self.beforescript = Script('')
+		self.afterscript = Script('')
+
+	def add_script(self, script):
+		self.scripts.append(script)
+	
+	def add_childern(self, child):
+		childern.append(child)
+	
+	def execute_script(self, script, base = None):
+		if base == None:
+			base = self.scope
+		script.execute(base)
+
+	def execute_child(self, child, base = None):
+		if base == None:
+			base = self.scope
+		child.play(Scope.Scope(base))
 
 	def play(self, basescope = None):
 		if basescope == None:
@@ -21,11 +57,11 @@ class Player(Playable.Playable, Evalable.Scoped):
 	def before(self, basescope = None):
 		self.execute_script(self.beforescript, basescope)
 
-	def execute(self, basescope = None):
-		self.play(basescope)
-
 	def playmain(self, basescope):
-		Evalable.Scoped.execute(self, basescope)
+		for script in self.scripts:
+			script.execute(basescope)
+		for child in self.childern:
+			child.play(Scope.Scope(basescope))
 
 	def after(self, basescope = None):
 		self.execute_script(self.afterscript, basescope)
@@ -37,7 +73,17 @@ class Controller:
 
 if __name__ == '__main__':
 	player = Player()
-	player.beforescript = Evalable.Script('print "before"')
-	player.afterscript = Evalable.Script('print "after"')
+	player.beforescript = Script('print "before"')
+	player.afterscript = Script('print "after"')
 	player.play()
+
+	scoped = Player()
+	script1 = Script('print 1')
+	script2 = Script('i = 77')
+	script3 = Script('print i')
+	scoped.add_script(script1)
+	scoped.add_script(script2)
+	scoped.add_script(script3)
+	scoped.play()
+
 
