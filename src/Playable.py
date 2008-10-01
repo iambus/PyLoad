@@ -5,18 +5,8 @@ class Playable:
 		pass
 	
 	def play(self):
-		self.before()
-		self.playmain()
-		self.after()
+		raise NotImplementedError()
 
-	def before(self):
-		pass
-	
-	def playmain(self):
-		pass
-	
-	def after(self):
-		pass
 
 if __name__ == '__main__':
 	Playable().play()

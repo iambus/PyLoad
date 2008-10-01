@@ -2,8 +2,9 @@
 import Playable
 import Scope
 
-class Script():
+class Script(Playable.Playable):
 	def __init__(self, script = '', scope = None):
+		Playable.Playable.__init__(self)
 		self.script = script
 		self.scope = scope
 
