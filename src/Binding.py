@@ -1,5 +1,5 @@
 
-class Binding:
+class AttrBinding:
 	def __init__(self, variable, name):
 		self.variable = variable
 		self.name = name

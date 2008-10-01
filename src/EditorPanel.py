@@ -94,7 +94,7 @@ class EditorPanel(wx.Panel):
 			fp.close()
 
 	def BindTo(self, variable, name):
-		self.binding = Binding(variable, name)
+		self.binding = AttrBinding(variable, name)
 		# please use Load explicitly
 		#self.editor.SetValue(self.binding.get())
 
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 		def __init__(self):
 			self.x = 2
 	c = C()
-	binding = Binding(c, 'x')
+	binding = AttrBinding(c, 'x')
 	print binding
 	binding.set(2)
 	assert binding.get() == 2
