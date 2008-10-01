@@ -113,7 +113,8 @@ class DetailsPanel(wx.Panel):
 		if hit.afterscript:
 			self.afterTab.BindTo(hit.afterscript, 'script')
 		if hit.reqstr:
-			self.requestTab.BindTo(hit, 'reqstr')
+			#self.requestTab.BindTo(hit, 'reqstr')
+			self.requestTab.BindToFuncs(hit.get_reqstr, hit.set_reqstr)
 			self.requestTab.Load(hit.get_relative_path(hit.reqfilename))
 		if hit.respstr:
 			self.responseTab.BindTo(hit, 'respstr')

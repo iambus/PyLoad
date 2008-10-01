@@ -14,6 +14,15 @@ class Binding:
 	def set(self, value):
 		setattr(self.variable, self.name, value)
 
+class FuncBinding:
+	def __init__(self, readfunc, writefunc):
+		self.readfunc = readfunc
+		self.writefunc = writefunc
+	def get(self):
+		return self.readfunc()
+	def set(self, value):
+		self.writefunc(value)
+
 def GetFont():
 	fontAttrs = [10, wx.SWISS, wx.NORMAL, wx.NORMAL, False, 'Courier New']
 	return wx.Font(*fontAttrs)
@@ -102,7 +111,13 @@ class EditorPanel(wx.Panel):
 
 	def BindTo(self, variable, name):
 		self.binding = Binding(variable, name)
-		self.editor.SetValue(self.binding.get())
+		# please use Load explicitly
+		#self.editor.SetValue(self.binding.get())
+
+	def BindToFuncs(self, readfunc, writefunc):
+		self.binding = FuncBinding(readfunc, writefunc)
+		# please use Load explicitly
+		#self.editor.SetValue(self.binding.get())
 
 
 if __name__ == '__main__':

@@ -5,6 +5,10 @@ import time
 import datetime
 
 from Player import Player
+from Request import Request
+
+import Logger
+log = Logger.getLogger()
 
 #TODO: thread-safe
 def uuid():
@@ -61,6 +65,18 @@ class Hit(PropertyMixin, Player):
 		self.reqstr = None
 		self.respstr = None
 
+	def finish(self):
+		self.request = Request(self.page, self.reqstr)
+
+	def get_reqstr(self):
+		log.debug('get reqstr')
+		return self.reqstr
+
+	def set_reqstr(self, reqstr):
+		log.debug('set reqstr')
+		self.reqstr = reqstr
+		self.request.set_reqstr(reqstr)
+
 	def save(self):
 		#TODO: save the correct content
 		if self.reqstr:
@@ -69,6 +85,13 @@ class Hit(PropertyMixin, Player):
 		if self.respstr:
 			self.save_relative_file(self.oresqfilename, self.resqstr)
 			self.save_relative_file(self.respfilename, self.resqstr)
+	
+	def playmain(self, basescope=None):
+		if basescope == None:
+			self.request.play()
+		else:
+			response = self.request.play(basescope.get_variables())
+			basescope.assign('response', response)
 
 class Page(Player):
 	def __init__(self, path):

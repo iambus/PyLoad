@@ -31,6 +31,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
     def end(self):
         log.debug('end:%s' % self)
         self.hit.reqstr = self.reqstr.getvalue()
+        self.hit.finish()
         self.reqstr.close()
         if self.respstr:
             self.hit.respstr = self.respstr.getvalue()
