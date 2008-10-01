@@ -26,7 +26,7 @@ class NoteBook(wx.Toolbook):
 		self.AddPage(self.recordTab, 'Record', imageId=-1)
 		self.recordTab.ResetSize()
 
-		colourList = [ "Design", "Runtime", "Result", ]
+		colourList = [ "Edit", "Play", "Result", ]
 		g = self.makeColorPanel()
 		for colour in colourList:
 			win = g.next()
@@ -97,8 +97,8 @@ class MainFrame(wx.Frame):
 				("&View", 
 					(
 					("Record\tCtrl+1", "Record", self.OnRecordViewSelected),
-					("Design\tCtrl+2", "Design", self.OnDesignViewSelected),
-					("Runtime\tCtrl+3", "Runtime", self.OnRuntimeViewSelected),
+					("Edit\tCtrl+2", "Edit", self.OnEditViewSelected),
+					("Play\tCtrl+3", "Play", self.OnPlayViewSelected),
 					("Result\tCtrl+4", "Result", self.OnResultViewSelected),
 					)),
 				("&Help", (
@@ -226,10 +226,10 @@ class MainFrame(wx.Frame):
 	def OnRecordViewSelected(self, event):
 		self.nb.SetSelection(0)
 
-	def OnDesignViewSelected(self, event):
+	def OnEditViewSelected(self, event):
 		self.nb.SetSelection(1)
 
-	def OnRuntimeViewSelected(self, event):
+	def OnPlayViewSelected(self, event):
 		self.nb.SetSelection(2)
 
 	def OnResultViewSelected(self, event):
