@@ -3,6 +3,10 @@ import wx
 from Special import Special
 import Controller
 import Player
+import Record
+
+import Logger
+log = Logger.getLogger()
 
 class MyDropTarget(wx.PyDropTarget):
 	def __init__(self, panel):
@@ -33,6 +37,7 @@ class MyDropTarget(wx.PyDropTarget):
 
 		item, flags = self.tree.HitTest((x,y))
 		if flags & wx.TREE_HITTEST_NOWHERE:
+			log.debug('no place to drop')
 			return d
 
 		self.panel.DropData(item, self.data.GetData())
@@ -97,6 +102,9 @@ class SpecialsPanel(wx.Panel):
 		self.specialIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize))
 		self.specialOpenIcon = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize))
 
+		self.recordIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize))
+		self.recordOpenIcon = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize))
+
 		self.pageIcon       = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize))
 		self.pageOpenIcon   = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize))
 		self.hitIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, iconSize))
@@ -128,11 +136,15 @@ class SpecialsPanel(wx.Panel):
 
 	def DropData(self, item, data):
 		itemData = self.tree.GetPyData(item)
+
+		# find a place to insert
 		if not (isinstance(itemData, Special) or isinstance(itemData, Controller.Controller)):
 			item = self.tree.GetItemParent(item)
 			itemData = self.tree.GetPyData(item)
 			if not (isinstance(itemData, Special) or isinstance(itemData, Controller.Controller)):
+				log.debug('no place to insert')
 				return
+
 		import Repository
 		data = Repository.lookup(data)
 		import inspect
@@ -140,7 +152,7 @@ class SpecialsPanel(wx.Panel):
 			data = data()
 			self.InsertController(item, data)
 		else:
-			self.CopyRecord(item, data)
+			self.UseRecord(item, data)
 
 	def InsertController(self, item, controller):
 		itemData = self.tree.GetPyData(item)
@@ -161,9 +173,51 @@ class SpecialsPanel(wx.Panel):
 		self.tree.Expand(item)
 
 
-	#TODO: give a better name
-	def CopyRecord(self, item, record):
-		pass
+	def UseRecord(self, item, data):
+		log.debug('use record')
+		parentdata = self.tree.GetPyData(item)
+		parentdata.add_child(data)
+
+		if isinstance(data, Record.Record):
+			self.InsertRecord(item, data)
+		elif isinstance(data, Record.Page):
+			self.InsertPage(item, data)
+		elif isinstance(data, Record.Hit):
+			self.InsertHit(item, data)
+		else:
+			assert False, 'Unknown type'
+
+		self.tree.Expand(item)
+
+	def InsertRecord(self, item, r):
+		recordItem = self.tree.AppendItem(item, "%s" % r.label)
+		self.tree.SetPyData(recordItem, r)
+		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
+
+		for p in r.pages:
+			self.InsertPage(recordItem, p)
+
+		self.tree.Expand(recordItem)
+
+	def InsertPage(self, item, p):
+		pageItem = self.tree.AppendItem(item, p.path)
+		self.tree.SetPyData(pageItem, p)
+		self.tree.SetItemImage(pageItem, self.recordIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(pageItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
+
+		for h in p.hits:
+			self.InsertHit(pageItem, h)
+
+		self.tree.Expand(pageItem)
+
+	def InsertHit(self, item, h):
+		hitItem = self.tree.AppendItem(item, h.label)
+		self.tree.SetPyData(hitItem, h)
+		self.tree.SetItemImage(hitItem, self.hitIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(hitItem, self.hitIcon, wx.TreeItemIcon_Selected)
+
+		self.tree.Expand(hitItem)
 
 if __name__ == '__main__':
 	import Test

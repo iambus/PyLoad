@@ -20,5 +20,13 @@ class Project:
 	def load(self):
 		pass
 
-
+class NoneProject:
+	def __init__(self, root = None):
+		pass
+	def add_record(self, record):
+		pass
+	def save(self):
+		pass
+	def load(self):
+		pass
 

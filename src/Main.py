@@ -30,6 +30,7 @@ class NoteBook(wx.Toolbook):
 		self.editTab = EditTab.EditTab(self)
 		self.AddPage(self.editTab, 'Edit', imageId=-1)
 		self.editTab.ResetSize()
+		self.editTab.recordPanel.SetMirrorOf(self.recordTab.tree)
 
 		colourList = [ "Play", "Result", ]
 		g = self.makeColorPanel()

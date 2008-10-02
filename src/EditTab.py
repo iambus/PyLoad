@@ -5,6 +5,7 @@ from wx.lib.splitter import MultiSplitterWindow
 from ControllersPanel import ControllersPanel
 from SpecialsPanel import SpecialsPanel
 from DetailsPanel import DetailsPanel
+from RecordPanel import RecordPanel
 
 class ColoredPanel(wx.Window):
 	def __init__(self, parent, color = 'red'):
@@ -21,7 +22,7 @@ class EditTab(wx.Panel):
 		self.leftsplitter = wx.SplitterWindow(self.splitter, style=wx.BORDER_NONE)
 
 		p1 = ControllersPanel(self.leftsplitter)
-		p2 = ColoredPanel(self.leftsplitter, 'pink')
+		p2 = RecordPanel(self.leftsplitter, True)
 		self.leftsplitter.SplitHorizontally(p1, p2, -300)
 
 		p3 = SpecialsPanel(self.splitter)
@@ -33,6 +34,7 @@ class EditTab(wx.Panel):
 		self.controllersPanel = p1
 		self.specialsPanel = p3
 		self.detailsPanel = p4
+		self.recordPanel = p2
 
 		# layout
 		import Layout
@@ -54,6 +56,9 @@ if __name__ == '__main__':
 	app = wx.PySimpleApp()
 	frame = wx.Frame(None, -1, "EditTab", size = (800, 600))
 	p = EditTab(frame)
+
+	import Record
+	p.recordPanel.AppendRecord(Record.Record())
 
 	frame.Center()
 	frame.Show(True)

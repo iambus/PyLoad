@@ -10,7 +10,7 @@ from Request import Request
 import Logger
 log = Logger.getLogger()
 
-from Repository import uuid
+from Repository import uuid, register
 
 class PropertyMixin:
 	def __init__(self, root = '.'):
@@ -21,6 +21,9 @@ class PropertyMixin:
 		self.foldername = self.time.strftime('%Y%m%d-%H%M%S') + ('-%06d-%s' % (self.time.microsecond, self.uuid))
 		self.filename = self.foldername + '.txt'
 		self.rootdir = root
+
+		# TODO: bad place to register
+		register(self.uuid, self)
 	
 	def make_folder(self):
 		os.makedirs(self.this_folder())
