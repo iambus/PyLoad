@@ -65,7 +65,7 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
 		self.project = Project.Project('.load')
-		self.nb.recordTab.project = self.project
+		self.nb.recordTab.tree.project = self.project
 		self.proxy = None
 
 	def InitIcons(self):
@@ -195,13 +195,13 @@ class MainFrame(wx.Frame):
 		menu.FindItemByPosition(1).Enable(True)
 
 		record = Record.Record()
-		self.nb.recordTab.AppendNewRecord(record)
+		self.nb.recordTab.tree.AppendNewRecord(record)
 
 		if self.proxy == None:
 			self.proxy = True
 			proxy.thread_start()
 
-		proxy.begin_catch(self.nb.recordTab.AppendNewHit)
+		proxy.begin_catch(self.nb.recordTab.tree.AppendNewHit)
 
 	def OnStop(self, evt):
 		self.toolbar.EnableTool(self.toolStart.GetId(), 1)
