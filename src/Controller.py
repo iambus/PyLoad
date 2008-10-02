@@ -27,7 +27,7 @@ class If(Player, Controller):
 			Player.playmain(self, basescope)
 
 class Loop(Player, Controller):
-	def __init__(self, condition = 'True'):
+	def __init__(self, condition = 'False'):
 		Player.__init__(self)
 		assert type(condition) == str or type(condition) == unicode
 		self.condition = Script(condition)

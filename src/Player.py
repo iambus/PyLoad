@@ -22,7 +22,7 @@ class Script(Playable.Playable):
 			scope = self.scope
 		return scope.eval(self.script)
 
-	def play(self, scope):
+	def play(self, scope = None):
 		self.execute(scope)
 
 class Player(Playable.Playable):

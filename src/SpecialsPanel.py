@@ -83,6 +83,11 @@ class SpecialsPanel(wx.Panel):
 		import Layout
 		Layout.SingleLayout(self, self.tree)
 
+		# bindings
+		self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
+		self.onSelChangedCallback = None
+
+
 	def InitTree(self):
 		self.tree = SpecialsTree(self)
 
@@ -108,6 +113,12 @@ class SpecialsPanel(wx.Panel):
 		self.tree.SetPyData(self.root, None)
 		self.tree.SetItemImage(self.root, self.specialIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(self.root, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
+
+	def OnSelChanged(self, event):
+		self.item = event.GetItem()
+		data = self.tree.GetPyData(self.item)
+		if self.onSelChangedCallback:
+			self.onSelChangedCallback(data)
 
 	def AppendNewSpecial(self):
 		specialItem = self.tree.AppendItem(self.root, "sp1")

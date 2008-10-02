@@ -4,6 +4,7 @@ from wx.lib.splitter import MultiSplitterWindow
 
 from ControllersPanel import ControllersPanel
 from SpecialsPanel import SpecialsPanel
+from DetailsPanel import DetailsPanel
 
 class ColoredPanel(wx.Window):
 	def __init__(self, parent, color = 'red'):
@@ -24,16 +25,30 @@ class EditPanel(wx.Panel):
 		self.leftsplitter.SplitHorizontally(p1, p2, -300)
 
 		p3 = SpecialsPanel(self.splitter)
-		p4 = ColoredPanel(self.splitter, 'gray')
+		p4 = DetailsPanel(self.splitter)
 		self.splitter.AppendWindow(self.leftsplitter, 180)
 		self.splitter.AppendWindow(p3, 180)
 		self.splitter.AppendWindow(p4, 150)
 
+		self.controllersPanel = p1
+		self.specialsPanel = p3
+		self.detailsPanel = p4
+
+		# layout
 		import Layout
 		Layout.SingleLayout(self, self.splitter)
 
+		# bindings
+		self.Bind(wx.EVT_BUTTON, self.OnPlay, self.detailsPanel.testButton)
+		self.specialsPanel.onSelChangedCallback = self.detailsPanel.Load
+
 	def ResetSize(self):
 		self.leftsplitter.SetSashPosition(180)
+
+	def OnPlay(self, event):
+		tree = self.specialsPanel.tree
+		player = tree.GetPyData(tree.GetSelection())
+		player.play()
 
 if __name__ == '__main__':
 	app = wx.PySimpleApp()

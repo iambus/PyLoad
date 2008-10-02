@@ -8,6 +8,7 @@ from EditorPanel import EditorPanel
 import Player
 import Record
 import Controller
+import Special
 
 # mappings
 
@@ -31,14 +32,18 @@ def LoadResponse(tab, hit):
 		tab.BindTo(hit, 'respstr')
 		tab.Load(hit.get_relative_path(hit.respfilename))
 
+def LoadEditor(tab, variable, name):
+	tab.BindTo(variable, name)
+	tab.Load()
+
 TabToInitFuncs = {
 	'Info' : lambda tab, data: tab.Load(data),
-	'Before' : lambda tab, data: tab.BindTo(data.beforescript, 'script'),
-	'After' : lambda tab, data: tab.BindTo(data.afterscript, 'script'),
+	'Before' : lambda tab, data: LoadEditor(tab, data.beforescript, 'script'),
+	'After' : lambda tab, data: LoadEditor(tab, data.afterscript, 'script'),
 	'Request' : LoadRequest,
 	'Response' : LoadResponse,
-	'Script' : lambda tab, data: tab.BindTo(data, 'script'),
-	'Condition' : lambda tab, data: tab.BindTo(data.condition, 'script'),
+	'Script' : lambda tab, data: LoadEditor(tab, data, 'script'),
+	'Condition' : lambda tab, data: LoadEditor(tab, data.condition, 'script'),
 		}
 
 ClassToTabs = {
@@ -48,6 +53,7 @@ ClassToTabs = {
 	Player.Script : ('Script',),
 	Controller.If : ('Before', 'Condition', 'After',),
 	Controller.Loop : ('Before', 'Condition', 'After',),
+	Special.Special : ('Before', 'After'),
 		}
 
 # main class
