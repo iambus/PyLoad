@@ -1,10 +1,11 @@
 
 import wx
 import wx.lib.newevent
-import wx.lib.layoutf
 
 import InfoPanel
 import EditorPanel
+
+from DetailsPanel import DetailsPanel
 
 import Record
 
@@ -18,108 +19,6 @@ class ColoredPanel(wx.Window):
 
 
 ##################################################
-# Details Panel
-
-class DetailsPanel(wx.Panel):
-	def __init__(self, parent):
-		wx.Panel.__init__(self, parent, -1)
-
-		self.nb = wx.Notebook(self, -1)
-		self.testButton = wx.Button(self, -1, "Test")
-
-		self.infoTab = None
-		self.beforeTab = None
-		self.requestTab = None
-		self.responseTab = None
-		self.afterTab = None
-
-		# Layout
-		self.SetAutoLayout(True)
-		self.nb.SetConstraints(
-				wx.lib.layoutf.Layoutf('t=t10#1;l=l10#1;b%b90#1;r=r10#1',(self,)))
-		self.testButton.SetConstraints(
-				wx.lib.layoutf.Layoutf('t_10#2;l=l10#1;h*;w*',(self,self.nb)))
-		self.testButton.Hide()
-
-
-		#self.Bind(wx.EVT_BUTTON, self.testButton, self.OnPlay)
-
-	def RemoveAllPages(self):
-		self.nb.DeleteAllPages()
-	
-	def GiveCommonTabs(self):
-		if not self.infoTab:
-			self.infoTab = InfoPanel.InfoPanel(self.nb)
-			self.nb.AddPage(self.infoTab, 'Info')
-			self.beforeTab = EditorPanel.EditorPanel(self.nb)
-			self.nb.AddPage(self.beforeTab, 'Before')
-			self.afterTab = EditorPanel.EditorPanel(self.nb)
-			self.nb.AddPage(self.afterTab, 'After')
-		elif self.requestTab:
-			self.nb.DeletePage(3)
-			self.nb.DeletePage(2)
-			self.requestTab = None
-			self.responseTab = None
-
-	def GiveAllTabs(self):
-		if not self.infoTab:
-			self.infoTab = InfoPanel.InfoPanel(self.nb)
-			self.nb.AddPage(self.infoTab, 'Info')
-			self.beforeTab = EditorPanel.EditorPanel(self.nb)
-			self.nb.AddPage(self.beforeTab, 'Before')
-			self.afterTab = EditorPanel.EditorPanel(self.nb)
-			self.nb.AddPage(self.afterTab, 'After')
-		if not self.requestTab:
-			self.requestTab = EditorPanel.EditorPanel(self.nb)
-			self.responseTab = EditorPanel.EditorPanel(self.nb)
-			self.nb.InsertPage(2, self.requestTab, 'Request')
-			self.nb.InsertPage(3, self.responseTab, 'Reponse')
-
-	def Load(self, data):
-		t = type(data)
-		if isinstance(data, Record.Record):
-			self.LoadRecord(data)
-		elif isinstance(data, Record.Page):
-			self.LoadPage(data)
-		elif isinstance(data, Record.Hit):
-			self.LoadHit(data)
-		else:
-			print t
-			assert False, 'Load wrong data! (What are you selection?)'
-		self.testButton.Show()
-
-	def LoadRecord(self, record):
-		self.GiveCommonTabs()
-		self.infoTab.Load(record)
-		if record.beforescript:
-			self.beforeTab.BindTo(record.beforescript, 'script')
-		if record.afterscript:
-			self.afterTab.BindTo(record.afterscript, 'script')
-
-	def LoadPage(self, page):
-		self.GiveCommonTabs()
-		self.infoTab.Load(page)
-		if page.beforescript:
-			self.beforeTab.BindTo(page.beforescript, 'script')
-		if page.afterscript:
-			self.afterTab.BindTo(page.afterscript, 'script')
-
-	def LoadHit(self, hit):
-		assert hit.beforescript.script != None
-		self.GiveAllTabs()
-		self.infoTab.Load(hit)
-		if hit.beforescript:
-			self.beforeTab.BindTo(hit.beforescript, 'script')
-		if hit.afterscript:
-			self.afterTab.BindTo(hit.afterscript, 'script')
-		if hit.reqstr:
-			#self.requestTab.BindTo(hit, 'reqstr')
-			self.requestTab.BindToFuncs(hit.get_reqstr, hit.set_reqstr)
-			self.requestTab.Load(hit.get_relative_path(hit.reqfilename))
-		if hit.respstr:
-			self.responseTab.BindTo(hit, 'respstr')
-			self.responseTab.Load(hit.get_relative_path(hit.respfilename))
-	
 #
 ##################################################
 # {{{ Record Tree
