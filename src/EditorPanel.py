@@ -7,12 +7,14 @@ from Binding import *
 import Logger
 log = Logger.getLogger()
 
-def GenerateTempFilePath():
+def GenerateTempFilePath(content = None):
 	#TODO: use a better approach...
 	import tempfile
 	import os
 	fd, path = tempfile.mkstemp(suffix = '.txt', prefix = 'pyload-')
-	fp = os.fdopen(fd)
+	fp = os.fdopen(fd, 'wb')
+	if content:
+		fp.write(content)
 	fp.close()
 	return path
 
@@ -73,11 +75,8 @@ class EditorPanel(wx.Panel):
 		if self.path:
 			path = self.path
 		else:
-			self.temppath = GenerateTempFilePath()
+			self.temppath = GenerateTempFilePath(self.editor.GetValue())
 			path = self.temppath
-			fp = open(path, 'wb')
-			fp.write(self.editor.GetValue())
-			fp.close()
 		assert self.path != None or self.temppath != None
 		assert path != None
 		cmd = 'gvim -b '+path
