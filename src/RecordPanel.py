@@ -200,7 +200,6 @@ class RecordPanel(wx.Panel):
 	########################################
 
 	def InitializeRoot(self):
-		tID = wx.NewId()
 		self.tree = RecordTree(self.splitter)
 
 		iconSize = (16,16)
@@ -338,7 +337,6 @@ class RecordPanel(wx.Panel):
 		hitItem = self.tree.AppendItem(pageItem, hit.label)
 		self.tree.SetPyData(hitItem, hit)
 		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Selected)
 
 		self.tree.Expand(recordItem)
 		self.tree.Expand(pageItem)

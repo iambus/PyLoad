@@ -3,6 +3,7 @@ import wx
 import IconImages
 
 import RecordPanel
+import EditPanel
 
 import Record
 import Project
@@ -26,7 +27,11 @@ class NoteBook(wx.Toolbook):
 		self.AddPage(self.recordTab, 'Record', imageId=-1)
 		self.recordTab.ResetSize()
 
-		colourList = [ "Edit", "Play", "Result", ]
+		self.editTab = EditPanel.EditPanel(self)
+		self.AddPage(self.editTab, 'Edit', imageId=-1)
+		self.editTab.ResetSize()
+
+		colourList = [ "Play", "Result", ]
 		g = self.makeColorPanel()
 		for colour in colourList:
 			win = g.next()

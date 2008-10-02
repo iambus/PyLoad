@@ -10,19 +10,11 @@ from Request import Request
 import Logger
 log = Logger.getLogger()
 
-#TODO: thread-safe
-def uuid():
-	i = 0
-	while i < 999999:
-		yield 'u%05d' % i
-		i = i + 1
-	assert False, 'Max uuid reached'
-
-guuid = uuid()
+from Repository import uuid
 
 class PropertyMixin:
 	def __init__(self, root = '.'):
-		self.uuid = guuid.next()
+		self.uuid = uuid()
 		self.time = datetime.datetime.now()
 		self.timestr = self.time.strftime('%Y-%m-%d %H:%M:%S')
 		self.label = self.timestr
@@ -96,7 +88,7 @@ class Hit(PropertyMixin, Player):
 class Page(Player):
 	def __init__(self, path):
 		Player.__init__(self)
-		self.uuid = guuid.next()
+		self.uuid = uuid()
 		self.time = None
 		self.path = path
 		self.label = path

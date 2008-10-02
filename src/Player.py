@@ -40,9 +40,9 @@ class Player(Playable.Playable):
 		assert isinstance(script, Script)
 		self.scripts.append(script)
 	
-	def add_childern(self, child):
+	def add_child(self, child):
 		assert isinstance(child, Playable.Playable)
-		childern.append(child)
+		self.childern.append(child)
 	
 	def execute_script(self, script, base = None):
 		assert isinstance(script, Script)

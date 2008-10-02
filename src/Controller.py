@@ -12,12 +12,12 @@ class Break(ControlFlag):
 class Controller:
 	pass
 
-class Group(Player):
+class Group(Player, Controller):
 	def __init__(self):
 		pass
 
-class If(Player):
-	def __init__(self, condition):
+class If(Player, Controller):
+	def __init__(self, condition = 'True'):
 		Player.__init__(self)
 		assert type(condition) == str or type(condition) == unicode
 		self.condition = Script(condition)
@@ -26,8 +26,8 @@ class If(Player):
 		if self.condition.eval(basescope):
 			Player.playmain(self, basescope)
 
-class Loop(Player):
-	def __init__(self, condition):
+class Loop(Player, Controller):
+	def __init__(self, condition = 'True'):
 		Player.__init__(self)
 		assert type(condition) == str or type(condition) == unicode
 		self.condition = Script(condition)
