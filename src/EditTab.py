@@ -13,7 +13,7 @@ class ColoredPanel(wx.Window):
 
 
 
-class EditPanel(wx.Panel):
+class EditTab(wx.Panel):
 	def __init__(self, parent):
 		wx.Panel.__init__(self, parent, -1)
 
@@ -52,8 +52,8 @@ class EditPanel(wx.Panel):
 
 if __name__ == '__main__':
 	app = wx.PySimpleApp()
-	frame = wx.Frame(None, -1, "EditPanel", size = (800, 600))
-	p = EditPanel(frame)
+	frame = wx.Frame(None, -1, "EditTab", size = (800, 600))
+	p = EditTab(frame)
 
 	frame.Center()
 	frame.Show(True)

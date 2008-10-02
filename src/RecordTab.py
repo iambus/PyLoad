@@ -19,8 +19,8 @@ class ColoredPanel(wx.Window):
 
 
 ##################################################
-# {{{ Record Panel
-class RecordPanel(wx.Panel):
+# {{{ Record Tab
+class RecordTab(wx.Panel):
 	def __init__(self, parent):
 		# Use the WANTS_CHARS style so the panel doesn't eat the Return key.
 		wx.Panel.__init__(self, parent, -1, style=wx.WANTS_CHARS)
@@ -75,9 +75,9 @@ if __name__ == '__main__':
 	app = wx.PySimpleApp()
 	#app.RedirectStdio()
 
-	#frame = RecordPanel(None)
+	#frame = RecordTab(None)
 	frame = wx.Frame(None, -1, "RecoradPanel", size = (800, 600))
-	rp = RecordPanel(frame)
+	rp = RecordTab(frame)
 	import Record
 	rp.tree.AppendRecord(Record.Record())
 	rp.tree.PostHit(Record.Hit('/'))

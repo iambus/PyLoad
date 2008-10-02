@@ -2,8 +2,8 @@
 import wx
 import IconImages
 
-import RecordPanel
-import EditPanel
+import RecordTab
+import EditTab
 
 import Record
 import Project
@@ -23,11 +23,11 @@ class NoteBook(wx.Toolbook):
 
 		self.AssignImageList(wx.ImageList(0,0))
 
-		self.recordTab = RecordPanel.RecordPanel(self)
+		self.recordTab = RecordTab.RecordTab(self)
 		self.AddPage(self.recordTab, 'Record', imageId=-1)
 		self.recordTab.ResetSize()
 
-		self.editTab = EditPanel.EditPanel(self)
+		self.editTab = EditTab.EditTab(self)
 		self.AddPage(self.editTab, 'Edit', imageId=-1)
 		self.editTab.ResetSize()
 
