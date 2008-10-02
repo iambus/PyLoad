@@ -8,7 +8,7 @@ import EditPanel
 import Record
 import Project
 
-import proxy
+import Proxy
 
 class ColoredPanel(wx.Window):
 	def __init__(self, parent, color):
@@ -199,9 +199,9 @@ class MainFrame(wx.Frame):
 
 		if self.proxy == None:
 			self.proxy = True
-			proxy.thread_start()
+			Proxy.thread_start()
 
-		proxy.begin_catch(self.nb.recordTab.tree.AppendNewHit)
+		Proxy.begin_catch(self.nb.recordTab.tree.AppendNewHit)
 
 	def OnStop(self, evt):
 		self.toolbar.EnableTool(self.toolStart.GetId(), 1)
@@ -210,7 +210,7 @@ class MainFrame(wx.Frame):
 		menu.FindItemByPosition(0).Enable(True)
 		menu.FindItemByPosition(1).Enable(False)
 
-		proxy.end_catch()
+		Proxy.end_catch()
 
 
 	def OnRun(self, evt):
@@ -252,7 +252,7 @@ class MainFrame(wx.Frame):
 	def OnClose(self, event):
 		if self.proxy:
 			self.proxy = None
-			proxy.stop()
+			Proxy.stop()
 		self.Destroy()
 
 
