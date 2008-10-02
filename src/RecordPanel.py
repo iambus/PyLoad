@@ -18,7 +18,7 @@ class SimpleTree(wx.TreeCtrl):
 
 
 (HitEvent, EVT_HIT_UPDATED) = wx.lib.newevent.NewEvent()
-class RecordTree(wx.Panel):
+class RecordPanel(wx.Panel):
 	def __init__(self, parent):
 		wx.Panel.__init__(self, parent, -1)
 

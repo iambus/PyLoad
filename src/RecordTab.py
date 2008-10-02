@@ -4,7 +4,7 @@ import wx
 import InfoPanel
 import EditorPanel
 
-from RecordTree import RecordTree
+from RecordPanel import RecordPanel
 from DetailsPanel import DetailsPanel
 
 import Record
@@ -29,7 +29,7 @@ class RecordTab(wx.Panel):
 
 		self.splitter = wx.SplitterWindow(self, style=wx.BORDER_NONE)
 
-		self.tree = RecordTree(self.splitter)
+		self.tree = RecordPanel(self.splitter)
 		self.detailsPanel = DetailsPanel(self.splitter)
 
 		self.splitter.SetMinimumPaneSize(20)
