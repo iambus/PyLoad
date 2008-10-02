@@ -7,6 +7,15 @@ from Binding import *
 import Logger
 log = Logger.getLogger()
 
+def GenerateTempFilePath():
+	#TODO: use a better approach...
+	import tempfile
+	import os
+	fd, path = tempfile.mkstemp(suffix = '.txt', prefix = 'pyload-')
+	fp = os.fdopen(fd)
+	fp.close()
+	return path
+
 def GetFont():
 	fontAttrs = [10, wx.SWISS, wx.NORMAL, wx.NORMAL, False, 'Courier New']
 	return wx.Font(*fontAttrs)
@@ -15,8 +24,9 @@ class EditorPanel(wx.Panel):
 	def __init__(self, parent, binding = None, filepath = None):
 		wx.Panel.__init__(self, parent, -1)
 
-		self.path = filepath
 		self.binding = binding
+		self.path = filepath
+		self.temppath = None
 
 		self.editor = wx.TextCtrl(self, -1,
                        size=(200, 100), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
@@ -59,15 +69,38 @@ class EditorPanel(wx.Panel):
 			self.Load()
 	
 	def OnVi(self, event):
-		if not self.path:
-			return
-		cmd = 'gvim '+self.path
+		assert self.temppath == None
+		if self.path:
+			path = self.path
+		else:
+			self.temppath = GenerateTempFilePath()
+			path = self.temppath
+			fp = open(path, 'wb')
+			fp.write(self.editor.GetValue())
+			fp.close()
+		assert self.path != None or self.temppath != None
+		assert path != None
+		cmd = 'gvim -b '+path
 		self.process = wx.Process(self)
 		pid = wx.Execute(cmd, wx.EXEC_ASYNC, self.process)
 
 	def OnViEnded(self, event):
+		assert self.path == None or self.temppath == None
+		assert self.path != None or self.temppath != None
+		path = self.path or self.temppath
+		self.temppath = None
+
+		fp = open(path, 'rb')
+		try:
+			v = fp.read()
+		finally:
+			fp.close()
+
+		self.editor.SetValue(v)
+		if self.binding:
+			self.binding.set(v)
+
 		self.process.Destroy()
-		self.Load()
 
 	def OnSave(self, event):
 		self.Save()
@@ -76,6 +109,8 @@ class EditorPanel(wx.Panel):
 		print 'search'
 
 	def Load(self, path = None):
+		assert self.path == None or self.temppath == None
+		#FIXME: order is not correct
 		if path:
 			self.path = path
 		if self.binding:
@@ -84,8 +119,13 @@ class EditorPanel(wx.Panel):
 			fp = open(self.path, 'rb')
 			self.editor.SetValue(fp.read())
 			fp.close()
+		elif self.temppath:
+			fp = open(self.temppath, 'rb')
+			self.editor.SetValue(fp.read())
+			fp.close()
 
 	def Save(self):
+		assert self.temppath == None
 		if self.binding:
 			self.binding.set(self.editor.GetValue())
 		if self.path:
@@ -106,20 +146,12 @@ class EditorPanel(wx.Panel):
 
 if __name__ == '__main__':
 
-	class C:
-		def __init__(self):
-			self.x = 2
-	c = C()
-	binding = AttrBinding(c, 'x')
-	print binding
-	binding.set(2)
-	assert binding.get() == 2
-
 	app = wx.PySimpleApp()
 	#app.RedirectStdio()
 
 	frame = wx.Frame(None, -1, "Editor", size = (800, 600))
-	EditorPanel(frame, 'F:/temp/_')
+	#EditorPanel(frame, 'F:/temp/_')
+	EditorPanel(frame)
 
 	frame.Center()
 	frame.Show(True)

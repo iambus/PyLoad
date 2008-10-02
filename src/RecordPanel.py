@@ -149,7 +149,6 @@ class RecordPanel(wx.Panel):
 	def AppendNewRecord(self, record):
 		assert not self.isMirror
 		self.project.add_record(record)
-		record.make_folder()
 
 		recordItem = self.tree.AppendItem(self.root, "%s" % record.label)
 		self.tree.SetPyData(recordItem, record)
@@ -190,7 +189,6 @@ class RecordPanel(wx.Panel):
 		self.tree.Expand(pageItem)
 		self.tree.Expand(hitItem)
 
-		hit.save()
 		self.NotifyMirrors()
 
 	########################################

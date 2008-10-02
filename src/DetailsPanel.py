@@ -25,12 +25,12 @@ TabToPanel = {
 def LoadRequest(tab, hit):
 	if hit.reqstr:
 		tab.BindToFuncs(hit.get_reqstr, hit.set_reqstr)
-		tab.Load(hit.get_relative_path(hit.reqfilename))
+		tab.Load()
 
 def LoadResponse(tab, hit):
 	if hit.respstr:
 		tab.BindTo(hit, 'respstr')
-		tab.Load(hit.get_relative_path(hit.respfilename))
+		tab.Load()
 
 def LoadEditor(tab, variable, name):
 	tab.BindTo(variable, name)
