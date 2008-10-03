@@ -291,6 +291,7 @@ class MainFrame(wx.Frame):
 
 def Main():
 	import sys
+	sys.path.append('runtime')
 	sys.path.append('plugin')
 	app = wx.PySimpleApp()
 	frame = MainFrame()
