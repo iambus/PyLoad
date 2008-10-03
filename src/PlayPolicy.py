@@ -6,7 +6,7 @@ class Iteration(Player):
 	def __init__(self, player = None):
 		Player.__init__(self)
 		self.player = player
-	def play(self, scope):
+	def play(self, scope = None):
 		assert self.scripts == [] and self.childern == []
 		self.childern = [self.player]
 		Player.play(self, scope)
@@ -19,15 +19,15 @@ class User(Player):
 		self.iteration_count = iteration_count
 		self.iteration_factory = iteration_factory
 
-	def play(self, scope):
+	def play(self, scope = None):
 		assert self.scripts == [] and self.childern == []
 		if self.iteration_factory:
-			self.before()
+			self.before(scope)
 			for i in range(self.iteration_count):
 				iteration = self.iteration_factory.create()
 				iteration.player = self.player
 				Player.execute_here(self, iteration, scope)
-			self.after()
+			self.after(scope)
 		else:
 			for i in range(self.iteration_count):
 				self.childern.append(self.player)
@@ -92,7 +92,20 @@ class IterationBasedPlayPolicy:
 		self.global_factory = global_factory
 
 
-	def play(self, scope = None):
+	def play_in_single_thread(self, scope = None):
+		g = self.global_factory.create()
+		users = []
+		g.before()
+		for i in range(self.user_count):
+			user = self.user_factory.create()
+			user.player = self.player
+			user.iteration_count = self.iteration_count
+			user.iteration_factory = self.iteration_factory
+			users.append(user)
+			user.play(g.scope)
+		g.after()
+
+	def play_in_multiple_threads(self, scope = None):
 		g = self.global_factory.create()
 		users = []
 		g.before()
@@ -107,6 +120,8 @@ class IterationBasedPlayPolicy:
 		for user in users:
 			user.join()
 		g.after()
+
+	play = play_in_multiple_threads
 
 if __name__ == '__main__':
 	pass
