@@ -8,6 +8,7 @@ import Record
 import Logger
 log = Logger.getLogger()
 
+# {{{ DropTarget
 class MyDropTarget(wx.PyDropTarget):
 	def __init__(self, panel):
 		wx.PyDropTarget.__init__(self)
@@ -57,9 +58,9 @@ class MyDropTarget(wx.PyDropTarget):
 #		print bits[flags]
 
 		return d  
+# }}}
 
-
-
+# {{{ SpecialsTree
 class SpecialsTree(wx.TreeCtrl):
 	def __init__(self, parent):
 		wx.TreeCtrl.__init__(self, parent, 
@@ -73,6 +74,7 @@ class SpecialsTree(wx.TreeCtrl):
 				)
 	def SelectedData(self):
 		return self.GetPyData(self.GetSelection())
+# }}}
 
 class SpecialsPanel(wx.Panel):
 	def __init__(self, parent):
@@ -126,10 +128,15 @@ class SpecialsPanel(wx.Panel):
 		self.tree.SetItemImage(self.root, self.specialIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(self.root, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
 
+	# {{{ Event Handler
 	def OnBeginEdit(self, event):
 		item = event.GetItem()
 		data = self.tree.GetPyData(item)
-		if not isinstance(data, Special):
+		if not (
+				isinstance(data, Special) or
+				isinstance(data, Controller.Controller) or
+				isinstance(data, Player.Script)
+				):
 			event.Veto()
 
 	def OnEndEdit(self, event):
@@ -162,6 +169,7 @@ class SpecialsPanel(wx.Panel):
 	def OnNewSpecial(self, event):
 		self.AppendNewSpecial()
 		self.NotifyObserver()
+	# }}}
 
 	def AppendNewSpecial(self):
 		special = Special()
@@ -189,74 +197,111 @@ class SpecialsPanel(wx.Panel):
 		import inspect
 		if inspect.isclass(data):
 			data = data()
-			self.InsertController(item, data)
+			self.InsertNewController(item, data)
 		else:
-			self.UseRecord(item, data)
+			self.UseData(item, data)
 
-	def InsertController(self, item, controller):
+	def InsertNewController(self, item, controller):
 		itemData = self.tree.GetPyData(item)
 		itemData.add_child(controller)
 
-		subItem = self.tree.AppendItem(item, str(controller.__class__))
-		self.tree.SetPyData(subItem, controller)
+		label = str(controller.__class__)
+		label = label[label.rfind('.')+1:]
+		controller.label = label
 
-		icon = None
-		if isinstance(controller, Player.Script):
-			icon = self.scriptIcon
-		elif isinstance(controller, Controller.If):
-			icon = self.ifIcon
-		elif isinstance(controller, Controller.Loop):
-			icon = self.loopIcon
-		self.tree.SetItemImage(subItem, icon, wx.TreeItemIcon_Normal)
+		self.LoadData(item, controller)
 
 		self.tree.Expand(item)
 
 
-	def UseRecord(self, item, data):
-		log.debug('use record')
+	def UseData(self, item, data):
 		parentdata = self.tree.GetPyData(item)
 		parentdata.add_child(data)
 
-		if isinstance(data, Record.Record):
-			self.InsertRecord(item, data)
-		elif isinstance(data, Record.Page):
-			self.InsertPage(item, data)
-		elif isinstance(data, Record.Hit):
-			self.InsertHit(item, data)
-		else:
-			assert False, 'Unknown type'
+		self.LoadData(item, data)
 
 		self.tree.Expand(item)
 
-	def InsertRecord(self, item, r):
+	# {{{ Load kinds of Data (the data to be loaded should have been added as parent node's child)
+	def LoadData(self, item, data):
+		mappings = {
+				Record.Record : self.LoadRecord,
+				Record.Page : self.LoadPage,
+				Record.Hit : self.LoadHit,
+				Player.Script : self.LoadScript,
+				Controller.If : self.LoadIf,
+				Controller.Loop : self.LoadLoop,
+				}
+		mappings[data.__class__](item, data)
+
+	def LoadRecord(self, item, r):
 		recordItem = self.tree.AppendItem(item, "%s" % r.label)
 		self.tree.SetPyData(recordItem, r)
 		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
 
 		for p in r.pages:
-			self.InsertPage(recordItem, p)
+			self.LoadPage(recordItem, p)
 
 		self.tree.Expand(recordItem)
 
-	def InsertPage(self, item, p):
+	def LoadPage(self, item, p):
 		pageItem = self.tree.AppendItem(item, p.path)
 		self.tree.SetPyData(pageItem, p)
 		self.tree.SetItemImage(pageItem, self.recordIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(pageItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
 
 		for h in p.hits:
-			self.InsertHit(pageItem, h)
+			self.LoadHit(pageItem, h)
 
 		self.tree.Expand(pageItem)
 
-	def InsertHit(self, item, h):
+	def LoadHit(self, item, h):
 		hitItem = self.tree.AppendItem(item, h.label)
 		self.tree.SetPyData(hitItem, h)
 		self.tree.SetItemImage(hitItem, self.hitIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(hitItem, self.hitIcon, wx.TreeItemIcon_Selected)
 
 		self.tree.Expand(hitItem)
+
+	def LoadScript(self, item, scriptData):
+		subItem = self.tree.AppendItem(item, scriptData.label)
+		self.tree.SetPyData(subItem, scriptData)
+		self.tree.SetItemImage(subItem, self.scriptIcon, wx.TreeItemIcon_Normal)
+	
+	def LoadIf(self, item, ifData):
+		subItem = self.tree.AppendItem(item, ifData.label)
+		self.tree.SetPyData(subItem, ifData)
+		self.tree.SetItemImage(subItem, self.ifIcon, wx.TreeItemIcon_Normal)
+
+		for child in ifData.childern:
+			self.LoadData(subItem, child)
+
+		self.tree.Expand(subItem)
+
+	def LoadLoop(self, item, loopData):
+		subItem = self.tree.AppendItem(item, loopData.label)
+		self.tree.SetPyData(subItem, loopData)
+		self.tree.SetItemImage(subItem, self.loopIcon, wx.TreeItemIcon_Normal)
+
+		for child in loopData.childern:
+			self.LoadData(subItem, child)
+
+		self.tree.Expand(subItem)
+	# }}}
+
+	def ReloadSpecial(self, item):
+		special = self.tree.GetPyData(item)
+		self.tree.DeleteChildren(item)
+		for child in special.childern:
+			self.LoadData(item, child)
+
+	def ReloadAll(self):
+		(child, cookie) = self.tree.GetFirstChild(self.root)
+		while child.IsOk():
+			self.ReloadSpecial(child)
+			(child, cookie) = self.tree.GetNextChild(self.root, cookie)
+
 
 	def NotifyObserver(self):
 		if self.onNewSpecialCallback:
@@ -274,3 +319,4 @@ if __name__ == '__main__':
 	import Test
 	Test.TestPanel(SpecialsPanel)
 
+# vim: foldmethod=marker:

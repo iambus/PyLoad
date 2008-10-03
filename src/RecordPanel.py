@@ -36,6 +36,8 @@ class RecordPanel(wx.Panel):
 		else:
 			self.InitSelf()
 
+		self.observers = set()
+
 	########################################
 
 	def InitializeRoot(self):
@@ -99,6 +101,7 @@ class RecordPanel(wx.Panel):
 		data = self.tree.GetPyData(item)
 		assert type(data.label) == str or type (data.label) == unicode, 'Invalid label type:%s' % type(data.label)
 		data.label = event.GetLabel()
+		self.NotifyObservers()
 
 
 	def OnLeftDClick(self, event):
@@ -157,7 +160,7 @@ class RecordPanel(wx.Panel):
 		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
 
-		self.NotifyMirrors()
+		self.NotifyObservers()
 
 	def AppendHit(self, hit, updated = False):
 		assert False, "Don't call it now"
@@ -166,7 +169,7 @@ class RecordPanel(wx.Panel):
 			self.UpdateHit(hit)
 		else:
 			self.AppendNewHit(hit)
-		self.NotifyMirrors()
+		self.NotifyObservers()
 
 	def AppendNewHit(self, hit):
 		assert not self.isMirror
@@ -191,19 +194,26 @@ class RecordPanel(wx.Panel):
 		self.tree.Expand(pageItem)
 		self.tree.Expand(hitItem)
 
-		self.NotifyMirrors()
+		self.NotifyObservers()
 
 	########################################
 
+	def AddObserver(self, callback):
+		assert not self.isMirror
+		self.observers.add(callback)
+
 	def SetMirrorOf(self, one):
+		assert self.isMirror
 		assert one.__class__ == RecordPanel
 		self.one = one
 		self.one.mirrors.add(self)
 
-	def NotifyMirrors(self):
+	def NotifyObservers(self):
 		if not self.isMirror:
 			for m in self.mirrors:
 				m.LoadAllRecords()
+			for callback in self.observers:
+				callback()
 
 	def LoadAllRecords(self):
 		assert self.isMirror
