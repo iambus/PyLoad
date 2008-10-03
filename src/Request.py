@@ -3,6 +3,8 @@ import urllib2
 from cStringIO import StringIO
 import re
 
+import Template
+
 import Logger
 log = Logger.getLogger()
 
@@ -10,35 +12,75 @@ class Request:
 	def __init__(self, url, reqstr = None):
 		self.url = url
 		self.reqstr = reqstr
+
 		if reqstr != None:
 			self.parse()
 	
 	def parse(self, reqstr = None):
 		if reqstr == None:
 			reqstr = self.reqstr
-		m = re.match(r'(.*)\r\n((?:.*\r\n)+)\r\n(.*)$', reqstr)
-		if m == None:
-			return
-		self.request_line = m.group(1)
-		self.headers = re.findall(r'([^:\r\n]+):\s?([^\r\n]*)', m.group(2))
-		self.body = m.group(3)
+
+		x = self.parse_r_n(reqstr)
+		if x == None:
+			x = self.parse_n(reqstr)
+		if x == None:
+			log.error("Can't parse request:[[[%s]]]" % repr(reqstr))
+
+		(self.request_line, self.headers, self.body) = x
 		self.method = re.match(r'\S+', self.request_line).group()
+
+		if self.method == 'GET':
+			assert self.body == ''
 
 	def set_host(self):
 		raise NotImplementedError()
 
 	def set_reqstr(self, reqstr):
+		log.debug('set_reqstr:%s' % reqstr)
 		self.reqstr = reqstr
 		self.parse()
 
 	def play(self, variables = {}):
-		# TODO: send real request...
-		req = urllib2.Request(url=self.url)
+		reqstr = Template.subst(self.reqstr, variables)
+		self.parse(reqstr)
+		log.debug('body:%s' % self.body)
+
+		req = self.construct_request()
 		response = urllib2.urlopen(req)
-		respstr = response.read()
-		response.respstr = respstr
+		rawbody = response.read()
+
+		response.rawbody = rawbody
+		response.body = rawbody
 		return response
 
+	def construct_request(self):
+		# TODO: handle cookie
+		url = self.url
+		data = self.body
+		headers = dict(filter(lambda kv: kv[0].lower() != 'content-length', self.headers))
+		if data:
+			return urllib2.Request(url=url, data=data, headers=headers)
+		else:
+			return urllib2.Request(url=url, headers=headers)
+
+	def parse_r_n(self, reqstr):
+		m = re.match(r'(.*)\r\n((?:.*\r\n)+)\r\n(.*)$', reqstr)
+		if m == None:
+			return
+		request_line = m.group(1)
+		headers = re.findall(r'([^:\r\n]+):\s?([^\r\n]*)', m.group(2))
+		body = m.group(3)
+		return (request_line, headers, body)
+
+	def parse_n(self, reqstr):
+		m = re.match(r'(.*)\n((?:.*\n)+)\n(.*)$', reqstr)
+		if m == None:
+			log.error("Can't parse request:[[[%s]]]" % repr(reqstr))
+			return
+		request_line = m.group(1)
+		headers = re.findall(r'([^:\n]+):\s?([^\n]*)', m.group(2))
+		body = m.group(3)
+		return (request_line, headers, body)
 
 if __name__ == '__main__':
 	r = Request('x')

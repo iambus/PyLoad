@@ -6,6 +6,8 @@ import datetime
 
 from Player import Player
 from Request import Request
+import Template
+import Coder
 
 import Logger
 log = Logger.getLogger()
@@ -33,10 +35,19 @@ class Hit(PropertyMixin, Player):
 		self.reqstr = None
 		self.respstr = None
 
+		self.reqcoder = Coder.EmptyCoder
+		self.respcoder = Coder.EmptyCoder
+
 	def finish(self):
-		self.request = Request(self.page, self.reqstr)
+		# TODO: detect coders
 		self.oreqstr = self.reqstr
 		self.orespstr = self.respstr
+		self.reqstr = self.reqcoder.decode(self.reqstr)
+		self.reqstr = Template.escape(self.reqstr)
+		if self.respstr:
+			self.respstr = self.respcoder.decode(self.respstr)
+
+		self.request = Request(self.page, self.reqstr)
 
 	def get_reqstr(self):
 		log.debug('get reqstr')
@@ -45,13 +56,14 @@ class Hit(PropertyMixin, Player):
 	def set_reqstr(self, reqstr):
 		log.debug('set reqstr')
 		self.reqstr = reqstr
-		self.request.set_reqstr(reqstr)
+		self.request.set_reqstr(self.reqcoder.encode(reqstr))
 
 	def playmain(self, basescope=None):
 		if basescope == None:
 			self.request.play()
 		else:
 			response = self.request.play(basescope.get_variables())
+			response.body = self.respcoder.decode(response.rawbody)
 			basescope.assign('response', response)
 
 class Page(Player):

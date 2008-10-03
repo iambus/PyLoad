@@ -217,7 +217,10 @@ class MainFrame(wx.Frame):
 			self.proxy = True
 			Proxy.thread_start()
 
-		Proxy.begin_catch(self.nb.recordTab.tree.AppendNewHit)
+		Proxy.begin_catch(
+				callback = self.nb.recordTab.tree.AppendNewHit,
+				filter = Proxy.WebFilter
+				)
 
 	def OnStop(self, event):
 		self.toolbar.EnableTool(self.toolStart.GetId(), 1)
