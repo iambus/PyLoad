@@ -79,8 +79,6 @@ class SpecialsPanel(wx.Panel):
 		wx.Panel.__init__(self, parent, -1)
 		
 		self.InitTree()
-		self.AppendNewSpecial()
-		self.AppendNewSpecial()
 
 		self.SetDropTarget(MyDropTarget(self))
 	
@@ -89,9 +87,15 @@ class SpecialsPanel(wx.Panel):
 		Layout.SingleLayout(self, self.tree)
 
 		# bindings
+		self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginEdit, self.tree)
+		self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndEdit, self.tree)
+
+		self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+
 		self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
 		self.onSelChangedCallback = None
 
+		self.onNewSpecialCallback = None
 
 	def InitTree(self):
 		self.tree = SpecialsTree(self)
@@ -122,17 +126,52 @@ class SpecialsPanel(wx.Panel):
 		self.tree.SetItemImage(self.root, self.specialIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(self.root, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
 
+	def OnBeginEdit(self, event):
+		item = event.GetItem()
+		data = self.tree.GetPyData(item)
+		if not isinstance(data, Special):
+			event.Veto()
+
+	def OnEndEdit(self, event):
+		if event.EditCancelled:
+			return
+		item = event.GetItem()
+		data = self.tree.GetPyData(item)
+		assert type(data.label) == str or type (data.label) == unicode, 'Invalid label type:%s' % type(data.label)
+		data.label = event.GetLabel()
+		self.NotifyObserver()
+
 	def OnSelChanged(self, event):
 		self.item = event.GetItem()
 		data = self.tree.GetPyData(self.item)
 		if self.onSelChangedCallback:
 			self.onSelChangedCallback(data)
 
+	def OnContextMenu(self, event):
+		if not hasattr(self, "popupID1"):
+			self.popupID1 = wx.NewId()
+
+			self.Bind(wx.EVT_MENU, self.OnNewSpecial, id=self.popupID1)
+
+		menu = wx.Menu()
+		menu.Append(self.popupID1, "New Special")
+
+		self.PopupMenu(menu)
+		menu.Destroy()
+
+	def OnNewSpecial(self, event):
+		self.AppendNewSpecial()
+		self.NotifyObserver()
+
 	def AppendNewSpecial(self):
-		specialItem = self.tree.AppendItem(self.root, "sp1")
-		self.tree.SetPyData(specialItem, Special())
+		special = Special()
+		special.label = 'New Special'
+		specialItem = self.tree.AppendItem(self.root, "New Special")
+		self.tree.SetPyData(specialItem, special)
 		self.tree.SetItemImage(specialItem, self.specialIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(specialItem, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
+
+		self.tree.SelectItem(specialItem)
 
 	def DropData(self, item, data):
 		itemData = self.tree.GetPyData(item)
@@ -218,6 +257,18 @@ class SpecialsPanel(wx.Panel):
 		self.tree.SetItemImage(hitItem, self.hitIcon, wx.TreeItemIcon_Selected)
 
 		self.tree.Expand(hitItem)
+
+	def NotifyObserver(self):
+		if self.onNewSpecialCallback:
+			self.onNewSpecialCallback(self.GetSpecials())
+
+	def GetSpecials(self):
+		specials = []
+		(child, cookie) = self.tree.GetFirstChild(self.root)
+		while child.IsOk():
+			specials.append(self.tree.GetPyData(child))
+			(child, cookie) = self.tree.GetNextChild(self.root, cookie)
+		return specials
 
 if __name__ == '__main__':
 	import Test

@@ -4,6 +4,7 @@ import IconImages
 
 import RecordTab
 import EditTab
+import PlayTab
 
 import Record
 import Project
@@ -32,7 +33,13 @@ class NoteBook(wx.Toolbook):
 		self.editTab.ResetSize()
 		self.editTab.recordPanel.SetMirrorOf(self.recordTab.tree)
 
-		colourList = [ "Play", "Result", ]
+		self.playTab = PlayTab.PlayTab(self)
+		self.AddPage(self.playTab, 'Play', imageId=-1)
+		self.playTab.ResetSize()
+
+		self.editTab.specialsPanel.onNewSpecialCallback = self.playTab.policyPanel.UpdateSpecials
+
+		colourList = [ "Result", ]
 		g = self.makeColorPanel()
 		for colour in colourList:
 			win = g.next()
@@ -45,12 +52,15 @@ class NoteBook(wx.Toolbook):
 			p = wx.Panel(self, -1)
 			win = ColoredPanel(p, color)
 			p.win = win
-			def OnCPSize(evt, win=win):
+			def OnCPSize(event, win=win):
 				win.SetPosition((0,0))
-				win.SetSize(evt.GetSize())
+				win.SetSize(event.GetSize())
 			p.Bind(wx.EVT_SIZE, OnCPSize)
 			yield p
 
+
+import wx.lib.newevent
+(PlayEvent, EVT_PLAY_STOPPED) = wx.lib.newevent.NewEvent()
 
 class MainFrame(wx.Frame):
 
@@ -64,6 +74,7 @@ class MainFrame(wx.Frame):
 		self.UseToolBar()
 
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
+		self.Bind(EVT_PLAY_STOPPED, self.OnTerminate)
 
 		self.project = Project.Project('.load')
 		self.nb.recordTab.tree.project = self.project
@@ -154,6 +165,7 @@ class MainFrame(wx.Frame):
 		#self.SetMenuBar(menuBar)
 	# }}}
 
+	# {{{ ToolBar
 	def UseToolBar(self):
 		toolbar = self.CreateToolBar()
 
@@ -187,8 +199,9 @@ class MainFrame(wx.Frame):
 
 	def createTool(self, toolbar, label, icon1, icon2):
 		return toolbar.AddLabelTool(wx.NewId(), label, icon1, icon2, shortHelp=label)
+	# }}}
 
-	def OnRecord(self, evt):
+	def OnRecord(self, event):
 		self.toolbar.EnableTool(self.toolStart.GetId(), 0)
 		self.toolbar.EnableTool(self.toolStop.GetId(), 1)
 		menu = self.GetMenuBar().GetMenu(1)
@@ -204,7 +217,7 @@ class MainFrame(wx.Frame):
 
 		Proxy.begin_catch(self.nb.recordTab.tree.AppendNewHit)
 
-	def OnStop(self, evt):
+	def OnStop(self, event):
 		self.toolbar.EnableTool(self.toolStart.GetId(), 1)
 		self.toolbar.EnableTool(self.toolStop.GetId(), 0)
 		menu = self.GetMenuBar().GetMenu(1)
@@ -214,14 +227,16 @@ class MainFrame(wx.Frame):
 		Proxy.end_catch()
 
 
-	def OnRun(self, evt):
+	def OnRun(self, event):
 		self.toolbar.EnableTool(self.toolRun.GetId(), 0)
 		self.toolbar.EnableTool(self.toolTerminate.GetId(), 1)
 		menu = self.GetMenuBar().GetMenu(1)
 		menu.FindItemByPosition(3).Enable(False)
 		menu.FindItemByPosition(4).Enable(True)
-	
-	def OnTerminate(self, evt):
+		
+		self.Play()
+
+	def OnTerminate(self, event):
 		self.toolbar.EnableTool(self.toolRun.GetId(), 1)
 		self.toolbar.EnableTool(self.toolTerminate.GetId(), 0)
 		menu = self.GetMenuBar().GetMenu(1)
@@ -256,6 +271,20 @@ class MainFrame(wx.Frame):
 			Proxy.stop()
 		self.Destroy()
 
+	def Play(self):
+		func = self.PlayInCurrentThread
+		import threading
+		class ProxyThread(threading.Thread):
+			def __init__(self, name='ListenThread'):
+				threading.Thread.__init__(self, name=name)
+			def run(self):
+				func()
+		thread = ProxyThread() 
+		thread.start()
+	
+	def PlayInCurrentThread(self):
+		self.nb.playTab.Play()
+		wx.PostEvent(self, PlayEvent())
 
 
 def Main():

@@ -19,12 +19,12 @@ class ColoredPanel(wx.Window):
 
 
 ##################################################
-# {{{ Record Tab
 class RecordTab(wx.Panel):
 	def __init__(self, parent):
 		# Use the WANTS_CHARS style so the panel doesn't eat the Return key.
 		wx.Panel.__init__(self, parent, -1, style=wx.WANTS_CHARS)
 
+		#XXX: why can't I remove it?
 		self.Bind(wx.EVT_SIZE, self.OnSize)
 
 		self.splitter = wx.SplitterWindow(self, style=wx.BORDER_NONE)
@@ -49,6 +49,7 @@ class RecordTab(wx.Panel):
 		self.splitter.SetSashPosition(170)
 
 	########################################
+	#XXX: why can't I remove it?
 	def OnSize(self, event):
 		event.Skip()
 
@@ -65,7 +66,6 @@ class RecordTab(wx.Panel):
 	
 	########################################
 
-# }}}
 
 ##################################################
 
@@ -77,12 +77,14 @@ if __name__ == '__main__':
 
 	#frame = RecordTab(None)
 	frame = wx.Frame(None, -1, "RecoradPanel", size = (800, 600))
-	rp = RecordTab(frame)
+	rt = RecordTab(frame)
 	import Record
-	rp.tree.AppendRecord(Record.Record())
-	rp.tree.PostHit(Record.Hit('/'))
-	rp.tree.PostHit(Record.Hit('/'))
-	rp.tree.PostHit(Record.Hit('/m3oui'))
+	import Project
+	rt.tree.project = Project.NoneProject()
+	rt.tree.AppendNewRecord(Record.Record())
+	rt.tree.AppendNewHit(Record.Hit('/'))
+	rt.tree.AppendNewHit(Record.Hit('/'))
+	rt.tree.AppendNewHit(Record.Hit('/m3oui'))
 
 
 	frame.Center()

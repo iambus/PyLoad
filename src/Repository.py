@@ -1,6 +1,7 @@
 
 
 def uuid_generator_generator():
+	'Internal usage'
 	import threading
 	lock = threading.Lock()
 	uuid_counter = 0
@@ -26,6 +27,7 @@ def uuid_generator_generator():
 uuid = uuid_generator_generator()
 
 def table_generator():
+	'Internal usage'
 	import threading
 	lock = threading.Lock()
 	mappings = {}
@@ -55,9 +57,15 @@ def register_object(obj):
 	register(id, obj)
 	return id
 
+class Mixin:
+	def __init__(self):
+		self.uuid = uuid()
+		register(self.uuid, self)
+
 if __name__ == '__main__':
 	print uuid()
 	print uuid()
 	register('x', 'hehe')
 	print lookup('x')
+	Mixin()
 

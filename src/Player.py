@@ -50,6 +50,13 @@ class Player(Playable.Playable):
 			base = self.scope
 		script.execute(base)
 
+	#TODO: give a better name
+	def execute_here(self, child, scope = None):
+		assert isinstance(child, Playable.Playable)
+		if scope == None:
+			scope = self.scope
+		child.play(scope)
+
 	def execute_child(self, child, base = None):
 		assert isinstance(child, Playable.Playable)
 		if base == None:

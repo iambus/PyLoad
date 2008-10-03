@@ -10,6 +10,8 @@ import Record
 import Controller
 import Special
 
+import PlayPolicy
+
 # mappings
 
 TabToPanel = {
@@ -54,6 +56,7 @@ ClassToTabs = {
 	Controller.If : ('Before', 'Condition', 'After',),
 	Controller.Loop : ('Before', 'Condition', 'After',),
 	Special.Special : ('Before', 'After'),
+	PlayPolicy.Factory : ('Before', 'After'),
 		}
 
 # main class

@@ -10,7 +10,7 @@ class ControllersPanel(wx.Panel):
 		self.list = wx.ListCtrl(self, -1,
 				style=wx.LC_LIST 
 				#| wx.BORDER_SUNKEN
-				| wx.BORDER_NONE
+				#| wx.BORDER_NONE
 				#| wx.LC_EDIT_LABELS
 				#| wx.LC_SORT_ASCENDING
 				#| wx.LC_NO_HEADER

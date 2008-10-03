@@ -93,6 +93,8 @@ class RecordPanel(wx.Panel):
 		item = event.GetItem()
 
 	def OnEndEdit(self, event):
+		if event.EditCancelled:
+			return
 		item = event.GetItem()
 		data = self.tree.GetPyData(item)
 		assert type(data.label) == str or type (data.label) == unicode, 'Invalid label type:%s' % type(data.label)
