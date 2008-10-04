@@ -27,6 +27,7 @@ class PlainSearchBar(wx.Panel):
 		self.SetSizer(sizer)
 
 
+# TODO: enable tab
 class SimpleSearchBar(wx.Panel):
 	def __init__(self, parent):
 		wx.Panel.__init__(self, parent, -1)

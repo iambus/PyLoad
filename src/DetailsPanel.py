@@ -26,17 +26,20 @@ TabToPanel = {
 
 def LoadRequest(tab, hit):
 	if hit.reqstr:
+		tab.Unload()
 		tab.BindToFuncs(hit.get_reqstr, hit.set_reqstr)
 		tab.Load()
 		tab.editor.SetSyntax(hit.req_handler.syntax)
 
 def LoadResponse(tab, hit):
 	if hit.respstr:
+		tab.Unload()
 		tab.BindTo(hit, 'respstr')
 		tab.Load()
 		tab.editor.SetSyntax(hit.resp_handler.syntax)
 
 def LoadScript(tab, variable, name):
+	tab.Unload()
 	tab.BindTo(variable, name)
 	tab.Load()
 	import editor.syntax.python
@@ -92,7 +95,7 @@ class DetailsPanel(wx.Panel):
 			currentTabNames.append(self.nb.GetPageText(i))
 		minlen = min( len(currentTabNames), len(newTabNames) )
 		n = 0
-		while n < minlen and currentTabNames[n] == newTabNames[n]:
+		while n < minlen and TabToPanel[currentTabNames[n]] == TabToPanel[newTabNames[n]]:
 			n += 1
 		if n == 0:
 			self.nb.DeleteAllPages()
@@ -112,6 +115,7 @@ class DetailsPanel(wx.Panel):
 		for i in range(n):
 			tab = self.nb.GetPage(i)
 			tabName = tabNames[i]
+			self.nb.SetPageText(i, tabName)
 			TabToInitFuncs[tabName](tab, data)
 
 		for i in range(n, len(tabNames)):
@@ -134,6 +138,8 @@ class DetailsPanel(wx.Panel):
 
 if __name__ == '__main__':
 	import Test
-	Test.TestPanel(DetailsPanel)
+	import Record
+	r = Record.Record()
+	Test.TestPanel(DetailsPanel, lambda p:p.Load(r))
 
 

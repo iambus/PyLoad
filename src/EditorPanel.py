@@ -54,7 +54,7 @@ class EditorPanel(wx.Panel):
 
 		# layout
 		bsizer = wx.FlexGridSizer(cols=6, hgap=10, vgap=10)
-		bsizer.AddGrowableCol(3)
+		#bsizer.AddGrowableCol(3)
 		bsizer.Add(self.viButton, 0, wx.ALL)
 		bsizer.Add(self.saveButton, 0, wx.ALL)
 
@@ -111,6 +111,11 @@ class EditorPanel(wx.Panel):
 
 	def OnSearch(self, event):
 		print 'search'
+
+	def Unload(self):
+		self.binding = None
+		self.path = None
+		self.temppath = None
 
 	def Load(self, path = None):
 		assert self.path == None or self.temppath == None
