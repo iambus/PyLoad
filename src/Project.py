@@ -12,7 +12,9 @@ class Project:
 	
 	def add_record(self, record):
 		self.records.append(record)
-		record.rootdir = self.root
+
+	def remove_record(self, record):
+		self.records.remove(record)
 
 	def save(self):
 		pass
@@ -22,8 +24,13 @@ class Project:
 
 class NoneProject:
 	def __init__(self, root = None):
+		self.records = []
 		pass
 	def add_record(self, record):
+		self.records.append(record)
+		pass
+	def remove_record(self, record):
+		self.records.remove(record)
 		pass
 	def save(self):
 		pass

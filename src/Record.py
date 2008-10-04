@@ -16,21 +16,17 @@ from Repository import uuid, register
 
 class PropertyMixin:
 	def __init__(self):
-		self.uuid = uuid()
 		self.time = datetime.datetime.now()
 		self.timestr = self.time.strftime('%Y-%m-%d %H:%M:%S')
 		self.label = self.timestr
 		self.foldername = self.time.strftime('%Y%m%d-%H%M%S') + ('-%06d-%s' % (self.time.microsecond, self.uuid))
 		self.filename = self.foldername + '.txt'
 
-		# TODO: bad place to register
-		register(self.uuid, self)
 
-
-class Hit(PropertyMixin, Player):
+class Hit(Player, PropertyMixin):
 	def __init__(self, page):
-		PropertyMixin.__init__(self)
 		Player.__init__(self)
+		PropertyMixin.__init__(self)
 		self.page = page
 		self.reqstr = None
 		self.respstr = None
@@ -77,7 +73,6 @@ class Hit(PropertyMixin, Player):
 class Page(Player):
 	def __init__(self, path):
 		Player.__init__(self)
-		self.uuid = uuid()
 		self.time = None
 		self.path = path
 		self.label = path
@@ -95,10 +90,10 @@ class Page(Player):
 		else:
 			return False
 
-class Record(PropertyMixin, Player):
+class Record(Player, PropertyMixin):
 	def __init__(self):
-		PropertyMixin.__init__(self)
 		Player.__init__(self)
+		PropertyMixin.__init__(self)
 		self.hits = []
 		self.pages = []
 		self.childern = self.pages

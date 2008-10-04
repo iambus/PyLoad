@@ -235,7 +235,7 @@ class SpecialsPanel(wx.Panel):
 		mappings[data.__class__](item, data)
 
 	def LoadRecord(self, item, r):
-		recordItem = self.tree.AppendItem(item, "%s" % r.label)
+		recordItem = self.tree.AppendItem(item, r.label)
 		self.tree.SetPyData(recordItem, r)
 		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
@@ -246,10 +246,10 @@ class SpecialsPanel(wx.Panel):
 		self.tree.Expand(recordItem)
 
 	def LoadPage(self, item, p):
-		pageItem = self.tree.AppendItem(item, p.path)
+		pageItem = self.tree.AppendItem(item, p.label)
 		self.tree.SetPyData(pageItem, p)
-		self.tree.SetItemImage(pageItem, self.recordIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(pageItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
+		self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
 
 		for h in p.hits:
 			self.LoadHit(pageItem, h)

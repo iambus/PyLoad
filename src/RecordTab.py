@@ -85,6 +85,8 @@ if __name__ == '__main__':
 	rt.tree.AppendNewHit(Record.Hit('/'))
 	rt.tree.AppendNewHit(Record.Hit('/'))
 	rt.tree.AppendNewHit(Record.Hit('/m3oui'))
+	rt.tree.AppendNewRecord(Record.Record())
+	rt.tree.AppendNewHit(Record.Hit('/'))
 
 
 	frame.Center()

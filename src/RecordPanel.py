@@ -1,7 +1,9 @@
 
 import wx
 import wx.lib.newevent
+import Record
 
+# {{{ SimpleTree
 class SimpleTree(wx.TreeCtrl):
 	def __init__(self, parent):
 		wx.TreeCtrl.__init__(self, parent, 
@@ -15,10 +17,36 @@ class SimpleTree(wx.TreeCtrl):
 				)
 	def SelectedData(self):
 		return self.GetPyData(self.GetSelection())
+# }}}
 
+# {{{ DropTarget
+class MyDropTarget(wx.PyDropTarget):
+	def __init__(self, panel):
+		wx.PyDropTarget.__init__(self)
+		self.panel = panel
+		self.tree = self.panel.tree
 
+		self.data = wx.CustomDataObject("record")
+		self.SetDataObject(self.data)
+
+	def OnData(self, x, y, d):
+		if not self.GetData():
+			return d
+
+		item, flags = self.tree.HitTest((x,y))
+		if flags & wx.TREE_HITTEST_NOWHERE:
+			return d
+
+		self.panel.MoveData(item, self.data.GetData())
+
+		return d  
+# }}}
+
+# {{{ RecordPanel
 (HitEvent, EVT_HIT_UPDATED) = wx.lib.newevent.NewEvent()
 class RecordPanel(wx.Panel):
+
+	# {{{ init
 	def __init__(self, parent, isMirror = False):
 		wx.Panel.__init__(self, parent, -1)
 
@@ -60,35 +88,61 @@ class RecordPanel(wx.Panel):
 
 
 	def InitSelf(self):
-		# Event Binding
+		# drag and drop
+		self.SetDropTarget(MyDropTarget(self))
+		self.tree.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnBeginDragSelf)
+
+		# common event Bindings
 		self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
+
 		self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginEdit, self.tree)
 		self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndEdit, self.tree)
 
-		self.tree.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
+		#self.tree.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
 		self.tree.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
 		self.tree.Bind(wx.EVT_RIGHT_UP, self.OnRightUp)
 
-		self.Bind(EVT_HIT_UPDATED, self.OnHit)
+		#self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
+		# hit handler
+		self.Bind(EVT_HIT_UPDATED, self.OnHit)
 		self.onSelChangedCallback = None
 
 	def InitMirror(self):
-		self.tree.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnBeginDrag)
+		self.tree.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnBeginDragMirror)
+	# }}}
 
 	########################################
 
+	# {{{ event handlers
+	def OnSelChanged(self, event):
+		self.item = event.GetItem()
+		data = self.tree.GetPyData(self.item)
+		if self.onSelChangedCallback:
+			self.onSelChangedCallback(data)
+
 	def OnRightDown(self, event):
-		pt = event.GetPosition();
-		item, flags = self.tree.HitTest(pt)
+		item = self.GetItemByPosition(event.GetPosition())
 		if item:
 			self.tree.SelectItem(item)
 
 	def OnRightUp(self, event):
+		item = self.GetItemByPosition(event.GetPosition())
+		if item:
+			#self.tree.EditLabel(item)
+			self.ShowContextMenu(item)
+
+	def OnLeftDClick(self, event):
 		pt = event.GetPosition();
 		item, flags = self.tree.HitTest(pt)
-		if item:        
-			self.tree.EditLabel(item)
+		event.Skip()
+
+	#XXX: why it's not working?
+	def OnContextMenu(self, event):
+		item = self.GetItemByPosition(event.GetPosition())
+		if item:
+			print 'right menu for item'
+			self.ShowContextMenu(item)
 
 
 	def OnBeginEdit(self, event):
@@ -104,12 +158,7 @@ class RecordPanel(wx.Panel):
 		self.NotifyObservers()
 
 
-	def OnLeftDClick(self, event):
-		pt = event.GetPosition();
-		item, flags = self.tree.HitTest(pt)
-		event.Skip()
-
-	def OnBeginDrag(self, event):
+	def OnBeginDragMirror(self, event):
 		assert self.isMirror
 		item = event.GetItem()
 		tree = event.GetEventObject()
@@ -127,11 +176,32 @@ class RecordPanel(wx.Panel):
 
 		wx.CallAfter(DoDragDrop) # can't call dropSource.DoDragDrop here..
 
-	def OnSelChanged(self, event):
-		self.item = event.GetItem()
-		data = self.tree.GetPyData(self.item)
-		if self.onSelChangedCallback:
-			self.onSelChangedCallback(data)
+	def OnBeginDragSelf(self, event):
+		assert not self.isMirror
+		item = event.GetItem()
+		tree = event.GetEventObject()
+		uuid = tree.GetPyData(item).uuid
+		def DoDragDrop():
+			dd = wx.CustomDataObject("record")
+			dd.SetData(uuid)
+
+			data = wx.DataObjectComposite()
+			data.Add(dd)
+
+			dropSource = wx.DropSource(self)
+			dropSource.SetData(data)
+			result = dropSource.DoDragDrop(wx.Drag_AllowMove)
+
+		wx.CallAfter(DoDragDrop) # can't call dropSource.DoDragDrop here..
+
+
+	def OnDeleteItem(self, event):
+		item = self.tree.GetSelection()
+		self.DeleteItem(item)
+
+	def OnDuplicateIem(self, event):
+		item = self.tree.GetSelection()
+		#TODO
 
 	def OnSize(self, event):
 		event.Skip()
@@ -142,6 +212,28 @@ class RecordPanel(wx.Panel):
 
 	def OnHit(self, event):
 		self.AppendHit(event.hit, event.isNewHit)
+	# }}}
+
+	########################################
+
+	def GetItemByPosition(self, position):
+		item, flags = self.tree.HitTest(position)
+		if item:
+			return item
+
+	def ShowContextMenu(self, item):
+		if not hasattr(self, "popupID1"):
+			self.popupID1 = wx.NewId()
+			self.popupID2 = wx.NewId()
+			self.Bind(wx.EVT_MENU, self.OnDuplicateIem, id=self.popupID1)
+			self.Bind(wx.EVT_MENU, self.OnDeleteItem, id=self.popupID2)
+
+		menu = wx.Menu()
+		menu.Append(self.popupID1, "Duplicate")
+		menu.Append(self.popupID2, "Delete")
+
+		self.PopupMenu(menu)
+		menu.Destroy()
 
 	########################################
 
@@ -183,8 +275,8 @@ class RecordPanel(wx.Panel):
 			page = record.last_page()
 			pageItem = self.tree.AppendItem(recordItem, page.path)
 			self.tree.SetPyData(pageItem, page)
-			self.tree.SetItemImage(pageItem, self.recordIcon, wx.TreeItemIcon_Normal)
-			self.tree.SetItemImage(pageItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
+			self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
+			self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
 
 		hitItem = self.tree.AppendItem(pageItem, hit.label)
 		self.tree.SetPyData(hitItem, hit)
@@ -197,7 +289,161 @@ class RecordPanel(wx.Panel):
 		self.NotifyObservers()
 
 	########################################
+	def MoveData(self, targetItem, sourceUUID):
+		assert not self.isMirror
+		sourceItem = self.FindItem(sourceUUID)
+		sourceData = self.tree.GetPyData(sourceItem)
+		targetData = self.tree.GetPyData(targetItem)
+		if sourceData == targetData:
+			return
 
+		if sourceData.__class__ == targetData.__class__:
+			self.MoveAfter(sourceItem, targetItem)
+		elif sourceData.__class__ == Record.Hit and targetData.__class__ == Record.Page:
+			self.MoveUnder(sourceItem, targetItem)
+		elif sourceData.__class__ == Record.Page and targetData.__class__ == Record.Record:
+			self.MoveUnder(sourceItem, targetItem)
+		else:
+			return
+
+		self.NotifyObservers()
+
+	def MoveUnder(self, sourceItem, targetItem):
+		#TODO: if source is already under target
+		sourceData = self.tree.GetPyData(sourceItem)
+		targetData = self.tree.GetPyData(targetItem)
+		self.DeleteItem(sourceItem)
+
+		targetData.add_child(sourceData)
+		mappings = {
+				Record.Record : self.LoadRecord,
+				Record.Page : self.LoadPage,
+				Record.Hit : self.LoadHit,
+				}
+		mappings[sourceData.__class__](targetItem, sourceData)
+
+		self.tree.Expand(targetItem)
+
+	def MoveAfter(self, sourceItem, targetItem):
+		#TODO: if source is already after target
+		sourceData = self.tree.GetPyData(sourceItem)
+		targetData = self.tree.GetPyData(targetItem)
+		parentItem = self.tree.GetItemParent(targetItem)
+		parentData = self.tree.GetPyData(parentItem)
+		self.DeleteItem(sourceItem)
+
+		if parentData:
+			childern = parentData.childern
+		else:
+			childern = self.project.records
+
+		index = childern.index(targetData)
+		childern.insert(index+1, sourceData)
+
+		mappings = {
+				Record.Record : self.InsertRecord,
+				Record.Page : self.InsertPage,
+				Record.Hit : self.InsertHit,
+				}
+		mappings[sourceData.__class__](parentItem, targetItem, sourceData)
+
+		self.tree.Expand(targetItem)
+
+	#FIXME: name confliction?
+	def DeleteItem(self, item):
+		data = self.tree.GetPyData(item)
+		parentItem = self.tree.GetItemParent(item)
+		parentData = self.tree.GetPyData(parentItem)
+		self.tree.Delete(item)
+		if parentData:
+			parentData.remove_child(data)
+		else:
+			# parent is root
+			assert parentItem == self.root
+			self.project.remove_record(data)
+
+		self.NotifyObservers()
+
+	#FIXME: duplicated code
+	def LoadRecord(self, item, r):
+		recordItem = self.tree.AppendItem(item, r.label)
+		self.tree.SetPyData(recordItem, r)
+		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
+
+		for p in r.pages:
+			self.LoadPage(recordItem, p)
+
+		self.tree.Expand(recordItem)
+
+	def LoadPage(self, item, p):
+		pageItem = self.tree.AppendItem(item, p.label)
+		self.tree.SetPyData(pageItem, p)
+		self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
+
+		for h in p.hits:
+			self.LoadHit(pageItem, h)
+
+		self.tree.Expand(pageItem)
+
+	def LoadHit(self, item, h):
+		hitItem = self.tree.AppendItem(item, h.label)
+		self.tree.SetPyData(hitItem, h)
+		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Selected)
+
+		self.tree.Expand(hitItem)
+
+	def InsertRecord(self, item, prev, r):
+		recordItem = self.tree.InsertItem(item, prev, r.label)
+		self.tree.SetPyData(recordItem, r)
+		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
+
+		for p in r.pages:
+			self.LoadPage(recordItem, p)
+
+		self.tree.Expand(recordItem)
+
+	#FIXME: duplicated code
+	def InsertPage(self, item, prev, p):
+		pageItem = self.tree.InsertItem(item, prev, p.label)
+		self.tree.SetPyData(pageItem, p)
+		self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
+
+		for h in p.hits:
+			self.LoadHit(pageItem, h)
+
+		self.tree.Expand(pageItem)
+
+	def InsertHit(self, item, prev, h):
+		hitItem = self.tree.InsertItem(item, prev, h.label)
+		self.tree.SetPyData(hitItem, h)
+		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Selected)
+
+		self.tree.Expand(hitItem)
+
+	def FindItem(self, uuid):
+		return self.FindItemFrom(self.root, uuid)
+
+	def FindItemFrom(self, item, uuid):
+		(child, cookie) = self.tree.GetFirstChild(item)
+		while child.IsOk():
+			# we have a child
+			data = self.tree.GetPyData(child)
+			if data.uuid == uuid:
+				return child
+			i = self.FindItemFrom(child, uuid)
+			if i:
+				return i
+			(child, cookie) = self.tree.GetNextChild(item, cookie)
+
+	########################################
+
+	# {{{ mirrors and observers
 	def AddObserver(self, callback):
 		assert not self.isMirror
 		self.observers.add(callback)
@@ -233,8 +479,8 @@ class RecordPanel(wx.Panel):
 		for p in record.pages:
 			pageItem = self.tree.AppendItem(recordItem, p.path)
 			self.tree.SetPyData(pageItem, p)
-			self.tree.SetItemImage(pageItem, self.recordIcon, wx.TreeItemIcon_Normal)
-			self.tree.SetItemImage(pageItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
+			self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
+			self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
 
 			for h in p.hits:
 				hitItem = self.tree.AppendItem(pageItem, h.label)
@@ -247,6 +493,7 @@ class RecordPanel(wx.Panel):
 			self.tree.Expand(pageItem)
 
 		self.tree.Expand(recordItem)
+	# }}}
 
 	########################################
 	def UpdateHit(self, hit):
@@ -261,7 +508,7 @@ class RecordPanel(wx.Panel):
 	def Play(self):
 		self.tree.SelectedData().play()
 
-
+# }}}
 
 if __name__ == '__main__':
 	import Record
@@ -269,7 +516,9 @@ if __name__ == '__main__':
 	def init(p):
 		p.project = Project.NoneProject()
 		p.AppendNewRecord(Record.Record())
+		p.AppendNewRecord(Record.Record())
 	import Test
 	Test.TestPanel(RecordPanel, init)
 
 
+# vim: foldmethod=marker:

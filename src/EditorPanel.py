@@ -71,6 +71,7 @@ class EditorPanel(wx.Panel):
 			self.Load()
 
 	def OnModified(self, event):
+		#FIXME: how to clear the Modify status?
 		if self.binding or self.path:
 			self.saveButton.Enable()
 	
@@ -116,6 +117,7 @@ class EditorPanel(wx.Panel):
 		self.binding = None
 		self.path = None
 		self.temppath = None
+		self.saveButton.Disable()
 
 	def Load(self, path = None):
 		assert self.path == None or self.temppath == None

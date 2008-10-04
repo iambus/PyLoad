@@ -59,6 +59,10 @@ def register_object(obj):
 
 class Mixin:
 	def __init__(self):
+		self.register_self()
+
+	def register_self(self):
+		"This method can be called by cloned objects to register themselves as new objects."
 		self.uuid = uuid()
 		register(self.uuid, self)
 

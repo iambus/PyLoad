@@ -1,10 +1,10 @@
 
-import Playable
+from Playable import Playable
 import Scope
 
-class Script(Playable.Playable):
+class Script(Playable):
 	def __init__(self, script = '', scope = None):
-		Playable.Playable.__init__(self)
+		Playable.__init__(self)
 		self.script = script
 		self.scope = scope
 
@@ -25,9 +25,9 @@ class Script(Playable.Playable):
 	def play(self, scope = None):
 		self.execute(scope)
 
-class Player(Playable.Playable):
+class Player(Playable):
 	def __init__(self):
-		Playable.Playable.__init__(self)
+		Playable.__init__(self)
 
 		self.scope = Scope.Scope()
 		self.scripts = []
@@ -41,8 +41,35 @@ class Player(Playable.Playable):
 		self.scripts.append(script)
 	
 	def add_child(self, child):
-		assert isinstance(child, Playable.Playable)
+		assert isinstance(child, Playable)
 		self.childern.append(child)
+
+	def remove_script(self, script):
+		assert isinstance(script, Script) or isinstance(script, str) or isinstance(script, unicode)
+		if isinstance(script, Script):
+			uuid = script.uuid
+		else:
+			uuid = script
+
+		for s in self.scripts:
+			if s.uuid == uuid:
+				self.scripts.remove(s)
+				assert uuid == script or s == script, 'Two different scripts own the same uuid?'
+				break
+
+	def remove_child(self, child):
+		assert isinstance(child, Playable) or isinstance(script, str) or isinstance(script, unicode)
+		if isinstance(child, Playable):
+			uuid = child.uuid
+		else:
+			uuid = child
+
+		for c in self.childern:
+			if c.uuid == uuid:
+				self.childern.remove(c)
+				assert uuid == child or c == child, 'Two different objs own the same uuid?'
+				break
+
 	
 	def execute_script(self, script, base = None):
 		assert isinstance(script, Script)
@@ -52,13 +79,13 @@ class Player(Playable.Playable):
 
 	#TODO: give a better name
 	def execute_here(self, child, scope = None):
-		assert isinstance(child, Playable.Playable)
+		assert isinstance(child, Playable)
 		if scope == None:
 			scope = self.scope
 		child.play(scope)
 
 	def execute_child(self, child, base = None):
-		assert isinstance(child, Playable.Playable)
+		assert isinstance(child, Playable)
 		if base == None:
 			base = self.scope
 		child.play(Scope.Scope(base))

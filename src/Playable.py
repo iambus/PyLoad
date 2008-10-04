@@ -1,8 +1,10 @@
 
+import Repository
 
-class Playable:
+class Playable(Repository.Mixin):
 	def __init__(self):
-		pass
+		# register uuid
+		Repository.Mixin.__init__(self)
 	
 	def play(self):
 		raise NotImplementedError()
