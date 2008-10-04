@@ -28,24 +28,28 @@ def LoadRequest(tab, hit):
 	if hit.reqstr:
 		tab.BindToFuncs(hit.get_reqstr, hit.set_reqstr)
 		tab.Load()
+		tab.editor.SetSyntax(hit.req_handler.syntax)
 
 def LoadResponse(tab, hit):
 	if hit.respstr:
 		tab.BindTo(hit, 'respstr')
 		tab.Load()
+		tab.editor.SetSyntax(hit.resp_handler.syntax)
 
-def LoadEditor(tab, variable, name):
+def LoadScript(tab, variable, name):
 	tab.BindTo(variable, name)
 	tab.Load()
+	import editor.syntax.python
+	tab.editor.SetSyntax(editor.syntax.python)
 
 TabToInitFuncs = {
 	'Info' : lambda tab, data: tab.Load(data),
-	'Before' : lambda tab, data: LoadEditor(tab, data.beforescript, 'script'),
-	'After' : lambda tab, data: LoadEditor(tab, data.afterscript, 'script'),
+	'Before' : lambda tab, data: LoadScript(tab, data.beforescript, 'script'),
+	'After' : lambda tab, data: LoadScript(tab, data.afterscript, 'script'),
 	'Request' : LoadRequest,
 	'Response' : LoadResponse,
-	'Script' : lambda tab, data: LoadEditor(tab, data, 'script'),
-	'Condition' : lambda tab, data: LoadEditor(tab, data.condition, 'script'),
+	'Script' : lambda tab, data: LoadScript(tab, data, 'script'),
+	'Condition' : lambda tab, data: LoadScript(tab, data.condition, 'script'),
 		}
 
 ClassToTabs = {

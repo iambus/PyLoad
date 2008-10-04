@@ -31,13 +31,13 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
     def end(self):
         log.debug('end:%s' % self)
         self.hit.reqstr = self.reqstr.getvalue()
-        self.hit.finish()
         self.reqstr.close()
         if self.respstr:
             self.hit.respstr = self.respstr.getvalue()
             self.respstr.close()
         else:
             self.hit.respstr = None
+        self.hit.finish() # XXX: is it a correct place to finish?
         global respcallback
         respcallback(self.hit)
 

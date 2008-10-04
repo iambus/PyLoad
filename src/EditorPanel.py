@@ -2,6 +2,8 @@
 import wx
 import wx.lib.layoutf
 
+from editor.CodeCtrl import CodeCtrl
+
 from Binding import *
 
 import Logger
@@ -30,7 +32,7 @@ class EditorPanel(wx.Panel):
 		self.path = filepath
 		self.temppath = None
 
-		self.editor = wx.TextCtrl(self, -1,
+		self.editor = CodeCtrl(self, -1,
                        size=(200, 100), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
 		self.viButton = wx.Button(self, -1, 'Edit in Vim')
 		self.saveButton = wx.Button(self, -1, 'Save')

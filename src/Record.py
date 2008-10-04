@@ -7,7 +7,7 @@ import datetime
 from Player import Player
 from Request import Request
 import Template
-import Coder
+import ContentTypeHandler
 
 import Logger
 log = Logger.getLogger()
@@ -34,18 +34,26 @@ class Hit(PropertyMixin, Player):
 		self.page = page
 		self.reqstr = None
 		self.respstr = None
+		self.oreqstr = None
+		self.orespstr = None
 
-		self.reqcoder = Coder.EmptyCoder
-		self.respcoder = Coder.EmptyCoder
+		self.req_hanlder = ContentTypeHandler.ContentTypeHandler()
+		self.resp_handler = ContentTypeHandler.ContentTypeHandler()
 
 	def finish(self):
+		assert self.oreqstr == None, 'finish twice!.'
 		# TODO: detect coders
 		self.oreqstr = self.reqstr
 		self.orespstr = self.respstr
-		self.reqstr = self.reqcoder.decode(self.reqstr)
+
+		self.req_handler = ContentTypeHandler.get_handler(self.reqstr)
+		if self.respstr:
+			self.resp_handler = ContentTypeHandler.get_handler(self.respstr)
+
+		self.reqstr = self.req_handler.coder.decode(self.reqstr)
 		self.reqstr = Template.escape(self.reqstr)
 		if self.respstr:
-			self.respstr = self.respcoder.decode(self.respstr)
+			self.respstr = self.resp_handler.coder.decode(self.respstr)
 
 		self.request = Request(self.page, self.reqstr)
 
@@ -56,14 +64,14 @@ class Hit(PropertyMixin, Player):
 	def set_reqstr(self, reqstr):
 		log.debug('set reqstr')
 		self.reqstr = reqstr
-		self.request.set_reqstr(self.reqcoder.encode(reqstr))
+		self.request.set_reqstr(self.req_handler.coder.encode(reqstr))
 
 	def playmain(self, basescope=None):
 		if basescope == None:
 			self.request.play()
 		else:
 			response = self.request.play(basescope.get_variables())
-			response.body = self.respcoder.decode(response.rawbody)
+			response.body = self.resp_handler.coder.decode(response.rawbody)
 			basescope.assign('response', response)
 
 class Page(Player):
@@ -112,7 +120,7 @@ class Record(PropertyMixin, Player):
 
 
 if __name__ == '__main__':
-	r = Record('rs')
+	r = Record()
 	r.add_hit(Hit('localhost'))
 
 	print r.uuid
@@ -120,6 +128,5 @@ if __name__ == '__main__':
 	print r.label
 	print r.foldername
 	print r.filename
-	print r.hits[0].this_file()
 
 
