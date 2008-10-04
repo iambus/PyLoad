@@ -200,16 +200,17 @@ class CodeCtrl(stc.StyledTextCtrl):
             self.CancelSearch()
             return
         fullText = self.GetText()
+        selectedText = self.GetSelectedText()
         if not regex:
             if forward:
                 start = self.GetSelection()[0]
-                if self.GetSelectedText() == text:
-                    start += 1
+                if selectedText == text:
+                    start += len(selectedText)
                 next = fullText.find(text, start)
             else:
                 end = self.GetSelection()[1]
-                if self.GetSelectedText() == text:
-                    end -= 1
+                if selectedText == text:
+                    end -= len(selectedText)
                 next = fullText.rfind(text, 0, end)
             if next != -1:
                 self.SetSelection(next, next+len(text))
@@ -222,13 +223,13 @@ class CodeCtrl(stc.StyledTextCtrl):
                 return
             if forward:
                 start = self.GetSelection()[0]
-                if regexp.search(self.GetSelectedText()):
-                    start += 1
+                if regexp.search(selectedText):
+                    start += len(selectedText)
                 m = regexp.search(fullText, start)
             else:
                 end = self.GetSelection()[1]
-                if regexp.search(self.GetSelectedText()):
-                    end -= 1
+                if regexp.search(selectedText):
+                    end -= len(selectedText)
                 # FIXME: '12345', '\d\d\d' should return '345' instead of '123'
                 iter = regexp.finditer(fullText, 0, end)
                 m = None
