@@ -1,0 +1,58 @@
+
+font =  'Courier New'
+size = 10
+size2 = 8
+
+STC_STYLE_DEFAULT     : "face:$font,size:$size"
+STC_STYLE_LINENUMBER  : "back:#C0C0C0,face:$font,size:$size2"
+STC_STYLE_CONTROLCHAR : "face:$font"
+STC_STYLE_BRACELIGHT  : "fore:#000000,back:#B5EEB5,bold,face:$font"
+STC_STYLE_BRACEBAD    : "fore:#000000,back:#FF0000,bold,face:$font"
+
+# Default 
+DEFAULT : "fore:#000000,face:$font,size:$size"
+
+# Comment
+COMMENT      : "fore:#008000,back:#F0FFF0,face:$font,size:$size"
+COMMENTLINE  : "fore:#008000,back:#F0FFF0,face:$font,size:$size"
+COMMENTDOC   : "fore:#008000,back:#F0FFF0,face:$font,size:$size"
+COMMENTBLOCK : "fore:#008000,back:#F0FFF0,face:$font,size:$size"
+
+# Number
+NUMBER : "fore:#007F7F,size:$size"
+
+# String
+CHARACTER     : "fore:#7F007F,face:$font,size:$size"
+STRING        : "fore:#7F007F,face:$font,size:$size"
+LITERALSTRING : "fore:#7F007F,face:$font,size:$size"
+TRIPLE        : "fore:#7F007F,face:$font,size:$size"
+TRIPLEDOUBLE  : "fore:#7F007F,face:$font,size:$size"
+
+# Keyword
+WORD  : "fore:#00007F,bold,face:$font,size:$size"
+WORD2 : "fore:#0000FF,face:$font,size:$size"
+WORD3 : "fore:#0000FF,face:$font,size:$size"
+WORD4 : "fore:#0000FF,face:$font,size:$size"
+
+# Operators
+OPERATOR : "bold,size:$size"
+
+# Identifiers
+IDENTIFIER : "fore:#000000,face:$font,size:$size"
+
+# Names
+CLASSNAME : "fore:#000000,face:$font,size:$size"
+DEFNAME   : "fore:#000000,face:$font,size:$size"
+
+# End of line where string is not closed
+STRINGEOL : "fore:#000000,face:$font,eol,size:$size"
+
+# Don't know what it is
+PREPROCESSOR : "fore:red,face:$font,size:$size"
+
+
+##################################################
+
+CaretForeground : "BLUE"
+
+
