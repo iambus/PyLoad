@@ -20,10 +20,6 @@ def GenerateTempFilePath(content = None):
 	fp.close()
 	return path
 
-def GetFont():
-	fontAttrs = [10, wx.SWISS, wx.NORMAL, wx.NORMAL, False, 'Courier New']
-	return wx.Font(*fontAttrs)
-
 class EditorPanel(wx.Panel):
 	def __init__(self, parent, binding = None, filepath = None):
 		wx.Panel.__init__(self, parent, -1)
@@ -41,9 +37,10 @@ class EditorPanel(wx.Panel):
 		self.searchButton = wx.Button(self, -1, 'Search')
 		self.reCheck = wx.CheckBox(self, -1, "Regular Expression")
 
-		self.font = GetFont()
-		self.editor.SetFont(self.font)
+		self.saveButton.Disable()
 
+		# bindings
+		self.Bind(wx.stc.EVT_STC_CHANGE, self.OnModified, self.editor)
 
 		self.Bind(wx.EVT_BUTTON, self.OnVi, self.viButton)
 		self.Bind(wx.EVT_BUTTON, self.OnSave, self.saveButton)
@@ -52,7 +49,7 @@ class EditorPanel(wx.Panel):
 
 		self.Bind(wx.EVT_END_PROCESS, self.OnViEnded)
 
-
+		# layout
 		bsizer = wx.FlexGridSizer(cols=6, hgap=10, vgap=10)
 		bsizer.AddGrowableCol(3)
 		bsizer.Add(self.viButton, 0, wx.ALL)
@@ -71,6 +68,9 @@ class EditorPanel(wx.Panel):
 
 		if self.path:
 			self.Load()
+
+	def OnModified(self, event):
+		self.saveButton.Enable()
 	
 	def OnVi(self, event):
 		assert self.temppath == None
@@ -98,13 +98,14 @@ class EditorPanel(wx.Panel):
 			fp.close()
 
 		self.editor.SetValue(v)
-		if self.binding:
-			self.binding.set(v)
+		#if self.binding:
+		#	self.binding.set(v)
 
 		self.process.Destroy()
 
 	def OnSave(self, event):
 		self.Save()
+		self.saveButton.Disable()
 
 	def OnSearch(self, event):
 		print 'search'
