@@ -12,8 +12,8 @@ fore = #f0f0f0
 STC_STYLE_DEFAULT     : "back:$back,face:$font,size:$size"
 STC_STYLE_LINENUMBER  : "fore:#b0b0b0,back:$back,face:$font,size:$size2"
 STC_STYLE_CONTROLCHAR : "back:$back,face:$font"
-STC_STYLE_BRACELIGHT  : "fore:#AEC0D0,back:#800080,bold,face:$font"
-STC_STYLE_BRACEBAD    : "fore:#b0b0b0,back:$back,bold,face:$font"
+STC_STYLE_BRACELIGHT  : "fore:#aec0d0,back:#800080,face:$font,size:$size"
+STC_STYLE_BRACEBAD    : "fore:#202020,back:#ffa500,face:$font,size:$size"
 
 ##################################################
 
@@ -21,13 +21,13 @@ STC_STYLE_BRACEBAD    : "fore:#b0b0b0,back:$back,bold,face:$font"
 DEFAULT : "fore:#ffffff,back:$back,face:$font,size:$size"
 
 # Comment
-COMMENT      : "fore:#D0D090,back:$back,face:$font,size:$size"
-COMMENTLINE  : "fore:#D0D090,back:$back,face:$font,size:$size"
-COMMENTDOC   : "fore:#D0D090,back:$back,face:$font,size:$size"
-COMMENTBLOCK : "fore:#D0D090,back:$back,face:$font,size:$size"
+COMMENT      : "fore:#d0d090,back:$back,face:$font,size:$size"
+COMMENTLINE  : "fore:#d0d090,back:$back,face:$font,size:$size"
+COMMENTDOC   : "fore:#d0d090,back:$back,face:$font,size:$size"
+COMMENTBLOCK : "fore:#d0d090,back:$back,face:$font,size:$size"
 
 # Number
-NUMBER : "fore:#E0C060,back:$back,face:$font,size:$size"
+NUMBER : "fore:#e0c060,back:$back,face:$font,size:$size"
 
 # String
 CHARACTER     : "fore:#80c0e0,back:$back,face:$font,size:$size"
@@ -43,7 +43,7 @@ WORD3 : "fore:#f0c0f0,back:$back,face:$font,size:$size"
 WORD4 : "fore:#f0c0f0,back:$back,face:$font,size:$size"
 
 # Operators
-OPERATOR : "fore:#D0D0D0,back:$back,face:$font,size:$size"
+OPERATOR : "fore:#d0d0d0,back:$back,face:$font,size:$size"
 
 # Identifiers
 IDENTIFIER : "fore:#d0d0d0,back:$back,face:$font,size:$size"
@@ -54,16 +54,16 @@ CLASSNAME : "fore:#f0c0f0,back:$back,face:$font,size:$size"
 DEFNAME   : "fore:#f0c0f0,back:$back,face:$font,size:$size"
 
 # End of line where string is not closed
-STRINGEOL : "fore:#000000,back:$back,face:$font,eol,size:$size"
+STRINGEOL : "fore:#f08060,back:$back,face:$font,eol,size:$size"
 
 # Don't know what it is
 PREPROCESSOR : "fore:red,back:$back,face:$font,size:$size"
 
 ##################################################
 
-CaretForeground : "#00F000"
-SelForeground   : "#65006A"
-SelBackground   : "#A6CAF0"
+CaretForeground : "#00f000"
+SelForeground   : "#65006a"
+SelBackground   : "#a6caf0"
 
 
 
