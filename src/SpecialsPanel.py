@@ -15,21 +15,14 @@ class MyDropTarget(wx.PyDropTarget):
 		self.panel = panel
 		self.tree = self.panel.tree
 
-		self.data = wx.CustomDataObject("xxx")
+		self.controllerData = wx.CustomDataObject("xxx")
+		self.specialData = wx.CustomDataObject("special")
+
+		self.data = wx.DataObjectComposite()
+		self.data.Add(self.controllerData)
+		self.data.Add(self.specialData)
+
 		self.SetDataObject(self.data)
-
-
-	def OnEnter(self, x, y, d):
-		return d
-
-	def OnLeave(self):
-		pass
-
-	def OnDrop(self, x, y):
-		return True
-
-	def OnDragOver(self, x, y, d):
-		return d
 
 
 	def OnData(self, x, y, d):
@@ -41,21 +34,16 @@ class MyDropTarget(wx.PyDropTarget):
 			log.debug('no place to drop')
 			return d
 
-		self.panel.DropData(item, self.data.GetData())
-#		bits = {
-#				wx.TREE_HITTEST_ABOVE : 'wx.TREE_HITTEST_ABOVE',
-#				wx.TREE_HITTEST_BELOW : 'wx.TREE_HITTEST_BELOW',
-#				wx.TREE_HITTEST_NOWHERE : 'wx.TREE_HITTEST_NOWHERE',
-#				wx.TREE_HITTEST_ONITEMBUTTON : 'wx.TREE_HITTEST_ONITEMBUTTON',
-#				wx.TREE_HITTEST_ONITEMICON : 'wx.TREE_HITTEST_ONITEMICON',
-#				wx.TREE_HITTEST_ONITEMINDENT : 'wx.TREE_HITTEST_ONITEMINDENT',
-#				wx.TREE_HITTEST_ONITEMLABEL : 'wx.TREE_HITTEST_ONITEMLABEL',
-#				wx.TREE_HITTEST_ONITEMRIGHT : 'wx.TREE_HITTEST_ONITEMRIGHT',
-#				wx.TREE_HITTEST_ONITEMSTATEICON : 'wx.TREE_HITTEST_ONITEMSTATEICON',
-#				wx.TREE_HITTEST_TOLEFT : 'wx.TREE_HITTEST_TOLEFT',
-#				wx.TREE_HITTEST_TORIGHT : 'wx.TREE_HITTEST_TORIGHT',
-#		}
-#		print bits[flags]
+		if self.controllerData.GetData():
+			data = self.controllerData.GetData()
+			self.panel.DropNewData(item, data)
+			#XXX: why I have to set it none?
+			self.controllerData.SetData('')
+		if self.specialData.GetData():
+			data = self.specialData.GetData()
+			self.panel.MoveData(item, data)
+			#XXX: why I have to set it none?
+			self.specialData.SetData('')
 
 		return d  
 # }}}
@@ -82,7 +70,9 @@ class SpecialsPanel(wx.Panel):
 		
 		self.InitTree()
 
+		# drag and drop
 		self.SetDropTarget(MyDropTarget(self))
+		self.tree.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnBeginDragSelf)
 	
 		# layout
 		import Layout
@@ -92,7 +82,9 @@ class SpecialsPanel(wx.Panel):
 		self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginEdit, self.tree)
 		self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndEdit, self.tree)
 
-		self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+		self.tree.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
+		self.tree.Bind(wx.EVT_RIGHT_UP, self.OnRightUp)
+		#self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
 		self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
 		self.onSelChangedCallback = None
@@ -148,31 +140,74 @@ class SpecialsPanel(wx.Panel):
 		data.label = event.GetLabel()
 		self.NotifyObserver()
 
-	def OnSelChanged(self, event):
-		self.item = event.GetItem()
-		data = self.tree.GetPyData(self.item)
-		if self.onSelChangedCallback:
-			self.onSelChangedCallback(data)
+	def OnBeginDragSelf(self, event):
+		item = event.GetItem()
+		tree = event.GetEventObject()
+		uuid = tree.GetPyData(item).uuid
+		def DoDragDrop():
+			dd = wx.CustomDataObject("special")
+			dd.SetData(uuid)
 
-	def OnContextMenu(self, event):
+			data = wx.DataObjectComposite()
+			data.Add(dd)
+
+			dropSource = wx.DropSource(self)
+			dropSource.SetData(data)
+			result = dropSource.DoDragDrop(wx.Drag_AllowMove)
+
+		wx.CallAfter(DoDragDrop) # can't call dropSource.DoDragDrop here..
+
+	def OnSelChanged(self, event):
+		item = event.GetItem()
+		if item:
+			data = self.tree.GetPyData(item)
+			if self.onSelChangedCallback:
+				self.onSelChangedCallback(data)
+
+	def OnRightDown(self, event):
+		item, flags = self.tree.HitTest(event.GetPosition())
+		if item:
+			self.tree.SelectItem(item)
+
+	def OnRightUp(self, event):
+		item, flags = self.tree.HitTest(event.GetPosition())
 		if not hasattr(self, "popupID1"):
 			self.popupID1 = wx.NewId()
-
+			self.popupID2 = wx.NewId()
+			self.popupID3 = wx.NewId()
 			self.Bind(wx.EVT_MENU, self.OnNewSpecial, id=self.popupID1)
+			self.Bind(wx.EVT_MENU, self.OnDeleteItem, id=self.popupID2)
+			self.Bind(wx.EVT_MENU, self.OnDuplicateItem, id=self.popupID3)
 
 		menu = wx.Menu()
 		menu.Append(self.popupID1, "New Special")
+		if item:
+			menu.Append(self.popupID2, "Delete")
+			menu.Append(self.popupID3, "Duplicate")
 
 		self.PopupMenu(menu)
 		menu.Destroy()
 
+	def OnContextMenu(self, event):
+		raise NotImplementedError("Use OnRightUp instead")
+
 	def OnNewSpecial(self, event):
 		self.AppendNewSpecial()
 		self.NotifyObserver()
+
+	def OnDeleteItem(self, event):
+		item = self.tree.GetSelection()
+		if item:
+			self.DeleteItem(item)
+
+	def OnDuplicateItem(self, event):
+		raise NotImplementedError()
 	# }}}
 
+	# {{{ Add new nodes
 	def AppendNewSpecial(self):
 		special = Special()
+		self.project.add_special(special)
 		special.label = 'New Special'
 		specialItem = self.tree.AppendItem(self.root, "New Special")
 		self.tree.SetPyData(specialItem, special)
@@ -180,26 +215,6 @@ class SpecialsPanel(wx.Panel):
 		self.tree.SetItemImage(specialItem, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
 
 		self.tree.SelectItem(specialItem)
-
-	def DropData(self, item, data):
-		itemData = self.tree.GetPyData(item)
-
-		# find a place to insert
-		if not (isinstance(itemData, Special) or isinstance(itemData, Controller.Controller)):
-			item = self.tree.GetItemParent(item)
-			itemData = self.tree.GetPyData(item)
-			if not (isinstance(itemData, Special) or isinstance(itemData, Controller.Controller)):
-				log.debug('no place to insert')
-				return
-
-		import Repository
-		data = Repository.lookup(data)
-		import inspect
-		if inspect.isclass(data):
-			data = data()
-			self.InsertNewController(item, data)
-		else:
-			self.UseData(item, data)
 
 	def InsertNewController(self, item, controller):
 		itemData = self.tree.GetPyData(item)
@@ -221,6 +236,50 @@ class SpecialsPanel(wx.Panel):
 		self.LoadData(item, data)
 
 		self.tree.Expand(item)
+
+	def DropNewData(self, item, data):
+		itemData = self.tree.GetPyData(item)
+
+		# find a place to insert
+		if not (isinstance(itemData, Special) or isinstance(itemData, Controller.Controller)):
+			item = self.tree.GetItemParent(item)
+			itemData = self.tree.GetPyData(item)
+			if not (isinstance(itemData, Special) or isinstance(itemData, Controller.Controller)):
+				log.debug('no place to insert')
+				return
+
+		import Repository
+		data = Repository.lookup(data)
+		import inspect
+		if inspect.isclass(data):
+			data = data()
+			self.InsertNewController(item, data)
+		else:
+			self.UseData(item, data)
+
+	# }}}
+
+	# {{{ Moving nodes
+	def MoveData(self, item, data):
+		pass
+	# }}}
+
+	# {{{ Deleting nodes
+	#FIXME: name confliction?
+	def DeleteItem(self, item):
+		data = self.tree.GetPyData(item)
+		parentItem = self.tree.GetItemParent(item)
+		parentData = self.tree.GetPyData(parentItem)
+		self.tree.Delete(item)
+		if parentData:
+			parentData.remove_child(data)
+		else:
+			# parent is root
+			assert parentItem == self.root
+			self.project.remove_special(data)
+
+		self.NotifyObserver()
+	# }}}
 
 	# {{{ Load kinds of Data (the data to be loaded should have been added as parent node's child)
 	def LoadData(self, item, data):
@@ -290,6 +349,8 @@ class SpecialsPanel(wx.Panel):
 		self.tree.Expand(subItem)
 	# }}}
 
+	##################################################
+
 	def ReloadSpecial(self, item):
 		special = self.tree.GetPyData(item)
 		self.tree.DeleteChildren(item)
@@ -317,6 +378,9 @@ class SpecialsPanel(wx.Panel):
 
 if __name__ == '__main__':
 	import Test
-	Test.TestPanel(SpecialsPanel)
+	import Project
+	def init(p):
+		p.project = Project.NoneProject()
+	Test.TestPanel(SpecialsPanel, init)
 
 # vim: foldmethod=marker:

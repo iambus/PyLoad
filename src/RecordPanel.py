@@ -199,7 +199,7 @@ class RecordPanel(wx.Panel):
 		item = self.tree.GetSelection()
 		self.DeleteItem(item)
 
-	def OnDuplicateIem(self, event):
+	def OnDuplicateItem(self, event):
 		item = self.tree.GetSelection()
 		#TODO
 
@@ -225,7 +225,7 @@ class RecordPanel(wx.Panel):
 		if not hasattr(self, "popupID1"):
 			self.popupID1 = wx.NewId()
 			self.popupID2 = wx.NewId()
-			self.Bind(wx.EVT_MENU, self.OnDuplicateIem, id=self.popupID1)
+			self.Bind(wx.EVT_MENU, self.OnDuplicateItem, id=self.popupID1)
 			self.Bind(wx.EVT_MENU, self.OnDeleteItem, id=self.popupID2)
 
 		menu = wx.Menu()

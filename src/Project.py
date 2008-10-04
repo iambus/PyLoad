@@ -6,6 +6,7 @@ class Project:
 	def __init__(self, root):
 		self.root = root
 		self.records = []
+		self.specials = []
 		if not os.path.exists(self.root):
 			os.makedirs(self.root)
 		os.path.isdir(self.root)
@@ -16,6 +17,12 @@ class Project:
 	def remove_record(self, record):
 		self.records.remove(record)
 
+	def add_special(self, special):
+		self.specials.append(special)
+
+	def remove_special(self, special):
+		self.specials.remove(special)
+
 	def save(self):
 		pass
 	
@@ -25,13 +32,15 @@ class Project:
 class NoneProject:
 	def __init__(self, root = None):
 		self.records = []
-		pass
+		self.specials = []
 	def add_record(self, record):
 		self.records.append(record)
-		pass
 	def remove_record(self, record):
 		self.records.remove(record)
-		pass
+	def add_special(self, special):
+		self.specials.append(special)
+	def remove_special(self, special):
+		self.specials.remove(special)
 	def save(self):
 		pass
 	def load(self):

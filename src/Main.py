@@ -80,6 +80,7 @@ class MainFrame(wx.Frame):
 
 		self.project = Project.Project('.load')
 		self.nb.recordTab.tree.project = self.project
+		self.nb.editTab.specialsPanel.project = self.project
 		self.proxy = None
 
 	def InitIcons(self):

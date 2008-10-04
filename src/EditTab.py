@@ -57,6 +57,8 @@ if __name__ == '__main__':
 	frame = wx.Frame(None, -1, "EditTab", size = (800, 600))
 	p = EditTab(frame)
 
+	import Project
+	p.specialsPanel.project = Project.NoneProject()
 	import Record
 	p.recordPanel.AppendRecord(Record.Record())
 

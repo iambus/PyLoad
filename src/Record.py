@@ -37,7 +37,7 @@ class Hit(Player, PropertyMixin):
 		self.resp_handler = ContentTypeHandler.ContentTypeHandler()
 
 	def finish(self):
-		assert self.oreqstr == None, 'finish twice!.'
+		assert self.oreqstr == None, 'finish twice!'
 		# TODO: detect coders
 		self.oreqstr = self.reqstr
 		self.orespstr = self.respstr
