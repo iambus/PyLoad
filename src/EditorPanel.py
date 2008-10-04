@@ -1,8 +1,8 @@
 
 import wx
-import wx.lib.layoutf
 
 from editor.CodeCtrl import CodeCtrl
+from editor.SearchBar import SearchBar
 
 from Binding import *
 
@@ -30,22 +30,25 @@ class EditorPanel(wx.Panel):
 
 		self.editor = CodeCtrl(self, -1,
                        size=(200, 100), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
-		self.viButton = wx.Button(self, -1, 'Edit in Vim')
-		self.saveButton = wx.Button(self, -1, 'Apply')
-		searchLabel = wx.StaticText(self, -1, "Search: ", style=wx.ALIGN_CENTRE)
-		self.searchField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER)
-		self.searchButton = wx.Button(self, -1, 'Search')
-		self.reCheck = wx.CheckBox(self, -1, "Regular Expression")
 
+		self.viButton = wx.Button(self, -1, 'Edit in Vim')
+
+		self.saveButton = wx.Button(self, -1, 'Apply')
 		self.saveButton.Disable()
+
+		self.search = SearchBar(self)
+		self.search.searchCallback = self.editor.SearchText
+		self.search.highlightCallback = self.editor.HighlightText
+		self.search.cancelSearchCallback = self.editor.CancelSearch
+
 
 		# bindings
 		self.Bind(wx.stc.EVT_STC_CHANGE, self.OnModified, self.editor)
 
 		self.Bind(wx.EVT_BUTTON, self.OnVi, self.viButton)
 		self.Bind(wx.EVT_BUTTON, self.OnSave, self.saveButton)
-		self.Bind(wx.EVT_BUTTON, self.OnSearch, self.searchButton)
-		self.Bind(wx.EVT_TEXT_ENTER, self.OnSearch, self.searchField)
+		#self.Bind(wx.EVT_BUTTON, self.OnSearch, self.searchButton)
+		#self.Bind(wx.EVT_TEXT_ENTER, self.OnSearch, self.searchField)
 
 		self.Bind(wx.EVT_END_PROCESS, self.OnViEnded)
 
@@ -54,10 +57,8 @@ class EditorPanel(wx.Panel):
 		bsizer.AddGrowableCol(3)
 		bsizer.Add(self.viButton, 0, wx.ALL)
 		bsizer.Add(self.saveButton, 0, wx.ALL)
-		bsizer.Add(searchLabel, 0, wx.ALL)
-		bsizer.Add(self.searchField, 1, wx.EXPAND)
-		bsizer.Add(self.searchButton, 0, wx.ALL)
-		bsizer.Add(self.reCheck, 0, wx.ALL)
+
+		bsizer.Add(self.search, 0, wx.ALL)
 
 
 		vsizer = wx.BoxSizer(wx.VERTICAL)
@@ -70,7 +71,8 @@ class EditorPanel(wx.Panel):
 			self.Load()
 
 	def OnModified(self, event):
-		self.saveButton.Enable()
+		if self.binding or self.path:
+			self.saveButton.Enable()
 	
 	def OnVi(self, event):
 		assert self.temppath == None
@@ -153,7 +155,9 @@ if __name__ == '__main__':
 
 	frame = wx.Frame(None, -1, "Editor", size = (800, 600))
 	#EditorPanel(frame, 'F:/temp/_')
-	EditorPanel(frame)
+	p = EditorPanel(frame)
+	import Record
+	
 
 	frame.Center()
 	frame.Show(True)

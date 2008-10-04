@@ -29,30 +29,6 @@ def F(V):
 """
 
 #----------------------------------------------------------------------
-
-
-if wx.Platform == '__WXMSW__':
-    faces = { 'times': 'Times New Roman',
-              'mono' : 'Courier New',
-              'helv' : 'Arial',
-              'other': 'Comic Sans MS',
-              'size' : 10,
-              'size2': 8,
-             }
-else:
-    faces = { 'times': 'Times',
-              'mono' : 'Courier',
-              'helv' : 'Helvetica',
-              'other': 'new century schoolbook',
-              'size' : 12,
-              'size2': 10,
-             }
-
-
-#----------------------------------------------------------------------
-
-# Load colors
-
 colorpath = 'colors/ps_color.colors'
 configdict = None
 
@@ -111,7 +87,7 @@ class CodeCtrl(stc.StyledTextCtrl):
         self.SetBackSpaceUnIndents(True)# Backspace unindents rather than delete 1 space
         self.SetTabIndents(True)        # Tab key indents
         self.SetTabWidth(4)             # Proscribed tab size for wx
-        self.SetUseTabs(False)          # Use spaces rather than tabs, or
+        #self.SetUseTabs(False)
 
         # show line numbers
         self.SetMarginType(1, wx.stc.STC_MARGIN_NUMBER)
@@ -201,6 +177,7 @@ class CodeCtrl(stc.StyledTextCtrl):
         self.SetKeyWords(1, " ".join(self.syntax.word2))
         self.SetKeyWords(2, " ".join(self.syntax.word3))
         self.SetKeyWords(3, " ".join(self.syntax.word4))
+        self.SetKeyWords(4, " ".join(self.syntax.word5))
 
     def SetSyntax(self, syntax):
         self.LoadSyntax(syntax)
@@ -215,6 +192,62 @@ class CodeCtrl(stc.StyledTextCtrl):
     def GetValue(self):
         return self.GetText().replace('\r\n', '\n')
 
+    #------------------------------
+
+    #TODO: match-case
+    def SearchText(self, text, forward = True, regex = False):
+        if text == '':
+            self.CancelSearch()
+            return
+        fullText = self.GetText()
+        if not regex:
+            if forward:
+                start = self.GetSelection()[0]
+                if self.GetSelectedText() == text:
+                    start += 1
+                next = fullText.find(text, start)
+            else:
+                end = self.GetSelection()[1]
+                if self.GetSelectedText() == text:
+                    end -= 1
+                next = fullText.rfind(text, 0, end)
+            if next != -1:
+                self.SetSelection(next, next+len(text))
+        else:
+            import re
+            try:
+                regexp = re.compile(text)
+            except:
+                # Invalid regular expression. Ignore it.
+                return
+            if forward:
+                start = self.GetSelection()[0]
+                if regexp.search(self.GetSelectedText()):
+                    start += 1
+                m = regexp.search(fullText, start)
+            else:
+                end = self.GetSelection()[1]
+                if regexp.search(self.GetSelectedText()):
+                    end -= 1
+                # FIXME: '12345', '\d\d\d' should return '345' instead of '123'
+                iter = regexp.finditer(fullText, 0, end)
+                m = None
+                try:
+                    while True:
+                        m = iter.next()
+                except StopIteration:
+                    pass
+            if m:
+                self.SetSelection(m.start(), m.end())
+
+    def HighlightText(self, text):
+        raise NotImplementedError("Don't know how to highlight...")
+
+    def CancelSearch(self):
+        range = self.GetSelection()
+        if range[0] != range[1]:
+            self.SetSelection(range[0], range[0])
+        #TODO: de-highlight
 
 #----------------------------------------------------------------------
 
@@ -226,9 +259,11 @@ def test():
     import syntax.html
     app = wx.PySimpleApp()
     frame = wx.Frame(None, -1, "TestPanel", size = (800, 600))
+
     p = CodeCtrl(frame)
     p.SetText(demoText)
-    p.SetSyntax(syntax.xml)
+    #p.SetSyntax(syntax.xml)
+
     frame.Center()
     frame.Show(True)
     app.MainLoop()
