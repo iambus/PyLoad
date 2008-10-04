@@ -347,8 +347,6 @@ class RecordPanel(wx.Panel):
 				}
 		mappings[sourceData.__class__](parentItem, targetItem, sourceData)
 
-		self.tree.Expand(targetItem)
-
 	#FIXME: name confliction?
 	def DeleteItem(self, item):
 		data = self.tree.GetPyData(item)

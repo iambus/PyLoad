@@ -238,25 +238,40 @@ class SpecialsPanel(wx.Panel):
 
 		self.tree.Expand(item)
 
-	def DropNewData(self, item, data):
-		itemData = self.tree.GetPyData(item)
+	def DropNewData(self, targetItem, uuid):
+		targetData = self.tree.GetPyData(targetItem)
 
-		# find a place to insert
-		if not (isinstance(itemData, Special) or isinstance(itemData, Controller.Controller)):
-			item = self.tree.GetItemParent(item)
-			itemData = self.tree.GetPyData(item)
-			if not (isinstance(itemData, Special) or isinstance(itemData, Controller.Controller)):
-				log.debug('no place to insert')
-				return
+		#TODO: can we introduce a "subable" interface?
+		subable = (Special, Controller.If, Controller.Loop)
+		unsubable = (Record.Record, Record.Page, Record.Hit, Player.Script)
 
+		if targetData.__class__ in subable:
+			# insert under
+			sourceData = self.GetDataFromUUID(uuid)
+			targetData.add_child(sourceData)
+			self.LoadData(targetItem, sourceData)
+			self.tree.Expand(targetItem)
+		else:
+			parentItem = self.tree.GetItemParent(targetItem)
+			parentData = self.tree.GetPyData(parentItem)
+			if parentData.__class__ in subable:
+				# insert after
+				sourceData = self.GetDataFromUUID(uuid)
+				childern = parentData.childern
+				index = childern.index(targetData)
+				childern.insert(index+1, sourceData)
+				self.InsertData(parentItem, targetItem, sourceData)
+
+	def GetDataFromUUID(self, uuid):
 		import Repository
-		data = Repository.lookup(data)
+		data = Repository.lookup(uuid)
 		import inspect
 		if inspect.isclass(data):
 			data = data()
-			self.InsertNewController(item, data)
-		else:
-			self.UseData(item, data)
+			label = str(data.__class__)
+			label = label[label.rfind('.')+1:]
+			data.label = label
+		return data
 
 	# }}}
 
@@ -319,8 +334,6 @@ class SpecialsPanel(wx.Panel):
 		childern.insert(index+1, sourceData)
 
 		self.InsertData(parentItem, targetItem, sourceData)
-
-		self.tree.Expand(targetItem)
 
 	# }}}
 
@@ -472,7 +485,7 @@ class SpecialsPanel(wx.Panel):
 		self.tree.SetItemImage(subItem, self.scriptIcon, wx.TreeItemIcon_Normal)
 	
 	def InsertIf(self, item, prev, ifData):
-		subItem = self.tree.AppendItem(item, ifData.label)
+		subItem = self.tree.InsertItem(item, prev, ifData.label)
 		self.tree.SetPyData(subItem, ifData)
 		self.tree.SetItemImage(subItem, self.ifIcon, wx.TreeItemIcon_Normal)
 
