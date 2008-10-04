@@ -31,7 +31,7 @@ class EditorPanel(wx.Panel):
 		self.editor = CodeCtrl(self, -1,
                        size=(200, 100), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
 		self.viButton = wx.Button(self, -1, 'Edit in Vim')
-		self.saveButton = wx.Button(self, -1, 'Save')
+		self.saveButton = wx.Button(self, -1, 'Apply')
 		searchLabel = wx.StaticText(self, -1, "Search: ", style=wx.ALIGN_CENTRE)
 		self.searchField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER)
 		self.searchButton = wx.Button(self, -1, 'Search')
