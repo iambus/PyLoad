@@ -407,6 +407,7 @@ class RecordPanel(wx.Panel):
 		self.tree.Expand(recordItem)
 
 	#FIXME: duplicated code
+	#FIXME: bad names -- "insert"?
 	def InsertPage(self, item, prev, p):
 		pageItem = self.tree.InsertItem(item, prev, p.label)
 		self.tree.SetPyData(pageItem, p)

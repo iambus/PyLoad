@@ -72,7 +72,7 @@ class SpecialsPanel(wx.Panel):
 
 		# drag and drop
 		self.SetDropTarget(MyDropTarget(self))
-		self.tree.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnBeginDragSelf)
+		self.tree.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnBeginDrag)
 	
 		# layout
 		import Layout
@@ -140,8 +140,9 @@ class SpecialsPanel(wx.Panel):
 		data.label = event.GetLabel()
 		self.NotifyObserver()
 
-	def OnBeginDragSelf(self, event):
+	def OnBeginDrag(self, event):
 		item = event.GetItem()
+		self.dragging_item = item
 		tree = event.GetEventObject()
 		uuid = tree.GetPyData(item).uuid
 		def DoDragDrop():
@@ -260,8 +261,67 @@ class SpecialsPanel(wx.Panel):
 	# }}}
 
 	# {{{ Moving nodes
-	def MoveData(self, item, data):
-		pass
+	def MoveData(self, targetItem, data):
+		sourceItem = self.dragging_item
+		self.dragging_item = None
+		sourceData = self.tree.GetPyData(sourceItem)
+		targetData = self.tree.GetPyData(targetItem)
+		if sourceData == targetData:
+			return
+
+		sourceParentItem = self.tree.GetItemParent(sourceItem)
+		targetParentItem = self.tree.GetItemParent(targetItem)
+		sourceParentData = self.tree.GetPyData(sourceParentItem)
+		targetParentData = self.tree.GetPyData(targetParentItem)
+
+		#TODO: can we introduce a "subable" interface?
+		subable = (Special, Controller.If, Controller.Loop)
+		unsubable = (Record.Record, Record.Page, Record.Hit, Player.Script)
+
+		if sourceParentData.__class__ in unsubable or targetParentData.__class__ in unsubable:
+			return
+
+		if sourceData.__class__ == Special:
+			self.MoveAfter(sourceItem, targetItem)
+		elif targetData.__class__ in subable:
+			self.MoveUnder(sourceItem, targetItem)
+		else:
+			self.MoveAfter(sourceItem, targetItem)
+
+		self.NotifyObserver()
+
+	#FIXME: duplicated code
+	def MoveUnder(self, sourceItem, targetItem):
+		sourceData = self.tree.GetPyData(sourceItem)
+		targetData = self.tree.GetPyData(targetItem)
+		self.DeleteItem(sourceItem)
+
+		targetData.add_child(sourceData)
+		self.LoadData(targetItem, sourceData)
+
+		self.tree.Expand(targetItem)
+
+	#FIXME: duplicated code
+	def MoveAfter(self, sourceItem, targetItem):
+		#TODO: if source is already after target
+		sourceData = self.tree.GetPyData(sourceItem)
+		targetData = self.tree.GetPyData(targetItem)
+		parentItem = self.tree.GetItemParent(targetItem)
+		parentData = self.tree.GetPyData(parentItem)
+		self.DeleteItem(sourceItem)
+
+		if parentData:
+			childern = parentData.childern
+		else:
+			childern = self.project.specials
+
+		index = childern.index(targetData)
+		childern.insert(index+1, sourceData)
+
+		self.InsertData(parentItem, targetItem, sourceData)
+
+		self.tree.Expand(targetItem)
+
 	# }}}
 
 	# {{{ Deleting nodes
@@ -340,6 +400,89 @@ class SpecialsPanel(wx.Panel):
 
 	def LoadLoop(self, item, loopData):
 		subItem = self.tree.AppendItem(item, loopData.label)
+		self.tree.SetPyData(subItem, loopData)
+		self.tree.SetItemImage(subItem, self.loopIcon, wx.TreeItemIcon_Normal)
+
+		for child in loopData.childern:
+			self.LoadData(subItem, child)
+
+		self.tree.Expand(subItem)
+	# }}}
+
+	# {{{ Insert kinds of Data AFTER a node (the data to be loaded should have been added as parent node's child)
+	#FIXME: duplicated code
+	#FIXME: bad names -- why "insert" suppose "the data to be loaded should have been added as parent node's child"?
+	def InsertData(self, item, prev, data):
+		mappings = {
+				Record.Record : self.InsertRecord,
+				Record.Page : self.InsertPage,
+				Record.Hit : self.InsertHit,
+				Player.Script : self.InsertScript,
+				Controller.If : self.InsertIf,
+				Controller.Loop : self.InsertLoop,
+				Special : self.InsertSpecial,
+				}
+		mappings[data.__class__](item, prev, data)
+
+	def InsertSpecial(self, item, prev, s):
+		assert item == self.root
+		specialItem = self.tree.InsertItem(item, prev, s.label)
+		self.tree.SetPyData(specialItem, s)
+		self.tree.SetItemImage(specialItem, self.specialIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(specialItem, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
+
+		for child in s.childern:
+			self.LoadData(specialItem, child)
+
+		self.tree.Expand(specialItem)
+
+	def InsertRecord(self, item, prev, r):
+		recordItem = self.tree.InsertItem(item, prev, r.label)
+		self.tree.SetPyData(recordItem, r)
+		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
+
+		for p in r.pages:
+			self.LoadPage(recordItem, p)
+
+		self.tree.Expand(recordItem)
+
+	def InsertPage(self, item, prev, p):
+		pageItem = self.tree.InsertItem(item, prev, p.label)
+		self.tree.SetPyData(pageItem, p)
+		self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
+
+		for h in p.hits:
+			self.LoadHit(pageItem, h)
+
+		self.tree.Expand(pageItem)
+
+	def InsertHit(self, item, prev, h):
+		hitItem = self.tree.InsertItem(item, prev, h.label)
+		self.tree.SetPyData(hitItem, h)
+		self.tree.SetItemImage(hitItem, self.hitIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(hitItem, self.hitIcon, wx.TreeItemIcon_Selected)
+
+		self.tree.Expand(hitItem)
+
+	def InsertScript(self, item, prev, scriptData):
+		subItem = self.tree.InsertItem(item, prev, scriptData.label)
+		self.tree.SetPyData(subItem, scriptData)
+		self.tree.SetItemImage(subItem, self.scriptIcon, wx.TreeItemIcon_Normal)
+	
+	def InsertIf(self, item, prev, ifData):
+		subItem = self.tree.AppendItem(item, ifData.label)
+		self.tree.SetPyData(subItem, ifData)
+		self.tree.SetItemImage(subItem, self.ifIcon, wx.TreeItemIcon_Normal)
+
+		for child in ifData.childern:
+			self.LoadData(subItem, child)
+
+		self.tree.Expand(subItem)
+
+	def InsertLoop(self, item, prev, loopData):
+		subItem = self.tree.InsertItem(item, prev, loopData.label)
 		self.tree.SetPyData(subItem, loopData)
 		self.tree.SetItemImage(subItem, self.loopIcon, wx.TreeItemIcon_Normal)
 
