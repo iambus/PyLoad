@@ -187,7 +187,8 @@ class SpecialsPanel(wx.Panel):
 		if item:
 			if self.UnderModifiable(item):
 				menu.Append(self.popupID2, "Delete")
-				menu.Append(self.popupID3, "Duplicate")
+				menu.Append(self.popupID3, "Duplicate (Not implemented)")
+				menu.FindItemByPosition(2).Enable(False)
 
 		self.PopupMenu(menu)
 		menu.Destroy()
