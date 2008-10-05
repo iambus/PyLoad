@@ -72,11 +72,12 @@ class NoneProject:
 if __name__ == '__main__':
 	import pickle
 	import Player
+	import Record
 	p = Project()
 
-	#p.add_record(Player.Script('print 2'))
-	#print p.records[0].uuid
-	#p.save('.load/project.pkl')
+	p.add_record(Player.Script('print 2'))
+	p.add_record(Record.Hit(''))
+	p.save('.load/project.pkl')
 
 	p.records = []
 
