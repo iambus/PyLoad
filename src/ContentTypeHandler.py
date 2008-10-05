@@ -8,6 +8,8 @@ import editor.syntax.python
 
 class ContentTypeHandler:
 	def __init__(self, coder = Coder.EmptyCoder, syntax = editor.syntax.default):
+		#coder and syntax should be immutable
+		#XXX how to promise?
 		self.coder = coder
 		self.syntax = syntax
 
@@ -19,6 +21,10 @@ class ContentTypeHandler:
 
 	def get(self):
 		return (self.coder, self.syntax)
+
+	#FIXME: maybe not good enough...
+	def __deepcopy__(self, ignored):
+		return ContentTypeHandler(self.coder, self.syntax)
 
 mapping = {
 		'default' : (Coder.EmptyCoder, editor.syntax.default),

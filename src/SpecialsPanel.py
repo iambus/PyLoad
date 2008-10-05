@@ -65,6 +65,7 @@ class SpecialsTree(wx.TreeCtrl):
 # }}}
 
 class SpecialsPanel(wx.Panel):
+	# {{{ init
 	def __init__(self, parent):
 		wx.Panel.__init__(self, parent, -1)
 		
@@ -119,6 +120,7 @@ class SpecialsPanel(wx.Panel):
 		self.tree.SetPyData(self.root, None)
 		self.tree.SetItemImage(self.root, self.specialIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(self.root, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
+	# }}}
 
 	# {{{ Event Handler
 	def OnBeginEdit(self, event):
@@ -183,8 +185,9 @@ class SpecialsPanel(wx.Panel):
 		menu = wx.Menu()
 		menu.Append(self.popupID1, "New Special")
 		if item:
-			menu.Append(self.popupID2, "Delete")
-			menu.Append(self.popupID3, "Duplicate")
+			if self.UnderModifiable(item):
+				menu.Append(self.popupID2, "Delete")
+				menu.Append(self.popupID3, "Duplicate")
 
 		self.PopupMenu(menu)
 		menu.Destroy()
@@ -343,6 +346,9 @@ class SpecialsPanel(wx.Panel):
 		data = self.tree.GetPyData(item)
 		parentItem = self.tree.GetItemParent(item)
 		parentData = self.tree.GetPyData(parentItem)
+
+		assert self.IsModifiable(parentItem)
+
 		self.tree.Delete(item)
 		if parentData:
 			parentData.remove_child(data)
@@ -531,6 +537,15 @@ class SpecialsPanel(wx.Panel):
 			specials.append(self.tree.GetPyData(child))
 			(child, cookie) = self.tree.GetNextChild(self.root, cookie)
 		return specials
+
+	def IsModifiable(self, item):
+		unmodifiable = (Record.Record, Record.Page, Record.Hit)
+		data = self.tree.GetPyData(item)
+		return data.__class__ not in unmodifiable
+
+	def UnderModifiable(self, item):
+		parentItem = self.tree.GetItemParent(item)
+		return self.IsModifiable(parentItem)
 
 if __name__ == '__main__':
 	import Test

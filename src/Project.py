@@ -10,6 +10,10 @@ class Project:
 		if not os.path.exists(self.root):
 			os.makedirs(self.root)
 		os.path.isdir(self.root)
+
+		self.global_factory = None
+		self.user_factory = None
+		self.iteration_factory = None
 	
 	def add_record(self, record):
 		self.records.append(record)

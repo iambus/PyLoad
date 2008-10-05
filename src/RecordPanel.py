@@ -200,8 +200,32 @@ class RecordPanel(wx.Panel):
 		self.DeleteItem(item)
 
 	def OnDuplicateItem(self, event):
-		item = self.tree.GetSelection()
-		#TODO
+		targetItem = self.tree.GetSelection()
+		targetData = self.tree.GetPyData(targetItem)
+		parentItem = self.tree.GetItemParent(targetItem)
+		parentData = self.tree.GetPyData(parentItem)
+
+		import Clone
+		sourceData = Clone.clone(targetData)
+
+		#FIXME: duplicated code
+		targetData = self.tree.GetPyData(targetItem)
+		parentItem = self.tree.GetItemParent(targetItem)
+
+		if parentData:
+			childern = parentData.childern
+		else:
+			childern = self.project.records
+
+		index = childern.index(targetData)
+		childern.insert(index+1, sourceData)
+
+		mappings = {
+				Record.Record : self.InsertRecord,
+				Record.Page : self.InsertPage,
+				Record.Hit : self.InsertHit,
+				}
+		mappings[sourceData.__class__](parentItem, targetItem, sourceData)
 
 	def OnSize(self, event):
 		event.Skip()

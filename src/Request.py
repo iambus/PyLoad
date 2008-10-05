@@ -25,6 +25,7 @@ class Request:
 			x = self.parse_n(reqstr)
 		if x == None:
 			log.error("Can't parse request:[[[%s]]]" % repr(reqstr))
+			return
 
 		(self.request_line, self.headers, self.body) = x
 		self.method = re.match(r'\S+', self.request_line).group()

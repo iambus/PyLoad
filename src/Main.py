@@ -18,7 +18,7 @@ class ColoredPanel(wx.Window):
 
 
 class NoteBook(wx.Toolbook):
-	def __init__(self, parent, id):
+	def __init__(self, parent, id, project = None):
 		wx.Toolbook.__init__(self, parent, id, style=wx.BK_TOP)
 
 
@@ -35,7 +35,7 @@ class NoteBook(wx.Toolbook):
 		self.editTab.recordPanel.SetMirrorOf(self.recordTab.tree)
 		self.recordTab.tree.AddObserver(self.editTab.specialsPanel.ReloadAll)
 
-		self.playTab = PlayTab.PlayTab(self)
+		self.playTab = PlayTab.PlayTab(self, project)
 		self.AddPage(self.playTab, 'Play', imageId=-1)
 		self.playTab.ResetSize()
 
@@ -69,7 +69,9 @@ class MainFrame(wx.Frame):
 	def __init__(self):
 		wx.Frame.__init__(self, None, -1, "PyLoad", size=(800, 600))
 
-		self.nb = NoteBook(self, -1)
+		self.project = Project.Project('.load')
+
+		self.nb = NoteBook(self, -1, self.project)
 
 		self.InitIcons()
 		self.UseMenuBar()
@@ -78,7 +80,7 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 		self.Bind(EVT_PLAY_STOPPED, self.OnTerminate)
 
-		self.project = Project.Project('.load')
+		#TODO: put in tabs' constructors
 		self.nb.recordTab.tree.project = self.project
 		self.nb.editTab.specialsPanel.project = self.project
 		self.proxy = None

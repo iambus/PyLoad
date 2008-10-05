@@ -115,7 +115,7 @@ class EachPanel(wx.Panel):
 
 
 class PlayTab(wx.Panel):
-	def __init__(self, parent):
+	def __init__(self, parent, project = None):
 		wx.Panel.__init__(self, parent, -1)
 
 		self.splitter = wx.SplitterWindow(self, style=wx.BORDER_NONE)
@@ -147,6 +147,12 @@ class PlayTab(wx.Panel):
 		self.globalFactory = PlayPolicy.GlobalFactory()
 		self.userFactory = PlayPolicy.UserFactory()
 		self.iterationFactory = PlayPolicy.IterationFactory()
+
+		if project:
+			project.global_factory = self.globalFactory
+			project.user_factory = self.userFactory
+			project.iteration_factory = self.iterationFactory
+		self.project = project
 
 	def OnItemSelected(self, event):
 		self.selectedFactory = [self.globalFactory, self.userFactory, self.iterationFactory][event.Index]
