@@ -44,13 +44,21 @@ class EditTab(wx.Panel):
 		self.Bind(wx.EVT_BUTTON, self.OnPlay, self.detailsPanel.testButton)
 		self.specialsPanel.onSelChangedCallback = self.detailsPanel.Load
 
-	def ResetSize(self):
-		self.leftsplitter.SetSashPosition(180)
-
 	def OnPlay(self, event):
 		tree = self.specialsPanel.tree
 		player = tree.GetPyData(tree.GetSelection())
 		player.play()
+
+	def ResetSize(self):
+		self.leftsplitter.SetSashPosition(180)
+
+	def Unload(self):
+		self.specialsPanel.Unload()
+		self.recordPanel.Unload()
+		self.detailsPanel.Unload()
+
+	def Reload(self):
+		self.specialsPanel.Reload()
 
 if __name__ == '__main__':
 	app = wx.PySimpleApp()

@@ -33,7 +33,7 @@ class NoteBook(wx.Toolbook):
 		self.editTab.ResetSize()
 
 		self.editTab.recordPanel.SetMirrorOf(self.recordTab.tree)
-		self.recordTab.tree.AddObserver(self.editTab.specialsPanel.ReloadAll)
+		self.recordTab.tree.AddObserver(self.editTab.specialsPanel.UpdateAll)
 
 		self.playTab = PlayTab.PlayTab(self, project)
 		self.AddPage(self.playTab, 'Play', imageId=-1)
@@ -70,6 +70,7 @@ class MainFrame(wx.Frame):
 		wx.Frame.__init__(self, None, -1, "PyLoad", size=(800, 600))
 
 		self.project = Project.Project()
+		self.path = None
 
 		self.nb = NoteBook(self, -1, self.project)
 
@@ -86,6 +87,15 @@ class MainFrame(wx.Frame):
 		self.proxy = None
 
 	def InitIcons(self):
+		self.newIcon = wx.ArtProvider_GetBitmap(wx.ART_NEW, wx.ART_OTHER, (16, 16))
+		self.newIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (16, 16)) #TODO: add correct icon
+		self.openIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, (16, 16))
+		self.openIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (16, 16)) #TODO: add correct icon
+		self.saveIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_SAVE, wx.ART_OTHER, (16, 16))
+		self.saveIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (16, 16)) #TODO: add correct icon
+		self.saveAsIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_OTHER, (16, 16))
+		self.saveAsIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (16, 16)) #TODO: add correct icon
+
 		self.startIcon = IconImages.getStartBitmap()
 		self.startIconOff = IconImages.getStartOffBitmap()
 
@@ -103,12 +113,15 @@ class MainFrame(wx.Frame):
 	def menuData(self):
 		return [
 				("&File", (
+					("&New\tCtrl+N", "Save file", self.OnNew),
+					("&Open\tCtrl+O", "Save file", self.OnOpen),
 					("&Save\tCtrl+S", "Save file", self.OnSave),
+					("Save &As", "Save file", self.OnSaveAs),
 					("", "", ""),
 					("E&xit", "Exit", self.OnExit),
 					("", "", ""),
 					)),
-				("&Op", 
+				("&Operation", 
 					(
 					("Record\tF5", "Record", self.OnRecord, True, self.startIcon, self.stopIconOff),
 					("Stop Recoding\tF6", "Record", self.OnStop, False, self.stopIcon, self.stopIconOff),
@@ -173,6 +186,20 @@ class MainFrame(wx.Frame):
 	# {{{ ToolBar
 	def UseToolBar(self):
 		toolbar = self.CreateToolBar()
+
+		new = toolbar.AddSimpleTool(wx.NewId(), self.newIcon, "New")
+		self.Bind(wx.EVT_MENU, self.OnNew, new)
+
+		open = toolbar.AddSimpleTool(wx.NewId(), self.openIcon, "Open")
+		self.Bind(wx.EVT_MENU, self.OnOpen, open)
+
+		save = toolbar.AddSimpleTool(wx.NewId(), self.saveIcon, "Save")
+		self.Bind(wx.EVT_MENU, self.OnSave, save)
+
+		saveAs = toolbar.AddSimpleTool(wx.NewId(), self.saveAsIcon, "Save As")
+		self.Bind(wx.EVT_MENU, self.OnSaveAs, saveAs)
+
+		toolbar.AddSeparator()
 
 		start = self.createTool(toolbar, "Record", self.startIcon, self.startIconOff)
 		self.Bind(wx.EVT_MENU, self.OnRecord, start)
@@ -267,8 +294,30 @@ class MainFrame(wx.Frame):
 	def OnAll(self, event):
 		print event
 
+	def OnNew(self, event):
+		raise NotImplementedError('New')
+
+	def OnOpen(self, event):
+		path = None
+		wildcard = "pickle (*.pkl)|*.pkl|"     \
+				   "All files (*.*)|*.*"
+		dialog = wx.FileDialog(
+				self, message="Save file as ...", defaultDir="",
+				defaultFile="", wildcard=wildcard, style=wx.OPEN
+				)
+		dialog.SetFilterIndex(0)
+		if dialog.ShowModal() == wx.ID_OK:
+			path = dialog.GetPath()
+		dialog.Destroy()
+		if path:
+			self.LoadProjectFrom(path)
+
 	def OnSave(self, event):
-		print 'Save'
+		self.SaveProjectTo(self.path)
+
+	def OnSaveAs(self, event):
+		self.SaveProjectTo(None)
+
 
 	def OnExit(self, event):
 		self.Close()
@@ -278,6 +327,44 @@ class MainFrame(wx.Frame):
 			self.proxy = None
 			Proxy.stop()
 		self.Destroy()
+
+	def UnloadAll(self):
+		self.nb.recordTab.Unload()
+		self.nb.editTab.Unload()
+		self.nb.playTab.Unload()
+
+	def ReloadAll(self):
+		self.nb.recordTab.Reload()
+		self.nb.editTab.Reload()
+		self.nb.playTab.Reload()
+
+	def LoadProjectFrom(self, path):
+		assert path
+		self.path = path
+		self.UnloadAll()
+		self.project.load_as_global(path)
+		self.ReloadAll()
+
+		self.SetTitle(path + ' - PyLoad')
+
+	def SaveProjectTo(self, path):
+		if not path:
+			wildcard = "pickle (*.pkl)|*.pkl|"     \
+					   "All files (*.*)|*.*"
+			dialog = wx.FileDialog(
+					self, message="Save file as ...", defaultDir="",
+					defaultFile="", wildcard=wildcard, style=wx.SAVE
+					)
+			dialog.SetFilterIndex(0)
+			if dialog.ShowModal() == wx.ID_OK:
+				path = dialog.GetPath()
+			dialog.Destroy()
+			if not path:
+				return
+		self.path = path
+		self.project.save(path)
+
+		self.SetTitle(path + ' - PyLoad')
 
 	def Play(self):
 		func = self.PlayInCurrentThread

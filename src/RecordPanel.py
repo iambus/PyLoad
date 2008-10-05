@@ -386,6 +386,7 @@ class RecordPanel(wx.Panel):
 
 		self.NotifyObservers()
 
+	########################################
 	#FIXME: duplicated code
 	def LoadRecord(self, item, r):
 		recordItem = self.tree.AppendItem(item, r.label)
@@ -465,6 +466,16 @@ class RecordPanel(wx.Panel):
 			(child, cookie) = self.tree.GetNextChild(item, cookie)
 
 	########################################
+	def Unload(self):
+		self.tree.DeleteChildren(self.root)
+
+	def Reload(self):
+		assert not self.isMirror
+		for r in self.project.records:
+			self.LoadRecord(r)
+		self.NotifyObservers()
+
+	########################################
 
 	# {{{ mirrors and observers
 	def AddObserver(self, callback):
@@ -490,10 +501,10 @@ class RecordPanel(wx.Panel):
 
 		project = self.one.project
 		for r in project.records:
-			self.AppendRecord(r)
+			self.LoadRecord(r)
 
-	def AppendRecord(self, record):
-		assert self.isMirror
+	def LoadRecord(self, record):
+		#assert self.isMirror
 		recordItem = self.tree.AppendItem(self.root, "%s" % record.label)
 		self.tree.SetPyData(recordItem, record)
 		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)

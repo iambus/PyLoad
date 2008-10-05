@@ -61,6 +61,13 @@ class RecordTab(wx.Panel):
 
 	########################################
 
+	def Unload(self):
+		self.tree.Unload()
+		self.detailsPanel.Unload()
+
+	def Reload(self):
+		self.tree.Reload()
+
 	def Play(self):
 		self.tree.tree.SelectedData().play()
 	

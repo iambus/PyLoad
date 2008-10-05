@@ -136,6 +136,10 @@ class DetailsPanel(wx.Panel):
 			TabToInitFuncs[tabName](tab, data)
 		self.testButton.Show()
 
+	def Unload(self):
+		self.nb.DeleteAllPages()
+		self.testButton.Hide()
+
 if __name__ == '__main__':
 	import Test
 	import Record

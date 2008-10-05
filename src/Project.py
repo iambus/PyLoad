@@ -30,11 +30,10 @@ class Project:
 	def save(self, path):
 		output = open(path, 'wb')
 		try:
-			pickle.dump(p, output)
+			pickle.dump(self, output)
 		finally:
 			output.close()
 	
-	#TODO: register uuid
 	def load(self, path):
 		input = open(path, 'rb')
 		try:
@@ -45,10 +44,13 @@ class Project:
 			self.user_factory = p.user_factory
 			self.iteration_factory = p.iteration_factory
 			self.repository_internal = p.repository_internal
-			Repository.get_global_repository().data = self.repository_internal
 
 		finally:
 			input.close()
+
+	def load_as_global(self, path):
+		self.load(path)
+		Repository.get_global_repository().data = self.repository_internal
 
 class NoneProject:
 	def __init__(self, root = None):
@@ -78,7 +80,7 @@ if __name__ == '__main__':
 
 	p.records = []
 
-	p.load('.load/project.pkl')
+	p.load_as_global('.load/project.pkl')
 	print p.records[0].uuid
 
 	Repository.lookup(p.records[0].uuid)

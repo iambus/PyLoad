@@ -142,7 +142,7 @@ class PlayTab(wx.Panel):
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self.eachPanel.list)
 		self.Bind(wx.EVT_BUTTON, self.OnTestPlay, self.detailsPanel.testButton)
 
-		#
+		#XXX: create new, or load from project?
 		import PlayPolicy
 		self.globalFactory = PlayPolicy.GlobalFactory()
 		self.userFactory = PlayPolicy.UserFactory()
@@ -164,6 +164,18 @@ class PlayTab(wx.Panel):
 	def ResetSize(self):
 		self.splitter.SetSashPosition(200)
 		self.splitter2.SetSashPosition(120)
+
+	def Unload(self):
+		self.globalFactory = None
+		self.userFactory = None
+		self.iterationFactory = None
+		self.detailsPanel.Unload()
+		self.policyPanel.specialField.UpdateChoices([],[])
+
+	def Reload(self):
+		self.globalFactory = self.project.global_factory
+		self.userFactory = self.project.user_factory
+		self.iterationFactory = self.project.iteration_factory
 
 	def Play(self):
 		if self.policyPanel.specialField.GetData() == None:

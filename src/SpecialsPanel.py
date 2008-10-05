@@ -373,6 +373,17 @@ class SpecialsPanel(wx.Panel):
 				}
 		mappings[data.__class__](item, data)
 
+	def LoadSpecial(self, item, s):
+		specialItem = self.tree.AppendItem(item, s.label)
+		self.tree.SetPyData(specialItem, s)
+		self.tree.SetItemImage(specialItem, self.specialIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(specialItem, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
+
+		for c in s.childern:
+			self.LoadData(specialItem, c)
+
+		self.tree.Expand(specialItem)
+
 	def LoadRecord(self, item, r):
 		recordItem = self.tree.AppendItem(item, r.label)
 		self.tree.SetPyData(recordItem, r)
@@ -514,16 +525,24 @@ class SpecialsPanel(wx.Panel):
 
 	##################################################
 
-	def ReloadSpecial(self, item):
+	def Unload(self):
+		self.tree.DeleteChildren(self.root)
+
+	def Reload(self):
+		for special in self.project.specials:
+			self.LoadSpecial(self.root, special)
+		self.NotifyObserver()
+
+	def UpdateSpecial(self, item):
 		special = self.tree.GetPyData(item)
 		self.tree.DeleteChildren(item)
 		for child in special.childern:
 			self.LoadData(item, child)
 
-	def ReloadAll(self):
+	def UpdateAll(self):
 		(child, cookie) = self.tree.GetFirstChild(self.root)
 		while child.IsOk():
-			self.ReloadSpecial(child)
+			self.UpdateSpecial(child)
 			(child, cookie) = self.tree.GetNextChild(self.root, cookie)
 
 
