@@ -40,7 +40,7 @@ EditorPanel disable button, disable editing (p3)
 better editor (finished)
 editor loading it slow (p3)
 add script/if/loop to pop menu (p2)
-better response (p2)
+better response (p2) (finished)
 
 debug feature: reload modules (p4)
 

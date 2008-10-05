@@ -8,6 +8,13 @@ import Template
 import Logger
 log = Logger.getLogger()
 
+class Response:
+	def __init__(self):
+		self.rawbody = None
+		self.body = None
+		self.headers = None
+
+
 class Request:
 	def __init__(self, url, reqstr = None):
 		self.url = url
@@ -47,11 +54,15 @@ class Request:
 		log.debug('body:%s' % self.body)
 
 		req = self.construct_request()
-		response = urllib2.urlopen(req)
-		rawbody = response.read()
+		resp = urllib2.urlopen(req)
+		rawbody = resp.read()
 
+		response = Response()
 		response.rawbody = rawbody
 		response.body = rawbody
+		response.url = resp.geturl()
+		response.info = resp.info()
+		response.headers = resp.info().headers
 		return response
 
 	def construct_request(self):
@@ -82,6 +93,7 @@ class Request:
 		headers = re.findall(r'([^:\n]+):\s?([^\n]*)', m.group(2))
 		body = m.group(3)
 		return (request_line, headers, body)
+
 
 if __name__ == '__main__':
 	r = Request('x')
