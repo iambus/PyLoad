@@ -32,6 +32,7 @@ threading util (p3)
 
 unicode support/i18n (p4)
 
+clean dead reference in repository (p3)
 
 Minor:
 
