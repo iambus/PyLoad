@@ -1,10 +1,10 @@
 
 
+# Deprecated
 def uuid_generator_generator():
 	'Internal usage'
 	import threading
 	lock = threading.Lock()
-	uuid_counter = 0
 
 	def uuid_generator():
 		i = 0
@@ -24,8 +24,7 @@ def uuid_generator_generator():
 
 	return uuid
 
-uuid = uuid_generator_generator()
-
+# Deprecated
 def table_generator():
 	'Internal usage'
 	import threading
@@ -50,7 +49,62 @@ def table_generator():
 
 	return (lookup, register)
 
-lookup, register = table_generator()
+# Deprecated
+class Repository:
+	def __init__(self):
+		self.uuid = uuid_generator_generator()
+		self.lookup, self.register = table_generator()
+
+class RepositoryInternal:
+	def __init__(self):
+		self.uuid_counter = 0
+		self.mappings = {}
+
+class Repository:
+	def __init__(self):
+		import threading
+		self.lock = threading.Lock()
+		self.data = RepositoryInternal()
+	
+	def uuid(self):
+		self.lock.acquire()
+		try:
+			return 'u%05d' % self.data.uuid_counter
+		finally:
+			self.data.uuid_counter += 1
+			self.lock.release()
+
+	def lookup(self, uuid):
+		assert type(uuid) == str
+		self.lock.acquire()
+		try:
+			return self.data.mappings[uuid]
+		finally:
+			self.lock.release()
+	
+	def register(self, uuid, v):
+		assert type(uuid) == str
+		self.lock.acquire()
+		try:
+			self.data.mappings[uuid] = v
+		finally:
+			self.lock.release()
+
+
+global_repository = Repository()
+uuid, lookup, register = global_repository.uuid, global_repository.lookup, global_repository.register
+
+def get_global_repository():
+	global global_repository
+	return global_repository
+
+def set_global_repository(repository):
+	global global_repository
+	global uuid, lookup, register 
+	old_global_repository = global_repository
+	global_repository = repository
+	uuid, lookup, register = repository.uuid, repository.lookup, repository.register
+	return old_global_repository
 
 def register_object(obj):
 	id = uuid()

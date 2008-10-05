@@ -1,20 +1,20 @@
 
+import pickle
 import os
 import os.path
+import Repository
 
 class Project:
-	def __init__(self, root):
-		self.root = root
+	def __init__(self):
 		self.records = []
 		self.specials = []
-		if not os.path.exists(self.root):
-			os.makedirs(self.root)
-		os.path.isdir(self.root)
 
 		self.global_factory = None
 		self.user_factory = None
 		self.iteration_factory = None
-	
+
+		self.repository_internal = Repository.get_global_repository().data
+
 	def add_record(self, record):
 		self.records.append(record)
 
@@ -27,11 +27,28 @@ class Project:
 	def remove_special(self, special):
 		self.specials.remove(special)
 
-	def save(self):
-		pass
+	def save(self, path):
+		output = open(path, 'wb')
+		try:
+			pickle.dump(p, output)
+		finally:
+			output.close()
 	
-	def load(self):
-		pass
+	#TODO: register uuid
+	def load(self, path):
+		input = open(path, 'rb')
+		try:
+			p = pickle.load(input)
+			self.records = p.records
+			self.specials = p.specials
+			self.global_factory = p.global_factory
+			self.user_factory = p.user_factory
+			self.iteration_factory = p.iteration_factory
+			self.repository_internal = p.repository_internal
+			Repository.get_global_repository().data = self.repository_internal
+
+		finally:
+			input.close()
 
 class NoneProject:
 	def __init__(self, root = None):
@@ -49,4 +66,22 @@ class NoneProject:
 		pass
 	def load(self):
 		pass
+
+if __name__ == '__main__':
+	import pickle
+	import Player
+	p = Project()
+
+	#p.add_record(Player.Script('print 2'))
+	#print p.records[0].uuid
+	#p.save('.load/project.pkl')
+
+	p.records = []
+
+	p.load('.load/project.pkl')
+	print p.records[0].uuid
+
+	Repository.lookup(p.records[0].uuid)
+
+
 

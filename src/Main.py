@@ -69,7 +69,7 @@ class MainFrame(wx.Frame):
 	def __init__(self):
 		wx.Frame.__init__(self, None, -1, "PyLoad", size=(800, 600))
 
-		self.project = Project.Project('.load')
+		self.project = Project.Project()
 
 		self.nb = NoteBook(self, -1, self.project)
 

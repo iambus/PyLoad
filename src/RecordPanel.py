@@ -500,7 +500,7 @@ class RecordPanel(wx.Panel):
 		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
 
 		for p in record.pages:
-			pageItem = self.tree.AppendItem(recordItem, p.path)
+			pageItem = self.tree.AppendItem(recordItem, p.label)
 			self.tree.SetPyData(pageItem, p)
 			self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
 			self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
