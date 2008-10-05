@@ -1,0 +1,50 @@
+
+Major:
+
+Project Saver/Loader (p1) (finished)
+
+Tree Editor
+	delete (finished)
+	drag (finished)
+	duplicate (p2) (1/2 finished)
+
+Infotab (p2)
+extractor (p3)
+
+HTTP Editor (finished)
+Cookie Manager (p1)
+AMF Encoder/Decoder (p1)
+
+Users (finished)
+Reporter (p1)
+
+UI Unit Tests (p4)
+Packages (p4)
+Exception Handler (p4)
+Performance (p4)
+
+Builtin/Global Variables/Modules for plugin (p4)
+
+Variable Manager (p5)
+
+iteration (p3)
+threading util (p3)
+
+unicode support/i18n (p4)
+
+
+Minor:
+
+Stopping Proxy (p3)
+EditorPanel disable button, disable editing (p3)
+better editor (finished)
+editor loading it slow (p3)
+add script/if/loop to pop menu (p2)
+better response (p2)
+
+debug feature: reload modules (p4)
+
+search: from begin after reach end (p3)
+naming conventions (p2)
+
+
