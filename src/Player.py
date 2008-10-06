@@ -1,25 +1,20 @@
 
 from Playable import Playable
-import Scope
+from Scope import Scope
 
 class Script(Playable):
-	def __init__(self, script = '', scope = None):
+	def __init__(self, script = ''):
 		Playable.__init__(self)
 		self.script = script
-		self.scope = scope
 
 	def execute(self, scope = None):
 		if scope == None:
-			if self.scope == None:
-				self.scope = Scope.Scope()
-			scope = self.scope
+			scope = Scope()
 		scope.execute(self.script)
 
 	def eval(self, scope = None):
 		if scope == None:
-			if self.scope == None:
-				self.scope = Scope.Scope()
-			scope = self.scope
+			scope = Scope()
 		return scope.eval(self.script)
 
 	def play(self, scope = None):
@@ -29,7 +24,6 @@ class Player(Playable):
 	def __init__(self):
 		Playable.__init__(self)
 
-		self.scope = Scope.Scope()
 		self.scripts = []
 		self.childern = []
 
@@ -74,25 +68,25 @@ class Player(Playable):
 	def execute_script(self, script, base = None):
 		assert isinstance(script, Script)
 		if base == None:
-			base = self.scope
+			base = Scope()
 		script.execute(base)
 
 	#TODO: give a better name
 	def execute_here(self, child, scope = None):
 		assert isinstance(child, Playable)
 		if scope == None:
-			scope = self.scope
+			scope = Scope()
 		child.play(scope)
 
 	def execute_child(self, child, base = None):
 		assert isinstance(child, Playable)
 		if base == None:
-			base = self.scope
-		child.play(Scope.Scope(base))
+			base = Scope()
+		child.play(Scope(base))
 
 	def play(self, basescope = None):
 		if basescope == None:
-			basescope = self.scope
+			basescope = Scope()
 		self.before(basescope)
 		self.playmain(basescope)
 		self.after(basescope)
@@ -104,7 +98,7 @@ class Player(Playable):
 		for script in self.scripts:
 			script.execute(basescope)
 		for child in self.childern:
-			child.play(Scope.Scope(basescope))
+			child.play(Scope(basescope))
 
 	def after(self, basescope = None):
 		self.execute_script(self.afterscript, basescope)

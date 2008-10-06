@@ -35,7 +35,16 @@ class User(Player):
 			self.childern = []
 
 class Global(Player):
-	pass
+	def __init__(self):
+		Player.__init__(self)
+		self.scope = Scope()
+	def before(self):
+		Player.before(self, self.scope)
+	def play(self):
+		Player.play(self, self.scope)
+	def after(self):
+		Player.after(self, self.scope)
+
 
 class Factory:
 	def __init__(self, C):

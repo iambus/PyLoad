@@ -65,6 +65,9 @@ class Scope:
 		except NameError:
 			return None
 
+	def clear(self):
+		self.variables.clear()
+
 class Life:
 	def __init__(self):
 		self.scopes = []
