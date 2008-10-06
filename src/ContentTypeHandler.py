@@ -40,7 +40,7 @@ mapping = {
 		'default' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.default),
 		'html' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.html),
 		'xml' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.xml),
-		'amf' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.xml),
+		'amf' : ContentTypeHandler(Coder.AMFCoder, editor.syntax.xml),
 		'python' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.python),
 		}
 

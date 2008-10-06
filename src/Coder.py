@@ -1,3 +1,11 @@
+"""
+
+decode:
+	convert raw request/response to human readable format
+encode:
+	convert human readable format to request/response
+
+"""
 
 class EmptyCoder:
 	@classmethod
@@ -23,6 +31,7 @@ class UnicodeCoder:
 	def decode(cls, s):
 		raise NotImplementedError()
 
+from amf.Coder import SimpleAMFCoder as AMFCoder
 
 if __name__ == '__main__':
 	print EmptyCoder.encode('x')

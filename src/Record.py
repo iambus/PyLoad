@@ -46,10 +46,10 @@ class Hit(Player, PropertyMixin):
 		if self.respstr:
 			self.resp_handler = ContentTypeHandler.get_handler(self.respstr)
 
-		self.reqstr = self.req_handler.coder.decode(self.reqstr)
+		self.reqstr = self.decode(self.reqstr, self.req_handler.coder)
 		self.reqstr = Template.escape(self.reqstr)
 		if self.respstr:
-			self.respstr = self.resp_handler.coder.decode(self.respstr)
+			self.respstr = self.decode(self.respstr, self.resp_handler.coder)
 
 		self.request = Request(self.page, self.reqstr)
 
@@ -60,15 +60,38 @@ class Hit(Player, PropertyMixin):
 	def set_reqstr(self, reqstr):
 		log.debug('set reqstr')
 		self.reqstr = reqstr
-		self.request.set_reqstr(self.req_handler.coder.encode(reqstr))
+		self.request.set_reqstr(self.encode(reqstr, self.req_handler.coder))
+
+	def decode(self, raw, coder):
+		header, body = self.split_header_and_body(raw)
+		return header + coder.decode(body)
+	def decode_body(self, body, coder):
+		return coder.decode(body)
+	def encode(self, exp, coder):
+		header, body = self.split_header_and_body(exp)
+		return header + coder.encode(body)
+	def split_header_and_body(self, whole):
+		index = whole.find('\r\n\r\n')
+		if index != -1:
+			index += 4
+		else:
+			index = whole.find('\n\n')
+			if index != -1:
+				index += 2
+		if index == -1:
+			raise RuntimeError("Bad reqest/response format:[%s]" % whole)
+		header = whole[0:index]
+		body = whole[index:]
+		return header, body
 
 	def playmain(self, basescope=None):
 		if basescope == None:
 			self.request.play()
 		else:
 			response = self.request.play(basescope.get_variables())
-			response.body = self.resp_handler.coder.decode(response.rawbody)
+			response.body = self.decode_body(response.rawbody, self.resp_handler.coder)
 			basescope.assign('response', response)
+
 
 class Page(Player):
 	def __init__(self, path):
