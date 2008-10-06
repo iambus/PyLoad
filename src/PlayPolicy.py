@@ -20,6 +20,8 @@ class User(Player):
 		self.iteration_factory = iteration_factory
 
 	def play(self, scope = None):
+		if scope == None:
+			scope = Scope()
 		assert self.scripts == [] and self.childern == []
 		if self.iteration_factory:
 			self.before(scope)
