@@ -3,6 +3,9 @@ import unittest
 import LoadTestEnv
 
 from Controller import *
+from Scope import Scope
+
+#TODO: please rewrite it since the implementation was changed.
 
 class TestIf(unittest.TestCase):
 	def setUp(self):
@@ -39,10 +42,11 @@ class TestLoop(unittest.TestCase):
 		self.loop.afterscript = Script('assert x >= 10; assert y == 10')
 
 	def testBasic(self):
-		self.loop.play()
+		scope = Scope()
+		self.loop.play(scope)
 
-		self.assertEqual(self.loop.scope.lookup('x'), 10)
-		self.assertEqual(self.loop.scope.lookup('y'), 10)
+		self.assertEqual(scope.lookup('x'), 10)
+		self.assertEqual(scope.lookup('y'), 10)
 	
 	def testChild(self):
 		self.loop = Loop('x < 10')
@@ -57,12 +61,13 @@ class TestLoop(unittest.TestCase):
 		g = Globals.copy_globals()
 		g['Break'] = Break
 
-		self.loop.scope.variables = g
+		scope = Scope()
+		scope.variables = g
 		self.loop.add_script(Script('if y == 3: raise Break()'))
 		self.loop.afterscript = Script('assert x == 3; assert y == 3')
-		self.loop.play()
-		self.assertEqual(self.loop.scope.lookup('x'), 3)
-		self.assertEqual(self.loop.scope.lookup('y'), 3)
+		self.loop.play(scope)
+		self.assertEqual(scope.lookup('x'), 3)
+		self.assertEqual(scope.lookup('y'), 3)
 
 class TestBreak(unittest.TestCase):
 	def setUp(self):
