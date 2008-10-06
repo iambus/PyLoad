@@ -5,6 +5,8 @@ import LoadTestEnv
 from Player import *
 from Scope import *
 
+#TODO: please rewrite it since the implementation was changed.
+
 ##################################################
 # test old Evalable class Script (now in Player)
 class TestScript(unittest.TestCase):
@@ -18,11 +20,8 @@ class TestScript(unittest.TestCase):
 		self.script.script = 'i = 2'
 		self.script.execute()
 
-		# i is local variable in script
+		# script has no local variables
 		self.script.script = 'j = i'
-		self.script.execute()
-
-		self.script.script = 'i = k'
 		self.assertRaises(NameError, self.script.execute)
 
 		scope = Scope()
@@ -31,17 +30,18 @@ class TestScript(unittest.TestCase):
 		self.script.execute(scope)
 
 		self.script.script = 'j = i'
-		self.script.execute()
+		self.assertRaises(NameError, self.script.execute)
 
 		scope = Scope()
 		self.script.script = 'j = i'
 		self.assertRaises(NameError, lambda:self.script.execute(scope))
 
 	def testConstructor(self):
+		scope = Scope()
 		script = Script('i = 2')
-		script.execute()
+		script.execute(scope)
 		script.script = 'j = i'
-		script.execute()
+		script.execute(scope)
 
 		script = Script('i = k')
 		self.assertRaises(NameError, script.execute)
@@ -68,7 +68,7 @@ class D(Player):
 	
 	def play(self, base = None):
 		if base == None:
-			base = self.scope
+			base = Scope()
 		self.script.execute(base)
 		Player.play(self, base)
 
@@ -100,17 +100,18 @@ class TestScoped(unittest.TestCase):
 		self.scoped.script.script = 'i = x'
 		self.scoped.play(scope)
 		self.assertEqual(scope['i'], 9)
-		self.assertEqual(self.scoped.scope['i'], None)
 
 	def testExecuteScript(self):
+		scope = Scope()
+
 		self.scoped.script.script = 'i = 2'
-		self.scoped.play()
+		self.scoped.play(scope)
 
 		script = Script('j = i')
-		self.scoped.execute_script(script)
+		self.scoped.execute_script(script, scope)
 
 		script = Script('j = k')
-		self.assertRaises(NameError, lambda:self.scoped.execute_script(script))
+		self.assertRaises(NameError, lambda:self.scoped.execute_script(script, scope))
 
 		scope = Scope()
 		scope['k'] = 3
@@ -118,10 +119,11 @@ class TestScoped(unittest.TestCase):
 		self.assertEqual(scope['j'], 3)
 
 	def testExecuteChild(self):
+		scope = Scope()
 		self.scoped.script.script = 'i = 2'
 		script = Script('j = 3')
-		self.scoped.execute_child(script)
-		self.assertEquals(self.scoped.scope.get_names(), [])
+		self.scoped.execute_child(script, scope)
+		self.assertEquals(scope.get_names(), [])
 
 		script = Script('j = k')
 		self.assertRaises(NameError, lambda:self.scoped.execute_script(script))
@@ -129,7 +131,6 @@ class TestScoped(unittest.TestCase):
 		scope = Scope()
 		scope['x'] = 11
 		self.scoped.execute_child(Script('j = x; x = 22'), scope)
-		self.assertEquals(self.scoped.scope.get_names(), [])
 		self.assertEquals(scope.get_names(), ['x'])
 		self.assertEquals(scope['x'], 22)
 
@@ -160,17 +161,18 @@ class TestPlayer(unittest.TestCase):
 		self.player = R()
 
 	def testBasic(self):
-		self.player.play()
+		scope = Scope()
+
+		self.player.play(scope)
 
 		self.player.beforescript.script = 'i = 2'
 		self.player.afterscript.script = 'i = i'
-		self.player.play()
+		self.player.play(scope)
 
 		self.player.p.beforescript.script = 'j = i'
-		self.player.play()
+		self.player.play(scope)
 
-		self.assertEqual(self.player.scope['i'], 2)
-		self.assertEqual(self.player.p.scope.get_variables(), {})
+		self.assertEqual(scope['i'], 2)
 
 		self.player.afterscript.script = 'i = j'
 		self.assertRaises(NameError, self.player.play)
@@ -200,17 +202,16 @@ class TestPlayer(unittest.TestCase):
 		self.assertRaises(NameError, self.player.play)
 
 	def testLocal(self):
+		scope = Scope()
+
 		self.player.beforescript.script = 'r = 1'
 		self.player.p.beforescript.script = 'p  = 1'
 		self.player.p.h1.beforescript.script = 'h1 = 1'
 		self.player.p.h2.beforescript.script = 'h2 = 1'
 
-		self.player.play()
+		self.player.play(scope)
 
-		self.assertEqual(sorted(self.player.scope.get_variables().keys()), ['__builtins__', 'r'])
-		self.assertEqual(self.player.p.scope.get_variables(), {})
-		self.assertEqual(self.player.p.h1.scope.get_variables(), {})
-		self.assertEqual(self.player.p.h2.scope.get_variables(), {})
+		self.assertEqual(sorted(scope.get_variables().keys()), ['__builtins__', 'r'])
 
 		self.player.p.h2.afterscript.script = 'h2 = k'
 		self.assertRaises(NameError, self.player.play)
