@@ -86,7 +86,6 @@ class RecordPanel(wx.Panel):
 		self.tree.SetItemImage(self.root, self.recordIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(self.root, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
 
-
 	def InitSelf(self):
 		# drag and drop
 		self.SetDropTarget(MyDropTarget(self))
@@ -110,6 +109,8 @@ class RecordPanel(wx.Panel):
 
 	def InitMirror(self):
 		self.tree.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnBeginDragMirror)
+		self.is_in_loading = False
+
 	# }}}
 
 	########################################
@@ -497,11 +498,16 @@ class RecordPanel(wx.Panel):
 
 	def LoadAllRecords(self):
 		assert self.isMirror
+		if self.is_in_loading:
+			return
+		self.is_in_loading = True
 		self.tree.DeleteChildren(self.root)
 
 		project = self.one.project
 		for r in project.records:
 			self.LoadRecord(r)
+
+		self.is_in_loading = False
 
 	def LoadRecord(self, record):
 		#assert self.isMirror
