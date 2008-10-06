@@ -3,6 +3,7 @@ import os
 import os.path
 import time
 import datetime
+import re
 
 from Player import Player
 from Request import Request
@@ -24,14 +25,28 @@ class PropertyMixin:
 
 
 class Hit(Player, PropertyMixin):
-	def __init__(self, page):
+	def __init__(self, url):
 		Player.__init__(self)
 		PropertyMixin.__init__(self)
-		self.page = page
+		self.url = url
 		self.reqstr = None
 		self.respstr = None
 		self.oreqstr = None
 		self.orespstr = None
+
+		#param_index = url.find('?')
+		#if param_index != -1:
+		#	self.page = url[:param_index]
+		#else:
+		#	self.page = url
+		import re
+		m = re.match(r'^https?://[^/]+(.*?)(\?[^/]*)?$', url)
+		if m:
+			self.page = m.group(1)
+		else:
+			self.page = url
+
+		self.label = url
 
 		self.req_hanlder = ContentTypeHandler.ContentTypeHandler()
 		self.resp_handler = ContentTypeHandler.ContentTypeHandler()
@@ -51,7 +66,7 @@ class Hit(Player, PropertyMixin):
 		if self.respstr:
 			self.respstr = self.decode(self.respstr, self.resp_handler.coder)
 
-		self.request = Request(self.page, self.reqstr)
+		self.request = Request(self.url, self.reqstr)
 
 	def get_reqstr(self):
 		log.debug('get reqstr')
