@@ -1,6 +1,7 @@
 
 from Scope import Scope
 from Player import Player, Script
+import Repository
 
 class Iteration(Player):
 	def __init__(self, player = None):
@@ -48,8 +49,9 @@ class Global(Player):
 		Player.after(self, self.scope)
 
 
-class Factory:
+class Factory(Repository.Mixin):
 	def __init__(self, C):
+		Repository.Mixin.__init__(self)
 		self.C = C
 		self.beforescript = Script('')
 		self.afterscript = Script('')
