@@ -6,9 +6,10 @@ Project Saver/Loader (p1) (finished)
 Tree Editor
 	delete (finished)
 	drag (finished)
-	duplicate (p2) (1/2 finished)
+	duplicate for records (p2) (finished)
+	duplicate for specials (p3)
 
-Infotab (p2)
+Infotab (p2) (finised)
 extractor (p3)
 
 HTTP Editor (finished)
@@ -40,12 +41,17 @@ Stopping Proxy (p3)
 EditorPanel disable button, disable editing (p3)
 better editor (finished)
 editor loading it slow (p3)
-add script/if/loop to pop menu (p2)
+add script/if/loop to pop menu (p3)
 better response (p2) (finished)
 
 debug feature: reload modules (p4)
 
 search: from begin after reach end (p3)
 naming conventions (p2)
+
+Fixing flashing issues of DetailsPanel/InfoPanel (p3)
+Make InfoPanel editable (p3)
+Allow user to change HTTP request host (p3)
+
 
 
