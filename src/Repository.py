@@ -120,10 +120,21 @@ class Mixin:
 		self.uuid = uuid()
 		register(self.uuid, self)
 
+##################################################
+def trace():
+	'Only for debug usage'
+	global global_repository
+	m = global_repository.data.mappings
+	for k, v in sorted(m.items()):
+		print '%6s => %s' % (k, v)
+
+##################################################
+
 if __name__ == '__main__':
 	print uuid()
 	print uuid()
 	register('x', 'hehe')
 	print lookup('x')
 	Mixin()
+	trace()
 
