@@ -53,5 +53,6 @@ Fixing flashing issues of DetailsPanel/InfoPanel (p3)
 Make InfoPanel editable (p3)
 Allow user to change HTTP request host (p3)
 
+Update unit test since the Scope has been removed from Script/Player (p3)
 
 
