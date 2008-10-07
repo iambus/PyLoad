@@ -37,7 +37,7 @@ clean dead reference in repository (p3)
 
 Minor:
 
-Stopping Proxy (p3)
+Stopping Proxy (p3) (finished)
 EditorPanel disable button, disable editing (p3)
 better editor (finished)
 editor loading it slow (p3)

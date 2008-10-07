@@ -244,8 +244,7 @@ class MainFrame(wx.Frame):
 		self.nb.recordTab.tree.AppendNewRecord(record)
 
 		if self.proxy == None:
-			self.proxy = True
-			Proxy.thread_start()
+			self.proxy = Proxy.thread_start()
 
 		Proxy.begin_catch(
 				callback = self.nb.recordTab.tree.AppendNewHit,
@@ -324,8 +323,9 @@ class MainFrame(wx.Frame):
 
 	def OnClose(self, event):
 		if self.proxy:
-			self.proxy = None
 			Proxy.stop()
+			self.proxy.join()
+			self.proxy = None
 		self.Destroy()
 
 	def UnloadAll(self):

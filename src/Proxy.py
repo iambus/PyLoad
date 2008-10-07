@@ -13,6 +13,11 @@ respcallback = lambda x: False
 
 running = 1
 
+STOPPING_URL = 'http://stop.it:0/'
+
+class StoppingFlag(Exception):
+	pass
+
 class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
     __base = BaseHTTPServer.BaseHTTPRequestHandler
     __base_handle = __base.handle
@@ -22,6 +27,8 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
 
     def init(self):
         log.debug('init:%s' % self)
+        if self.path == STOPPING_URL:
+            raise StoppingFlag()
         self.hit = Record.Hit(self.path)
         #TODO: thread-safe
 
@@ -67,7 +74,10 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
             self.raw_requestline = self.rfile.readline()
             if self.parse_request(): self.send_error(403)
         else:
-            self.__base_handle()
+            try:
+                self.__base_handle()
+            except StoppingFlag:
+                pass
 
     def _connect_to(self, netloc, sock):
         i = netloc.find(':')
@@ -209,11 +219,8 @@ def start(port=8008):
     sa = httpd.socket.getsockname()
     log.info("Serving HTTP on %s port %s ..." % (sa[0], sa[1]))
     while running:
-        log.debug('while running')
         httpd.handle_request()
-        if not running:
-            break
-    #log.info('Stopped')
+    log.info('Stopped')
 
 def thread_start(port=8008):
     import threading
@@ -224,6 +231,7 @@ def thread_start(port=8008):
             start(port)
     thread = ProxyThread() 
     thread.start()
+    return thread
 
 def stop():
     global running
@@ -231,7 +239,10 @@ def stop():
     log.info('Stopping')
     import urllib
     proxies = {'http': 'http://localhost:8008'}
-    urllib.urlopen('http://localhost:8000/', proxies=proxies)
+    try:
+        urllib.urlopen(STOPPING_URL, proxies=proxies)
+    except:
+        pass
 
 def begin_catch(callback = None, filter = None):
     global respcallback, respfilter
