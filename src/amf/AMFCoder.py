@@ -24,9 +24,10 @@ class StringRef:
 		return str(self)
 
 class Trait:
-	def __init__(self):
+	def __init__(self, is_dynamic = False):
 		self.classname = None
 		self.member_names = []
+		self.is_dynamic = is_dynamic
 	def get_class_name(self):
 		return self.classname
 	def get_member_names(self):
@@ -55,6 +56,7 @@ class TraitExt:
 	def __init__(self):
 		self.classname = None
 		self.member_names = [u'value']
+		self.is_dynamic = False
 	def get_class_name(self):
 		return self.classname
 	def get_member_names(self):
@@ -80,7 +82,7 @@ class Object:
 			return "object<{%s}>={%s}" % (self.trait, ', '.join(x))
 		else:
 			assert len(self.members) == 0
-			return "dynamic-object<{%s}>=%s" % (self.trait, self.members)
+			return "dynamic-object<{%s}>=%s" % (self.trait, self.dynamic_members)
 	def __repr__(self):
 		return str(self)
 
@@ -94,6 +96,18 @@ class Array:
 			return "list-array=%s" % self.list
 		else:
 			return "assoc-array=%s" % self.assoc
+	def __repr__(self):
+		return str(self)
+
+class ComplexObjectRef:
+	def __init__(self, table, index):
+		raise RuntimeError('Note: This piece of code is not tested yet.')
+		self.reftable = table
+		self.refindex = index
+	def get_referenced(self):
+		return self.reftable[self.refindex]
+	def __str__(self):
+		return 'complex-ref-%s' % self.get_referenced()
 	def __repr__(self):
 		return str(self)
 
@@ -280,7 +294,7 @@ class AMFDecoder:
 			index = u >> 1
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXXX 0
 			# U29O-ref
-			raise NotImplementedError()
+			return ComplexObjectRef(self.complex_object_reference_table, index)
 		else:
 			dense_portion = u >> 1
 
@@ -306,19 +320,24 @@ class AMFDecoder:
 			index = u >> 1
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXXX 0
 			# U29O-ref
-			raise NotImplementedError()
+			return ComplexObjectRef(self.complex_object_reference_table, index)
 		elif u & 2 == 0:
 			index  = u >> 2
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXX 01
 			# U29O-traits-ref
 			trait = TraitRef(self.trait_reference_table, index)
-			#print trait.get_class_name(), trait.get_member_names()
 			obj = Object(trait)
+			self.complex_object_reference_table.append(obj)
 			member_names = trait.get_member_names()
 			for name in member_names:
 				obj.members.append(self.read_value())
+			if trait.get_referenced().is_dynamic:
+				name = self.read_utf8_vr()
+				while name != '':
+					value = self.read_value()
+					obj.dynamic_members[name] = value
+					name = self.read_utf8_vr()
 			return obj
-			#raise NotImplementedError()
 		elif u & 4:
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXX 111
 			assert (u >> 3) == 0
@@ -328,30 +347,38 @@ class AMFDecoder:
 			self.trait_reference_table.append(trait)
 
 			obj = Object(trait)
+			self.complex_object_reference_table.append(obj)
 			obj.members.append(self.read_value())
 			return obj
-			raise NotImplementedError()
 		else:
 			# XXXXXXXXXXXXXXXXXXXXXXXXXX? 011
 			# U29O-traits
 			if u & 8:
 				# XXXXXXXXXXXXXXXXXXXXXXXXXX 1011
 				# dynamic
-				obj = Object(None)
-				obj.classname = self.read_utf8_vr()
-				assert obj.classname == ''
+				trait = Trait(is_dynamic = True)
+				trait.classname = self.read_utf8_vr()
+				#XXX: can dynamic trait has class name?
+				assert trait.classname == ''
+				#XXX: dynamic trait shold be put into reference table?
+				self.trait_reference_table.append(trait)
 
 				member_count = u >> 4
+				#XXX: can dynamic trait has static memebers?
 				assert member_count == 0
+
+				obj = Object(trait)
+				self.complex_object_reference_table.append(obj)
 
 				name = self.read_utf8_vr()
 				while name != '':
+					#XXX: should the dynamic fields be put in trait?
+					#trait.member_names.append(name)
 					value = self.read_value()
 					obj.dynamic_members[name] = value
 					name = self.read_utf8_vr()
 
 				return obj
-				#raise NotImplementedError()
 			else:
 				# XXXXXXXXXXXXXXXXXXXXXXXXXX 0011
 				# not dynamic
@@ -364,12 +391,12 @@ class AMFDecoder:
 					trait.member_names.append(self.read_utf8_vr())
 
 				obj = Object(trait)
+				self.complex_object_reference_table.append(obj)
 				for i in range(member_count):
 					member_value = self.read_value()
 					obj.members.append(member_value)
 
 				return obj
-				#raise NotImplementedError()
 	# }}}
 
 	########################################
@@ -408,6 +435,7 @@ class AMFDecoder:
 
 
 if __name__ == '__main__':
+	fp = open('client-ping.txt', 'rb')
 	fp = open('login-response.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
