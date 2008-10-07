@@ -191,6 +191,7 @@ class AMFDecoder:
 			header.header_length = self.read_u32()
 			header.value = self.read_value()
 			packet.headers.append(header)
+			self.switch_to_amf0()
 
 
 		packet.message_count = self.read_u16()
@@ -200,8 +201,10 @@ class AMFDecoder:
 			message.target_uri = self.read_utf8()
 			message.response_uri = self.read_utf8()
 			message.message_length = self.read_u32()
+			#TODO: use messsage-length for assert
 			message.value = self.read_value()
 			packet.messages.append(message)
+			self.switch_to_amf0()
 
 		assert self.fp.read() == '', 'Decode error: something left in stream...'
 
@@ -380,7 +383,6 @@ class AMFDecoder:
 					#XXX: should the dynamic fields be put in trait?
 					#trait.member_names.append(name)
 					value = self.read_value()
-					print name, value
 					obj.dynamic_members[name] = value
 					name = self.read_utf8_vr()
 
@@ -411,7 +413,7 @@ class AMFDecoder:
 	def read_value0(self):
 		x = self.read_byte()
 		if x == 0x11:
-			self.read_value = self.read_value3
+			self.switch_to_amf3()
 			return self.read_value3()
 		funs = {
 				0x02: self.read_utf8,
@@ -433,6 +435,12 @@ class AMFDecoder:
 				0x0a: self.read_object,
 			   }
 		return funs[x]()
+
+	def switch_to_amf0(self):
+		self.read_value = self.read_value0
+
+	def switch_to_amf3(self):
+		self.read_value = self.read_value3
 
 	read_value = read_value0
 	# }}}
