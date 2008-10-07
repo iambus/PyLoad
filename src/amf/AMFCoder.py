@@ -27,11 +27,13 @@ class Trait:
 	def __init__(self, is_dynamic = False):
 		self.classname = None
 		self.member_names = []
-		self.is_dynamic = is_dynamic
+		self.dynamic = is_dynamic
 	def get_class_name(self):
 		return self.classname
 	def get_member_names(self):
 		return self.member_names
+	def is_dynamic(self):
+		return self.dynamic
 	def __str__(self):
 		return "trait<%s>" % self.classname
 	def __repr__(self):
@@ -47,6 +49,8 @@ class TraitRef:
 		return self.get_referenced().get_class_name()
 	def get_member_names(self):
 		return self.reftable[self.refindex].get_member_names()
+	def is_dynamic(self):
+		return self.get_referenced().is_dynamic()
 	def __str__(self):
 		return 'trait-ref:%s:%s' % (self.refindex, self.get_class_name())
 	def __repr__(self):
@@ -56,11 +60,12 @@ class TraitExt:
 	def __init__(self):
 		self.classname = None
 		self.member_names = [u'value']
-		self.is_dynamic = False
 	def get_class_name(self):
 		return self.classname
 	def get_member_names(self):
 		return self.member_names
+	def is_dynamic(self):
+		return False
 	def __str__(self):
 		return "trait-ext<%s>" % self.classname
 	def __repr__(self):
@@ -72,7 +77,7 @@ class Object:
 		self.members = []
 		self.dynamic_members = {}
 	def __str__(self):
-		if self.trait:
+		if not self.trait.is_dynamic():
 			x = []
 			member_names = self.trait.get_member_names()
 			for i in range(len(member_names)):
@@ -92,7 +97,7 @@ class Array:
 		self.assoc = {}
 	def __str__(self):
 		assert len(self.list) == 0 or len(self.assoc) == 0
-		if self.list:
+		if not self.assoc:
 			return "list-array=%s" % self.list
 		else:
 			return "assoc-array=%s" % self.assoc
@@ -101,7 +106,7 @@ class Array:
 
 class ComplexObjectRef:
 	def __init__(self, table, index):
-		raise RuntimeError('Note: This piece of code is not tested yet.')
+		#raise RuntimeError('Note: This piece of code is not tested yet.')
 		self.reftable = table
 		self.refindex = index
 	def get_referenced(self):
@@ -331,7 +336,7 @@ class AMFDecoder:
 			member_names = trait.get_member_names()
 			for name in member_names:
 				obj.members.append(self.read_value())
-			if trait.get_referenced().is_dynamic:
+			if trait.get_referenced().is_dynamic():
 				name = self.read_utf8_vr()
 				while name != '':
 					value = self.read_value()
@@ -375,6 +380,7 @@ class AMFDecoder:
 					#XXX: should the dynamic fields be put in trait?
 					#trait.member_names.append(name)
 					value = self.read_value()
+					print name, value
 					obj.dynamic_members[name] = value
 					name = self.read_utf8_vr()
 
