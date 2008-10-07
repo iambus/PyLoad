@@ -1,5 +1,7 @@
 
 import urllib2
+import cookielib
+
 from cStringIO import StringIO
 import re
 
@@ -40,6 +42,16 @@ class Request:
 		if self.method == 'GET':
 			assert self.body == ''
 
+		headers = {}
+		for k, v in headers.items():
+			if k.lower() == 'content-length':
+				continue
+			elif k.lower() == 'cookie':
+				headers['Cookie'] = v
+			else:
+				headers[k] = v
+		self.headers = headers
+
 	def set_host(self):
 		raise NotImplementedError()
 
@@ -53,8 +65,29 @@ class Request:
 		self.parse(reqstr)
 		log.debug('body:%s' % self.body)
 
-		req = self.construct_request()
-		resp = urllib2.urlopen(req)
+		url = self.url
+		data = self.body
+		headers = self.headers
+
+		browser = variables.get('browser')
+		cookie = variables.get('cookie')
+		if browser and hasattr(browser, 'urlopen'):
+			if headers.has_key('Cookie'):
+				del headers['Cookie']
+		elif cookie and isinstance(cookie, cookielib.CookieJar):
+			if headers.has_key('Cookie'):
+				del headers['Cookie']
+			opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
+			browser = opener
+		else:
+			browser = urllib2
+
+		if data:
+			req = urllib2.Request(url=url, data=data, headers=headers)
+		else:
+			req = urllib2.Request(url=url, headers=headers)
+
+		resp = browser.urlopen(req)
 		rawbody = resp.read()
 
 		response = Response()
@@ -64,16 +97,6 @@ class Request:
 		response.info = resp.info()
 		response.headers = resp.info().headers
 		return response
-
-	def construct_request(self):
-		# TODO: handle cookie
-		url = self.url
-		data = self.body
-		headers = dict(filter(lambda kv: kv[0].lower() != 'content-length', self.headers))
-		if data:
-			return urllib2.Request(url=url, data=data, headers=headers)
-		else:
-			return urllib2.Request(url=url, headers=headers)
 
 	def parse_r_n(self, reqstr):
 		m = re.match(r'(.*)\r\n((?:.*\r\n)+)\r\n(.*)$', reqstr)
