@@ -3,22 +3,84 @@ from struct import *
 
 ##################################################
 
+# {{{ AMF Types
 class NULL:
 	def __str__(self):
 		return 'null'
 	def __repr__(self):
 		return str(self)
 
-class Object:
+class StringRef:
+	def __init__(self, table, index):
+		self.refindex = index
+		self.reftable = table
+	def get_referenced(self):
+		return self.reftable[self.refindex]
+	def get(self):
+		return self.get_referenced()
+	def __str__(self):
+		return 'string-ref:%s:%s' % (self.refindex, self.get_referenced())
+	def __repr__(self):
+		return str(self)
+
+class Trait:
 	def __init__(self):
-		self.members = {}
+		self.classname = None
+		self.member_names = []
+	def get_class_name(self):
+		return self.classname
+	def get_member_names(self):
+		return self.member_names
+	def __str__(self):
+		return "trait<%s>" % self.classname
+	def __repr__(self):
+		return str(self)
+
+class TraitRef:
+	def __init__(self, table, index):
+		self.refindex = index
+		self.reftable = table
+	def get_referenced(self):
+		return self.reftable[self.refindex]
+	def get_class_name(self):
+		return self.get_referenced().get_class_name()
+	def get_member_names(self):
+		return self.reftable[self.refindex].get_member_names()
+	def __str__(self):
+		return 'trait-ref:%s:%s' % (self.refindex, self.get_class_name())
+	def __repr__(self):
+		return str(self)
+
+class TraitExt:
+	def __init__(self):
+		self.classname = None
+		self.member_names = [u'value']
+	def get_class_name(self):
+		return self.classname
+	def get_member_names(self):
+		return self.member_names
+	def __str__(self):
+		return "trait-ext<%s>" % self.classname
+	def __repr__(self):
+		return str(self)
+
+class Object:
+	def __init__(self, trait):
+		self.trait = trait
+		self.members = []
 		self.dynamic_members = {}
 	def __str__(self):
-		assert len(self.members) == 0 or len(self.dynamic_members) == 0
-		if self.members:
-			return "dynamic-object<%s>=%s" % (self.classname, self.members)
+		if self.trait:
+			x = []
+			member_names = self.trait.get_member_names()
+			for i in range(len(member_names)):
+				name = member_names[i]
+				value = self.members[i]
+				x.append('%s: %s' % (repr(name), repr(value)))
+			return "object<{%s}>={%s}" % (self.trait, ', '.join(x))
 		else:
-			return "object<%s>=%s" % (self.classname, self.dynamic_members)
+			assert len(self.members) == 0
+			return "dynamic-object<{%s}>=%s" % (self.trait, self.members)
 	def __repr__(self):
 		return str(self)
 
@@ -35,19 +97,11 @@ class Array:
 	def __repr__(self):
 		return str(self)
 
-class StringRef:
-	def __init__(self, index):
-		self.refindex = index
+class StrictArray:
+	def __init__(self, array):
+		self.array = array
 	def __str__(self):
-		return 'string-ref:%s' % self.refindex
-	def __repr__(self):
-		return str(self)
-
-class TraitRef:
-	def __init__(self, index):
-		self.refindex = index
-	def __str__(self):
-		return 'trait-ref:%s' % self.refindex
+		return 'strict-array=%s' % self.array
 	def __repr__(self):
 		return str(self)
 
@@ -91,14 +145,19 @@ class AMFPacket:
 		return "[Version]\n%s\n\n[Headers]\n%s\n\n[Messages]\n%s\n\n" % (self.version, h, m)
 	def __repr__(self):
 		return str(self)
+# }}}
 
 ##################################################
 
 class AMFDecoder:
 	def __init__(self, fp):
 		self.fp = fp
+		self.trait_reference_table = []
+		self.string_reference_table = []
+		self.complex_object_reference_table = []
 
 	########################################
+	# {{{ decode: return a AMFPacket object
 	def decode(self):
 		packet = AMFPacket()
 		packet.version = self.read_u16()
@@ -125,20 +184,14 @@ class AMFDecoder:
 			message.value = self.read_value()
 			packet.messages.append(message)
 
-		reference_table = []
-		try:
-			while True:
-				reference_table.append(self.read_value())
-		except TypeError:
-			pass
-
-		#TODO: how to get reference tables?
-		#XXX: how to get reference tables?
+		assert self.fp.read() == '', 'Decode error: something left in stream...'
 
 		return packet
+	# }}}
 
 	########################################
 
+	# {{{ read basic types
 	def read_byte(self):
 		return ord(self.fp.read(1))
 
@@ -180,12 +233,15 @@ class AMFDecoder:
 		if u & 1 == 0:
 			# U29S-ref
 			index = u >> 1
-			return StringRef(index)
+			return StringRef(self.string_reference_table, index)
 			#raise NotImplementedError()
 		else:
 			# U29S-value *(UTF-8-char)
 			bytes_length = u >> 1
-			return self.read_utf8_n(bytes_length)
+			string = self.read_utf8_n(bytes_length)
+			if string:
+				self.string_reference_table.append(string)
+			return string
 
 	def read_null(self):
 		return NULL()
@@ -198,17 +254,18 @@ class AMFDecoder:
 
 	def read_double(self):
 		return unpack('!d', self.fp.read(8))[0]
+	# }}}
 
 	########################################
+	# {{{ read arrays and objects
 
 	#AMF0
 	def read_strict_array(self):
 		array_count = self.read_u32()
-		#TODO: use AMF array, instead of python list
 		array = []
 		for i in range(array_count):
 			array.append(self.read_value())
-		return array
+		return StrictArray(array)
 
 	#AMF0
 	def read_typed_object(self):
@@ -230,11 +287,12 @@ class AMFDecoder:
 			array = Array()
 
 			name = self.read_utf8_vr()
+			assert name == '', 'Please review the code and make sure the associative array is supported correctly'
 			while name != '':
 				value = self.read_value()
+				array.assoc[name] = value
 				print 'assoc-value: [', name, '=>', value, ']'
 				name = self.read_utf8_vr()
-				array.assoc[name] = value
 
 			for i in range(dense_portion):
 				array.list.append(self.read_value())
@@ -253,31 +311,38 @@ class AMFDecoder:
 			index  = u >> 2
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXX 01
 			# U29O-traits-ref
-			return TraitRef(index)
+			trait = TraitRef(self.trait_reference_table, index)
+			#print trait.get_class_name(), trait.get_member_names()
+			obj = Object(trait)
+			member_names = trait.get_member_names()
+			for name in member_names:
+				obj.members.append(self.read_value())
+			return obj
 			#raise NotImplementedError()
-		elif u & 4 == 1:
+		elif u & 4:
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXX 111
 			assert (u >> 3) == 0
 			# U29O-traits-ext
+			trait = TraitExt()
+			trait.classname = self.read_utf8_vr()
+			self.trait_reference_table.append(trait)
+
+			obj = Object(trait)
+			obj.members.append(self.read_value())
+			return obj
 			raise NotImplementedError()
 		else:
-			# XXXXXXXXXXXXXXXXXXXXXXXXXX? 111
+			# XXXXXXXXXXXXXXXXXXXXXXXXXX? 011
 			# U29O-traits
 			if u & 8:
-				# XXXXXXXXXXXXXXXXXXXXXXXXXX 1111
+				# XXXXXXXXXXXXXXXXXXXXXXXXXX 1011
 				# dynamic
-				obj = Object()
+				obj = Object(None)
 				obj.classname = self.read_utf8_vr()
 				assert obj.classname == ''
 
 				member_count = u >> 4
 				assert member_count == 0
-				member_names = []
-				for i in range(member_count):
-					member_names.append(self.read_utf8_vr())
-				for i in range(member_count):
-					member_value = self.read_value()
-					obj.members[member_names[i]] = member_value
 
 				name = self.read_utf8_vr()
 				while name != '':
@@ -288,24 +353,28 @@ class AMFDecoder:
 				return obj
 				#raise NotImplementedError()
 			else:
-				# XXXXXXXXXXXXXXXXXXXXXXXXXX 0111
+				# XXXXXXXXXXXXXXXXXXXXXXXXXX 0011
 				# not dynamic
-				obj = Object()
-				obj.classname = self.read_utf8_vr()
+				trait = Trait()
+				trait.classname = self.read_utf8_vr()
+				self.trait_reference_table.append(trait)
 
 				member_count = u >> 4
-				member_names = []
 				for i in range(member_count):
-					member_names.append(self.read_utf8_vr())
+					trait.member_names.append(self.read_utf8_vr())
+
+				obj = Object(trait)
 				for i in range(member_count):
 					member_value = self.read_value()
-					obj.members[member_names[i]] = member_value
+					obj.members.append(member_value)
 
 				return obj
 				#raise NotImplementedError()
+	# }}}
 
 	########################################
 
+	# {{{ read values
 	def read_value0(self):
 		x = self.read_byte()
 		if x == 0x11:
@@ -333,13 +402,15 @@ class AMFDecoder:
 		return funs[x]()
 
 	read_value = read_value0
+	# }}}
 
 	########################################
 
 
 if __name__ == '__main__':
-	fp = open('4.txt', 'rb')
+	fp = open('login-response.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	print packet
 
+# vim: foldmethod=marker:
