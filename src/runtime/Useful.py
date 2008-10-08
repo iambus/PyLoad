@@ -1,6 +1,8 @@
 
 import cookielib, urllib2
 
+__all__ = ['Cookie', 'Browser']
+
 def Cookie():
 	return cookielib.CookieJar()
 
