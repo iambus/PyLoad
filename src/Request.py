@@ -56,14 +56,12 @@ class Request:
 		raise NotImplementedError()
 
 	def set_reqstr(self, reqstr):
-		log.debug('set_reqstr:%s' % reqstr)
 		self.reqstr = reqstr
 		self.parse()
 
 	def play(self, variables = {}):
 		reqstr = Template.subst(self.reqstr, variables)
 		self.parse(reqstr)
-		log.debug('body:%s' % self.body)
 
 		url = self.url
 		data = self.body
@@ -71,23 +69,29 @@ class Request:
 
 		browser = variables.get('browser')
 		cookie = variables.get('cookie')
-		if browser and hasattr(browser, 'urlopen'):
+		if browser and hasattr(browser, 'open'):
 			if headers.has_key('Cookie'):
 				del headers['Cookie']
+			requester = browser.open
+		#XXX: maybe not a good idea
+		elif browser and hasattr(browser, 'urlopen'):
+			if headers.has_key('Cookie'):
+				del headers['Cookie']
+			requester = browser.open
 		elif cookie and isinstance(cookie, cookielib.CookieJar):
 			if headers.has_key('Cookie'):
 				del headers['Cookie']
 			opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
-			browser = opener
+			requester = opener.open
 		else:
-			browser = urllib2
+			requester = urllib2.urlopen
 
 		if data:
 			req = urllib2.Request(url=url, data=data, headers=headers)
 		else:
 			req = urllib2.Request(url=url, headers=headers)
 
-		resp = browser.urlopen(req)
+		resp = requester(req)
 		rawbody = resp.read()
 
 		response = Response()
