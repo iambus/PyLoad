@@ -13,7 +13,7 @@ Infotab (p2) (finised)
 extractor (p3)
 
 HTTP Editor (finished)
-Cookie Manager (p1)
+Cookie Manager (p1) (finished)
 AMF Encoder/Decoder (p1)
 
 Users (finished)
