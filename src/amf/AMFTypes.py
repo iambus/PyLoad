@@ -5,6 +5,7 @@ class NULL:
 	def __repr__(self):
 		return str(self)
 
+#XXX: should we use StringRef?
 class StringRef:
 	def __init__(self, table, index):
 		self.refindex = index
@@ -66,6 +67,7 @@ class TraitExt:
 	def __repr__(self):
 		return str(self)
 
+#XXX: should we always use ObjectRef?
 class Object:
 	def __init__(self, trait):
 		self.trait = trait
@@ -148,6 +150,10 @@ class AMFPacket:
 		self.headers = []
 		self.message_count = None
 		self.messages = []
+
+		self.trait_reference_table = None
+		self.string_reference_table = None
+		self.complex_object_reference_table = None
 
 	def __str__(self):
 		h = ''

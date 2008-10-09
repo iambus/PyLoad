@@ -6,7 +6,11 @@ from AMFTypes import *
 
 class AMFDecoder:
 	def __init__(self, fp):
-		self.fp = fp
+		if type(fp) == str or type(fp) == unicode:
+			import cStringIO
+			self.fp = cStringIO.StringIO(fp)
+		else:
+			self.fp = fp
 		self.trait_reference_table = []
 		self.string_reference_table = []
 		self.complex_object_reference_table = []
@@ -44,6 +48,10 @@ class AMFDecoder:
 
 		assert self.fp.read() == '', 'Decode error: something left in stream...'
 
+		packet.string_reference_table = self.string_reference_table
+		packet.trait_reference_table = self.trait_reference_table
+		self.complex_object_reference_table = self.complex_object_reference_table
+
 		return packet
 	# }}}
 
@@ -73,7 +81,12 @@ class AMFDecoder:
 		if (b3 & 0x80) == 0:
 			return bx
 		b4 = self.read_byte()
-		return (bx << 8) | b4
+		bx = (bx << 8) | b4
+		if (bx & 0x10000000):
+			#XXX: negative number?
+			return bx - 0x20000000
+		else:
+			return bx
 
 	def read_utf8_n(self, n):
 		return self.fp.read(n).decode('utf-8')
