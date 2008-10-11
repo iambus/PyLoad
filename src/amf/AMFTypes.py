@@ -1,13 +1,43 @@
 
+class AMF0Type:
+	def __init__(self):
+		self.version = 0
+
+class AMF3Type:
+	def __init__(self):
+		self.version = 3
+
 class NULL:
 	def __str__(self):
 		return 'null'
 	def __repr__(self):
 		return str(self)
 
+class TRUE:
+	def __str__(self):
+		return 'True'
+	def __repr__(self):
+		return str(self)
+
+class FALSE:
+	def __str__(self):
+		return 'False'
+	def __repr__(self):
+		return str(self)
+
+class String:
+	def __init__(self, string):
+		self.string = string
+	def __str__(self):
+		return self.string
+	def __repr__(self):
+		return repr(self.string)
+
 #XXX: should we use StringRef?
-class StringRef:
+class StringRef(AMF3Type):
 	def __init__(self, table, index):
+		AMF3Type.__init__(self)
+		raise RuntimeError("I'm trying to refactor code to remove this type, please don't use it now")
 		self.refindex = index
 		self.reftable = table
 	def get_referenced(self):
@@ -19,8 +49,9 @@ class StringRef:
 	def __repr__(self):
 		return str(self)
 
-class Trait:
+class Trait(AMF3Type):
 	def __init__(self, is_dynamic = False):
+		AMF3Type.__init__(self)
 		self.classname = None
 		self.member_names = []
 		self.dynamic = is_dynamic
@@ -35,25 +66,9 @@ class Trait:
 	def __repr__(self):
 		return str(self)
 
-class TraitRef:
-	def __init__(self, table, index):
-		self.refindex = index
-		self.reftable = table
-	def get_referenced(self):
-		return self.reftable[self.refindex]
-	def get_class_name(self):
-		return self.get_referenced().get_class_name()
-	def get_member_names(self):
-		return self.reftable[self.refindex].get_member_names()
-	def is_dynamic(self):
-		return self.get_referenced().is_dynamic()
-	def __str__(self):
-		return 'trait-ref:%s:%s' % (self.refindex, self.get_class_name())
-	def __repr__(self):
-		return str(self)
-
-class TraitExt:
+class TraitExt(AMF3Type):
 	def __init__(self):
+		AMF3Type.__init__(self)
 		self.classname = None
 		self.member_names = [u'value']
 	def get_class_name(self):
@@ -67,9 +82,28 @@ class TraitExt:
 	def __repr__(self):
 		return str(self)
 
+class TraitRef(AMF3Type):
+	def __init__(self, trait, index):
+		AMF3Type.__init__(self)
+		self.trait = trait
+		self.refindex = index
+	def get_referenced(self):
+		return self.trait
+	def get_class_name(self):
+		return self.get_referenced().get_class_name()
+	def get_member_names(self):
+		return self.get_referenced().get_member_names()
+	def is_dynamic(self):
+		return self.get_referenced().is_dynamic()
+	def __str__(self):
+		return 'trait-ref:%s:%s' % (self.refindex, self.get_class_name())
+	def __repr__(self):
+		return str(self)
+
 #XXX: should we always use ObjectRef?
-class Object:
+class Object(AMF3Type):
 	def __init__(self, trait):
+		AMF3Type.__init__(self)
 		self.trait = trait
 		self.members = []
 		self.dynamic_members = {}
@@ -88,8 +122,20 @@ class Object:
 	def __repr__(self):
 		return str(self)
 
-class Array:
+class ObjectRef(AMF3Type):
+	def __init__(self, object, index):
+		AMF3Type.__init__(self)
+		self.object = object
+		self.refindex = index
+	def __str__(self):
+		return str(self.object)
+	def __repr__(self):
+		return str(self)
+
+
+class Array(AMF3Type):
 	def __init__(self):
+		AMF3Type.__init__(self)
 		self.list = []
 		self.assoc = {}
 	def __str__(self):
@@ -101,9 +147,10 @@ class Array:
 	def __repr__(self):
 		return str(self)
 
-class ComplexObjectRef:
+class ComplexObjectRef(AMF3Type):
 	def __init__(self, table, index):
-		#raise RuntimeError('Note: This piece of code is not tested yet.')
+		AMF3Type.__init__(self)
+		raise RuntimeError("I'm trying to refactor code to remove this type, please don't use it now")
 		self.reftable = table
 		self.refindex = index
 	def get_referenced(self):
@@ -113,13 +160,16 @@ class ComplexObjectRef:
 	def __repr__(self):
 		return str(self)
 
-class StrictArray:
+class StrictArray(AMF0Type):
 	def __init__(self, array):
+		AMF0Type.__init__(self)
 		self.array = array
 	def __str__(self):
 		return 'strict-array=%s' % self.array
 	def __repr__(self):
 		return str(self)
+
+##################################################
 
 class HeaderType:
 	def __init__(self):
@@ -165,4 +215,9 @@ class AMFPacket:
 		return "[Version]\n%s\n\n[Headers]\n%s\n\n[Messages]\n%s\n\n" % (self.version, h, m)
 	def __repr__(self):
 		return str(self)
+
+
+##################################################
+
+
 

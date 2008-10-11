@@ -96,6 +96,7 @@ class AMFDecoder:
 		return self.read_utf8_n(bytes_length)
 
 	def read_utf8_long(self):
+		assert False, 'Dev note: utf8-long is used, should we differ utf8 and utf-long using different String types?'
 		bytes_length = self.read_u32()
 		return self.read_utf8_n(bytes_length)
 
@@ -104,7 +105,8 @@ class AMFDecoder:
 		if u & 1 == 0:
 			# U29S-ref
 			index = u >> 1
-			return StringRef(self.string_reference_table, index)
+			#return String(self.string_reference_table[index])
+			return self.string_reference_table[index]
 			#raise NotImplementedError()
 		else:
 			# U29S-value *(UTF-8-char)
@@ -118,10 +120,10 @@ class AMFDecoder:
 		return NULL()
 
 	def read_false(self):
-		return False
+		return FALSE()
 
 	def read_true(self):
-		return True
+		return TRUE()
 
 	def read_double(self):
 		return unpack('!d', self.fp.read(8))[0]
@@ -177,12 +179,12 @@ class AMFDecoder:
 			index = u >> 1
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXXX 0
 			# U29O-ref
-			return ComplexObjectRef(self.complex_object_reference_table, index)
+			return ObjectRef(self.complex_object_reference_table[index], index)
 		elif u & 2 == 0:
 			index  = u >> 2
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXX 01
 			# U29O-traits-ref
-			trait = TraitRef(self.trait_reference_table, index)
+			trait = TraitRef(self.trait_reference_table[index], index)
 			obj = Object(trait)
 			self.complex_object_reference_table.append(obj)
 			member_names = trait.get_member_names()
@@ -204,9 +206,10 @@ class AMFDecoder:
 			self.trait_reference_table.append(trait)
 
 			obj = Object(trait)
+			index = len(self.complex_object_reference_table)
 			self.complex_object_reference_table.append(obj)
 			obj.members.append(self.read_value())
-			return obj
+			return ObjectRef(obj, index)
 		else:
 			# XXXXXXXXXXXXXXXXXXXXXXXXXX? 011
 			# U29O-traits
@@ -225,6 +228,7 @@ class AMFDecoder:
 				assert member_count == 0
 
 				obj = Object(trait)
+				index = len(self.complex_object_reference_table)
 				self.complex_object_reference_table.append(obj)
 
 				name = self.read_utf8_vr()
@@ -235,7 +239,7 @@ class AMFDecoder:
 					obj.dynamic_members[name] = value
 					name = self.read_utf8_vr()
 
-				return obj
+				return ObjectRef(obj, index)
 			else:
 				# XXXXXXXXXXXXXXXXXXXXXXXXXX 0011
 				# not dynamic
@@ -248,12 +252,13 @@ class AMFDecoder:
 					trait.member_names.append(self.read_utf8_vr())
 
 				obj = Object(trait)
+				index = len(self.complex_object_reference_table)
 				self.complex_object_reference_table.append(obj)
 				for i in range(member_count):
 					member_value = self.read_value()
 					obj.members.append(member_value)
 
-				return obj
+				return ObjectRef(obj, index)
 	# }}}
 
 	########################################
@@ -267,7 +272,7 @@ class AMFDecoder:
 		funs = {
 				0x02: self.read_utf8,
 				0x0a: self.read_strict_array,
-				0x10: self.read_typed_object,
+				#0x10: self.read_typed_object,
 			   }
 		return funs[x]()
 
@@ -300,6 +305,8 @@ class AMFDecoder:
 if __name__ == '__main__':
 	fp = open('client-ping.txt', 'rb')
 	fp = open('login-response.txt', 'rb')
+	fp = open('login.txt', 'rb')
+	fp = open('client-ping-response.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	print packet
