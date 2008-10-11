@@ -225,8 +225,7 @@ class SpecialsPanel(wx.Panel):
 		itemData = self.tree.GetPyData(item)
 		itemData.add_child(controller)
 
-		label = str(controller.__class__)
-		label = label[label.rfind('.')+1:]
+		label = controller.__class__.__name__
 		controller.label = label
 
 		self.LoadData(item, controller)
@@ -272,8 +271,7 @@ class SpecialsPanel(wx.Panel):
 		import inspect
 		if inspect.isclass(data):
 			data = data()
-			label = str(data.__class__)
-			label = label[label.rfind('.')+1:]
+			label = data.__class__.__name__
 			data.label = label
 		return data
 
