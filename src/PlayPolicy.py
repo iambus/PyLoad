@@ -40,13 +40,12 @@ class User(Player):
 class Global(Player):
 	def __init__(self):
 		Player.__init__(self)
-		self.scope = Scope()
-	def before(self):
-		Player.before(self, self.scope)
-	def play(self):
-		Player.play(self, self.scope)
-	def after(self):
-		Player.after(self, self.scope)
+	def before(self, scope):
+		Player.before(self, scope)
+	def play(self, scope):
+		Player.play(self, scope)
+	def after(self, scope):
+		Player.after(self, scope)
 
 
 class Factory(Repository.Mixin):
@@ -108,15 +107,16 @@ class IterationBasedPlayPolicy:
 	def play_in_single_thread(self, scope = None):
 		g = self.global_factory.create()
 		users = []
-		g.before()
+		scope = Scope()
+		g.before(scope)
 		for i in range(self.user_count):
 			user = self.user_factory.create()
 			user.player = self.player
 			user.iteration_count = self.iteration_count
 			user.iteration_factory = self.iteration_factory
 			users.append(user)
-			user.play(g.scope)
-		g.after()
+			user.play(scope)
+		g.after(scope)
 
 	def play_in_multiple_threads(self, scope = None):
 		g = self.global_factory.create()
