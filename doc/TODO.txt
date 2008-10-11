@@ -14,7 +14,8 @@ extractor (p3)
 
 HTTP Editor (finished)
 Cookie Manager (p1) (finished)
-AMF Encoder/Decoder (p1)
+AMF Encoder/Decoder (p1) (finished)
+AMF XML (p1)
 
 Users (finished)
 Reporter (p1)
