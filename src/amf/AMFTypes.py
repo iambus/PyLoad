@@ -33,50 +33,50 @@ class String:
 	def __repr__(self):
 		return repr(self.string)
 
-#XXX: should we use StringRef?
-class StringRef(AMF3Type):
-	def __init__(self, table, index):
-		AMF3Type.__init__(self)
-		raise RuntimeError("I'm trying to refactor code to remove this type, please don't use it now")
-		self.refindex = index
-		self.reftable = table
-	def get_referenced(self):
-		return self.reftable[self.refindex]
-	def get(self):
-		return self.get_referenced()
-	def __str__(self):
-		return 'string-ref:%s:%s' % (self.refindex, self.get_referenced())
-	def __repr__(self):
-		return str(self)
-
 class Trait(AMF3Type):
-	def __init__(self, is_dynamic = False):
+	def __init__(self, classname):
 		AMF3Type.__init__(self)
-		self.classname = None
+		self.classname = classname
 		self.member_names = []
-		self.dynamic = is_dynamic
 	def get_class_name(self):
 		return self.classname
 	def get_member_names(self):
 		return self.member_names
+	def instance(self):
+		raise NotImplementedError('Trait is abstract')
+
+class StaticTrait(Trait):
+	def __init__(self, classname):
+		Trait.__init__(self, classname)
 	def is_dynamic(self):
-		return self.dynamic
+		return False
+	def instance(self):
+		return StaticObject(self)
 	def __str__(self):
 		return "trait<%s>" % self.classname
 	def __repr__(self):
 		return str(self)
 
-class TraitExt(AMF3Type):
-	def __init__(self):
-		AMF3Type.__init__(self)
-		self.classname = None
-		self.member_names = [u'value']
-	def get_class_name(self):
-		return self.classname
-	def get_member_names(self):
-		return self.member_names
+class DynamicTrait(Trait):
+	def __init__(self, classname):
+		Trait.__init__(self, classname)
+	def is_dynamic(self):
+		return True
+	def instance(self):
+		return DynamicObject(self)
+	def __str__(self):
+		return "dynamic-trait<%s>" % self.classname
+	def __repr__(self):
+		return str(self)
+
+class TraitExt(Trait):
+	def __init__(self, classname):
+		Trait.__init__(self, classname)
+		self.member_names.append(u'value')
 	def is_dynamic(self):
 		return False
+	def instance(self):
+		return ExtObject(self)
 	def __str__(self):
 		return "trait-ext<%s>" % self.classname
 	def __repr__(self):
@@ -85,6 +85,7 @@ class TraitExt(AMF3Type):
 class TraitRef(AMF3Type):
 	def __init__(self, trait, index):
 		AMF3Type.__init__(self)
+		assert isinstance(trait, Trait)
 		self.trait = trait
 		self.refindex = index
 	def get_referenced(self):
@@ -93,6 +94,8 @@ class TraitRef(AMF3Type):
 		return self.get_referenced().get_class_name()
 	def get_member_names(self):
 		return self.get_referenced().get_member_names()
+	def instance(self):
+		return self.get_referenced().instance()
 	def is_dynamic(self):
 		return self.get_referenced().is_dynamic()
 	def __str__(self):
@@ -100,25 +103,47 @@ class TraitRef(AMF3Type):
 	def __repr__(self):
 		return str(self)
 
-#XXX: should we always use ObjectRef?
 class Object(AMF3Type):
 	def __init__(self, trait):
 		AMF3Type.__init__(self)
-		self.trait = trait
+		if isinstance(trait, Trait):
+			self.trait = trait
+		elif isinstance(trait, TraitRef):
+			self.trait = trait.trait
 		self.members = []
+
+class StaticObject(Object):
+	def __init__(self, trait):
+		Object.__init__(self, trait)
+	def __str__(self):
+		assert self.trait.__class__ == StaticTrait, 'StaticObject should have StaticTrait, but got %s' % self.trait.__class__
+		x = []
+		member_names = self.trait.get_member_names()
+		for i in range(len(member_names)):
+			name = member_names[i]
+			value = self.members[i]
+			x.append('%s: %s' % (repr(name), repr(value)))
+		return "static-object<{%s}>={%s}" % (self.trait, ', '.join(x))
+	def __repr__(self):
+		return str(self)
+
+class DynamicObject(Object):
+	def __init__(self, trait):
+		Object.__init__(self, trait)
 		self.dynamic_members = {}
 	def __str__(self):
-		if not self.trait.is_dynamic():
-			x = []
-			member_names = self.trait.get_member_names()
-			for i in range(len(member_names)):
-				name = member_names[i]
-				value = self.members[i]
-				x.append('%s: %s' % (repr(name), repr(value)))
-			return "object<{%s}>={%s}" % (self.trait, ', '.join(x))
-		else:
-			assert len(self.members) == 0
-			return "dynamic-object<{%s}>=%s" % (self.trait, self.dynamic_members)
+		assert self.trait.__class__ == DynamicTrait
+		assert len(self.members) == 0
+		return "dynamic-object<{%s}>=%s" % (self.trait, self.dynamic_members)
+	def __repr__(self):
+		return str(self)
+
+class ExtObject(Object):
+	def __init__(self, trait):
+		Object.__init__(self, trait)
+	def __str__(self):
+		assert self.trait.__class__ == TraitExt
+		return "ext-object<{%s}>=(%s)" % (self.trait, self.members[0])
 	def __repr__(self):
 		return str(self)
 
@@ -144,19 +169,6 @@ class Array(AMF3Type):
 			return "list-array=%s" % self.list
 		else:
 			return "assoc-array=%s" % self.assoc
-	def __repr__(self):
-		return str(self)
-
-class ComplexObjectRef(AMF3Type):
-	def __init__(self, table, index):
-		AMF3Type.__init__(self)
-		raise RuntimeError("I'm trying to refactor code to remove this type, please don't use it now")
-		self.reftable = table
-		self.refindex = index
-	def get_referenced(self):
-		return self.reftable[self.refindex]
-	def __str__(self):
-		return 'complex-ref-%s' % self.get_referenced()
 	def __repr__(self):
 		return str(self)
 

@@ -50,7 +50,7 @@ class AMFDecoder:
 
 		packet.string_reference_table = self.string_reference_table
 		packet.trait_reference_table = self.trait_reference_table
-		self.complex_object_reference_table = self.complex_object_reference_table
+		packet.complex_object_reference_table = self.complex_object_reference_table
 
 		return packet
 	# }}}
@@ -153,7 +153,7 @@ class AMFDecoder:
 			index = u >> 1
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXXX 0
 			# U29O-ref
-			return ComplexObjectRef(self.complex_object_reference_table, index)
+			raise NotImplementedError('ArrayRef is not implemented yet')
 		else:
 			dense_portion = u >> 1
 
@@ -185,8 +185,9 @@ class AMFDecoder:
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXX 01
 			# U29O-traits-ref
 			trait = TraitRef(self.trait_reference_table[index], index)
-			obj = Object(trait)
-			self.complex_object_reference_table.append(obj)
+			assert not isinstance(trait.trait, TraitRef)
+			obj = trait.instance()
+			objref = self.put_object(obj)
 			member_names = trait.get_member_names()
 			for name in member_names:
 				obj.members.append(self.read_value())
@@ -196,16 +197,15 @@ class AMFDecoder:
 					value = self.read_value()
 					obj.dynamic_members[name] = value
 					name = self.read_utf8_vr()
-			return obj
+			return objref
 		elif u & 4:
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXX 111
 			assert (u >> 3) == 0
 			# U29O-traits-ext
-			trait = TraitExt()
-			trait.classname = self.read_utf8_vr()
-			self.trait_reference_table.append(trait)
+			trait = TraitExt(self.read_utf8_vr())
+			trait = self.put_trait(trait)
 
-			obj = Object(trait)
+			obj = ExtObject(trait)
 			index = len(self.complex_object_reference_table)
 			self.complex_object_reference_table.append(obj)
 			obj.members.append(self.read_value())
@@ -216,20 +216,18 @@ class AMFDecoder:
 			if u & 8:
 				# XXXXXXXXXXXXXXXXXXXXXXXXXX 1011
 				# dynamic
-				trait = Trait(is_dynamic = True)
-				trait.classname = self.read_utf8_vr()
+				trait = DynamicTrait(self.read_utf8_vr())
 				#XXX: can dynamic trait has class name?
 				assert trait.classname == ''
 				#XXX: dynamic trait shold be put into reference table?
-				self.trait_reference_table.append(trait)
+				trait = self.put_trait(trait)
 
 				member_count = u >> 4
 				#XXX: can dynamic trait has static memebers?
 				assert member_count == 0
 
-				obj = Object(trait)
-				index = len(self.complex_object_reference_table)
-				self.complex_object_reference_table.append(obj)
+				obj = DynamicObject(trait)
+				objref = self.put_object(obj)
 
 				name = self.read_utf8_vr()
 				while name != '':
@@ -239,27 +237,35 @@ class AMFDecoder:
 					obj.dynamic_members[name] = value
 					name = self.read_utf8_vr()
 
-				return ObjectRef(obj, index)
+				return objref
 			else:
 				# XXXXXXXXXXXXXXXXXXXXXXXXXX 0011
 				# not dynamic
-				trait = Trait()
-				trait.classname = self.read_utf8_vr()
-				self.trait_reference_table.append(trait)
+				trait = StaticTrait(self.read_utf8_vr())
+				trait = self.put_trait(trait)
 
 				member_count = u >> 4
 				for i in range(member_count):
-					trait.member_names.append(self.read_utf8_vr())
+					trait.get_member_names().append(self.read_utf8_vr())
 
-				obj = Object(trait)
-				index = len(self.complex_object_reference_table)
-				self.complex_object_reference_table.append(obj)
+				obj = StaticObject(trait)
+				objref = self.put_object(obj)
 				for i in range(member_count):
 					member_value = self.read_value()
 					obj.members.append(member_value)
 
-				return ObjectRef(obj, index)
+				return objref
 	# }}}
+
+	def put_trait(self, trait):
+		index = len(self.trait_reference_table)
+		self.trait_reference_table.append(trait)
+		return TraitRef(trait, index)
+
+	def put_object(self, obj):
+		index = len(self.complex_object_reference_table)
+		self.complex_object_reference_table.append(obj)
+		return ObjectRef(obj, index)
 
 	########################################
 
@@ -303,9 +309,9 @@ class AMFDecoder:
 
 
 if __name__ == '__main__':
-	fp = open('client-ping.txt', 'rb')
-	fp = open('login-response.txt', 'rb')
 	fp = open('login.txt', 'rb')
+	fp = open('login-response.txt', 'rb')
+	fp = open('client-ping.txt', 'rb')
 	fp = open('client-ping-response.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
