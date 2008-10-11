@@ -16,7 +16,9 @@ class AMFEncoder:
 		self.trait_rref_table = {}
 		self.complex_rref_table = {}
 
-	def decode(self):
+	########################################
+	# {{{ encode: encode AMFPacket into stream
+	def encode(self):
 		packet = self.packet
 		assert packet.version == 3, 'Only AMF 3 is supported'
 		self.write_u16(packet.version)
@@ -35,10 +37,9 @@ class AMFEncoder:
 			self.write_utf8(message.target_uri)
 			self.write_utf8(message.response_uri)
 			self.write_u32(-1)
-			self.write_value(header.value)
+			self.write_value(message.value)
 			self.switch_to_amf0()
-
-
+	# }}}
 	########################################
 	# {{{ write basic types
 
@@ -82,6 +83,7 @@ class AMFEncoder:
 			self.write_byte(b4)
 
 	def write_utf8(self, s):
+		assert self.write_value == self.write_value0, 'write_utf8 should be only use in AMF0'
 		utf8 = s.encode('utf-8')
 		self.write_u16(len(utf8))
 		self.fp.write(utf8)
@@ -93,7 +95,7 @@ class AMFEncoder:
 
 	def write_utf8_vr(self, s):
 		if s == '':
-			self.fp.write('0x01')
+			self.fp.write('\x01')
 			return
 		utf8 = s.encode('utf-8')
 		index = self.string_rref_table.get(utf8)
@@ -101,21 +103,24 @@ class AMFEncoder:
 			u = index << 1
 			self.write_u29(u)
 		else:
-			u = (len(utf-8) << 1) | 1
+			u = (len(utf8) << 1) | 1
 			self.write_u29(u)
-			self.fp.write(utf-8)
+			self.fp.write(utf8)
 
 			index = len(self.string_reference_table)
-			self.string_reference_table.append(utf-8)
-			self.string_rref_table[utf-8] = index
+			self.string_reference_table.append(utf8)
+			self.string_rref_table[utf8] = index
 
-	def write_null(self):
+	def write_null(self, ignore):
+		# Nothing to write
 		pass
 
-	def write_false(self):
+	def write_false(self, ignore):
+		# Nothing to write
 		pass
 
-	def write_true(self):
+	def write_true(self, ignore):
+		# Nothing to write
 		pass
 
 	def write_double(self, d):
@@ -127,48 +132,153 @@ class AMFEncoder:
 
 	def write_strict_array(self, array):
 		array = array.array
-		array_count = self.read_u32()
 		self.write_u32(len(array))
-		array = []
 		for i in array:
 			self.write_value(i)
 
-	def write_array(self, array):
-		pass
+	def write_array(self, arrayref):
+		index = self.put_array(arrayref)
+		if index != None:
+			# array-ref
+			u = index << 1
+			self.write_u29(u)
+		else:
+			array = arrayref.array
+			assoc_values = array.assoc
+			list_values = array.list
 
-	def write_object(self, obj):
-		pass
+			dense_portion = len(list_values)
+			u = (dense_portion << 1) | 1
+			self.write_u29(u)
+
+			for k, v in assoc_values:
+				self.write_utf8_vr(k)
+				self.write_value(v)
+			self.write_utf8_vr('')
+			for item in list_values:
+				self.write_value(item)
+
+	def write_object(self, objref):
+		index = self.put_object(objref)
+		obj = objref.object
+		if index != None:
+			# object-ref
+			u = index << 1
+			self.write_u29(u)
+		else:
+			traitref = obj.trait
+			trait = traitref.trait
+			index = self.put_trait(traitref)
+			if index != None:
+				# trait-ref
+				u = (index << 2) | 1
+				self.write_u29(u)
+				for member in obj.members:
+					self.write_value(member)
+				if trait.is_dynamic():
+					for k, v in obj.dynamic_members:
+						self.write_utf8_vr(k)
+						self.write_value(v)
+					self.write_utf8_vr('')
+			else:
+				if isinstance(trait, TraitExt):
+					assert isinstance(obj, ExtObject)
+					#XXX: are the high 26 bits always 0?
+					u = (0 << 3) | 7
+					self.write_u29(u)
+					self.write_utf8_vr(trait.classname)
+					self.write_value(obj.members[0])
+				elif isinstance(trait, StaticTrait):
+					assert isinstance(obj, StaticObject)
+					u = (len(trait.member_names) << 4) | 3
+					self.write_u29(u)
+					self.write_utf8_vr(trait.classname)
+					for name in trait.member_names:
+						self.write_utf8_vr(name)
+					for value in obj.members:
+						self.write_value(value)
+				elif isinstance(trait, DynamicTrait):
+					assert isinstance(obj, DynamicObject)
+					u = (len(trait.member_names) << 4) | 11
+					assert u == 11, 'Often the static members of dynamic object is empty'
+					self.write_u29(u)
+					self.write_utf8_vr(trait.classname)
+					for name in trait.member_names:
+						self.write_utf8_vr(name)
+					for value in obj.members:
+						self.write_value(value)
+					for k, v in obj.dynamic_members:
+						self.write_utf8_vr(k)
+						self.write_value(v)
+					self.write_utf8_vr('')
+				else:
+					raise TypeError('Unknown object type: %s, trait: %s' % (obj.__class__, trait.__class__))
+
+	def put_trait(self, traitref):
+		'return index if the trait already registered (which means the index should be used as reference)'
+		assert isinstance(traitref, TraitRef)
+		if self.trait_rref_table.has_key(traitref.refindex):
+			return self.trait_rref_table[traitref.refindex]
+		else:
+			index = len(self.trait_reference_table)
+			self.trait_reference_table.append(index)
+			self.trait_rref_table[traitref.refindex] = index
+
+	def put_object(self, objref):
+		'return index if the object already registered (which means the index should be used as reference)'
+		assert isinstance(objref, ObjectRef)
+		return self.put_complext_object(objref)
+
+	def put_array(self, arrayref):
+		'return index if the object already registered (which means the index should be used as reference)'
+		assert isinstance(arrayref, ArrayRef)
+		return self.put_complext_object(arrayref)
+
+	def put_complext_object(self, ref):
+		if self.complex_rref_table.has_key(ref.refindex):
+			return self.complex_rref_table[ref.refindex]
+		else:
+			index = len(self.complex_object_reference_table)
+			self.complex_object_reference_table.append(index)
+			self.complex_rref_table[ref.refindex] = index
 
 	# }}}
 	########################################
+	# {{{ write values
 	def write_value0(self, value):
 		if isinstance(value, AMF3Type):
 			self.switch_to_amf3()
 			self.write_value(value)
+			return
 		else:
-			assert type(value) == StrictArray, 'AMF0 type is not supported except strict-array'
+			assert value.__class__ in [StrictArray, str, unicode], 'AMF0 type is not supported except strict-array and str. %s is not supported' % value.__class__
 
-		t = type(value)
+		t = value.__class__
 		funs = {
-				StrictArray: ('0x0a', self.write_strict_array),
+				str        : ('\x02', self.write_utf8),
+				unicode    : ('\x02', self.write_utf8),
+				StrictArray: ('\x0a', self.write_strict_array),
 				}
+		assert funs.has_key(t), '%s is not supported in AMF0' % t
 
 		b, func = funs[t]
 		self.fp.write(b)
 		func(value)
 
 	def write_value3(self, value):
-		t = type(value)
+		t = value.__class__
 		funs = {
-				NULL  : ('0x01', self.write_null),
-				FALSE : ('0x02', self.write_false),
-				TRUE  : ('0x03', self.write_true),
-				int   : ('0x04', self.write_u29),
-				float : ('0x05', self.write_double),
-				str   : ('0x06', self.write_utf8_vr),
-				Array : ('0x09', self.write_array),
-				Object: ('0x0a', self.write_object),
+				NULL     : ('\x01', self.write_null),
+				FALSE    : ('\x02', self.write_false),
+				TRUE     : ('\x03', self.write_true),
+				int      : ('\x04', self.write_u29),
+				float    : ('\x05', self.write_double),
+				str      : ('\x06', self.write_utf8_vr),
+				unicode  : ('\x06', self.write_utf8_vr),
+				ArrayRef : ('\x09', self.write_array),
+				ObjectRef: ('\x0a', self.write_object),
 				}
+		assert funs.has_key(t), '%s is not supported in AMF3' % t
 		b, func = funs[t]
 		self.fp.write(b)
 		func(value)
@@ -177,17 +287,30 @@ class AMFEncoder:
 		self.write_value = self.write_value0
 
 	def switch_to_amf3(self):
-		self.fp.write('0x11')
+		self.fp.write('\x11')
 		self.write_value = self.write_value3
 
-
 	write_value = write_value0
+	# }}}
+	########################################
 
 if __name__ == '__main__':
-	pass
-
-
-
+	from AMFDecoder import AMFDecoder
+	from cStringIO import StringIO
+	fp = open('login.txt', 'rb')
+	fp = open('login-response.txt', 'rb')
+	fp = open('client-ping.txt', 'rb')
+	fp = open('client-ping-response.txt', 'rb')
+	decoder = AMFDecoder(fp)
+	packet = decoder.decode()
+	#print packet
+	fp = StringIO()
+	encoder = AMFEncoder(fp, packet)
+	encoder.encode()
+	v = fp.getvalue()
+	fp = open('x', 'wb')
+	fp.write(v)
+	fp.close()
 
 
 # vim: foldmethod=marker:

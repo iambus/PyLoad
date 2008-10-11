@@ -36,13 +36,14 @@ class String:
 class Trait(AMF3Type):
 	def __init__(self, classname):
 		AMF3Type.__init__(self)
+		assert classname != None
 		self.classname = classname
 		self.member_names = []
 	def get_class_name(self):
 		return self.classname
 	def get_member_names(self):
 		return self.member_names
-	def instance(self):
+	def instance(self, ref):
 		raise NotImplementedError('Trait is abstract')
 
 class StaticTrait(Trait):
@@ -50,8 +51,8 @@ class StaticTrait(Trait):
 		Trait.__init__(self, classname)
 	def is_dynamic(self):
 		return False
-	def instance(self):
-		return StaticObject(self)
+	def instance(self, ref):
+		return StaticObject(ref)
 	def __str__(self):
 		return "trait<%s>" % self.classname
 	def __repr__(self):
@@ -62,8 +63,8 @@ class DynamicTrait(Trait):
 		Trait.__init__(self, classname)
 	def is_dynamic(self):
 		return True
-	def instance(self):
-		return DynamicObject(self)
+	def instance(self, ref):
+		return DynamicObject(ref)
 	def __str__(self):
 		return "dynamic-trait<%s>" % self.classname
 	def __repr__(self):
@@ -75,8 +76,8 @@ class TraitExt(Trait):
 		self.member_names.append(u'value')
 	def is_dynamic(self):
 		return False
-	def instance(self):
-		return ExtObject(self)
+	def instance(self, ref):
+		return ExtObject(ref)
 	def __str__(self):
 		return "trait-ext<%s>" % self.classname
 	def __repr__(self):
@@ -94,8 +95,10 @@ class TraitRef(AMF3Type):
 		return self.get_referenced().get_class_name()
 	def get_member_names(self):
 		return self.get_referenced().get_member_names()
+	def get_id(self):
+		return refindex
 	def instance(self):
-		return self.get_referenced().instance()
+		return self.get_referenced().instance(self)
 	def is_dynamic(self):
 		return self.get_referenced().is_dynamic()
 	def __str__(self):
@@ -106,35 +109,35 @@ class TraitRef(AMF3Type):
 class Object(AMF3Type):
 	def __init__(self, trait):
 		AMF3Type.__init__(self)
-		if isinstance(trait, Trait):
-			self.trait = trait
-		elif isinstance(trait, TraitRef):
-			self.trait = trait.trait
+		assert isinstance(trait, TraitRef), 'Object must has a TraitRef instead of Trait'
+		self.trait = trait
 		self.members = []
 
 class StaticObject(Object):
 	def __init__(self, trait):
 		Object.__init__(self, trait)
 	def __str__(self):
-		assert self.trait.__class__ == StaticTrait, 'StaticObject should have StaticTrait, but got %s' % self.trait.__class__
+		trait = self.trait.get_referenced()
+		assert trait.__class__ == StaticTrait, 'StaticObject should have StaticTrait, but got %s' % trait.__class__
 		x = []
-		member_names = self.trait.get_member_names()
+		member_names = trait.get_member_names()
 		for i in range(len(member_names)):
 			name = member_names[i]
 			value = self.members[i]
 			x.append('%s: %s' % (repr(name), repr(value)))
-		return "static-object<{%s}>={%s}" % (self.trait, ', '.join(x))
+		return "static-object<{%s}>={%s}" % (trait, ', '.join(x))
 	def __repr__(self):
 		return str(self)
 
 class DynamicObject(Object):
 	def __init__(self, trait):
 		Object.__init__(self, trait)
-		self.dynamic_members = {}
+		self.dynamic_members = []
 	def __str__(self):
-		assert self.trait.__class__ == DynamicTrait
+		trait = self.trait.get_referenced()
+		assert trait.__class__ == DynamicTrait
 		assert len(self.members) == 0
-		return "dynamic-object<{%s}>=%s" % (self.trait, self.dynamic_members)
+		return "dynamic-object<{%s}>=%s" % (trait, self.dynamic_members)
 	def __repr__(self):
 		return str(self)
 
@@ -142,8 +145,9 @@ class ExtObject(Object):
 	def __init__(self, trait):
 		Object.__init__(self, trait)
 	def __str__(self):
-		assert self.trait.__class__ == TraitExt
-		return "ext-object<{%s}>=(%s)" % (self.trait, self.members[0])
+		trait = self.trait.get_referenced()
+		assert trait.__class__ == TraitExt
+		return "ext-object<{%s}>=(%s)" % (trait, self.members[0])
 	def __repr__(self):
 		return str(self)
 
@@ -156,13 +160,15 @@ class ObjectRef(AMF3Type):
 		return str(self.object)
 	def __repr__(self):
 		return str(self)
+	def get_id(self):
+		return refindex
 
 
 class Array(AMF3Type):
 	def __init__(self):
 		AMF3Type.__init__(self)
 		self.list = []
-		self.assoc = {}
+		self.assoc = []
 	def __str__(self):
 		assert len(self.list) == 0 or len(self.assoc) == 0
 		if not self.assoc:
@@ -171,6 +177,19 @@ class Array(AMF3Type):
 			return "assoc-array=%s" % self.assoc
 	def __repr__(self):
 		return str(self)
+
+class ArrayRef(AMF3Type):
+	def __init__(self, array, index):
+		AMF3Type.__init__(self)
+		assert isinstance(array, Array)
+		self.array = array
+		self.refindex = index
+	def __str__(self):
+		return str(self.array)
+	def __repr__(self):
+		return str(self)
+	def get_id(self):
+		return refindex
 
 class StrictArray(AMF0Type):
 	def __init__(self, array):

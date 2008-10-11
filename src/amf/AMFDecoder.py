@@ -92,10 +92,12 @@ class AMFDecoder:
 		return self.fp.read(n).decode('utf-8')
 
 	def read_utf8(self):
+		assert self.read_value == self.read_value0, 'read_utf8 should be only use in AMF0'
 		bytes_length = self.read_u16()
 		return self.read_utf8_n(bytes_length)
 
 	def read_utf8_long(self):
+		assert self.read_value == self.read_value0, 'read_utf8_long should be only use in AMF0'
 		assert False, 'Dev note: utf8-long is used, should we differ utf8 and utf-long using different String types?'
 		bytes_length = self.read_u32()
 		return self.read_utf8_n(bytes_length)
@@ -153,25 +155,25 @@ class AMFDecoder:
 			index = u >> 1
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXXX 0
 			# U29O-ref
-			raise NotImplementedError('ArrayRef is not implemented yet')
+			return ArrayRef(self.complex_object_reference_table[index], index)
 		else:
 			dense_portion = u >> 1
 
 			array = Array()
+			aref = self.put_array(array)
 
 			name = self.read_utf8_vr()
 			assert name == '', 'Please review the code and make sure the associative array is supported correctly'
 			while name != '':
 				value = self.read_value()
-				array.assoc[name] = value
-				print 'assoc-value: [', name, '=>', value, ']'
+				array.assoc.append((name, value))
 				name = self.read_utf8_vr()
 
 			for i in range(dense_portion):
 				array.list.append(self.read_value())
 
 			assert len(array.assoc) == 0 or len(array.list) == 0
-			return array
+			return aref
 
 	def read_object(self):
 		u = self.read_u29()
@@ -195,7 +197,7 @@ class AMFDecoder:
 				name = self.read_utf8_vr()
 				while name != '':
 					value = self.read_value()
-					obj.dynamic_members[name] = value
+					obj.dynamic_members.append((name, value))
 					name = self.read_utf8_vr()
 			return objref
 		elif u & 4:
@@ -229,12 +231,17 @@ class AMFDecoder:
 				obj = DynamicObject(trait)
 				objref = self.put_object(obj)
 
+				#TODO: read static members if this is possiable
+				for i in range(member_count):
+					member_value = self.read_value()
+					obj.members.append(member_value)
+
 				name = self.read_utf8_vr()
 				while name != '':
 					#XXX: should the dynamic fields be put in trait?
 					#trait.member_names.append(name)
 					value = self.read_value()
-					obj.dynamic_members[name] = value
+					obj.dynamic_members.append((name, value))
 					name = self.read_utf8_vr()
 
 				return objref
@@ -255,7 +262,6 @@ class AMFDecoder:
 					obj.members.append(member_value)
 
 				return objref
-	# }}}
 
 	def put_trait(self, trait):
 		index = len(self.trait_reference_table)
@@ -267,6 +273,12 @@ class AMFDecoder:
 		self.complex_object_reference_table.append(obj)
 		return ObjectRef(obj, index)
 
+	def put_array(self, array):
+		index = len(self.complex_object_reference_table)
+		self.complex_object_reference_table.append(array)
+		return ArrayRef(array, index)
+
+	# }}}
 	########################################
 
 	# {{{ read values
