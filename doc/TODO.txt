@@ -56,4 +56,7 @@ Allow user to change HTTP request host (p3)
 
 Update unit test since the Scope has been removed from Script/Player (p3)
 
+redirect stdout/stderr to log file (p3)
+
+
 
