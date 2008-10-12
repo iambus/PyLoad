@@ -36,6 +36,8 @@ unicode support/i18n (p4)
 
 clean dead reference in repository (p3)
 
+command line tool (p3)
+
 Minor:
 
 Stopping Proxy (p3) (finished)
