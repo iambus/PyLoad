@@ -406,6 +406,7 @@ class MainFrame(wx.Frame):
 
 	def SaveReport(self):
 		self.report.finish()
+		import datetime
 		filename = 'reports/%s.db' % datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 		import shutil
 		shutil.copyfile(self.report.path, filename)
