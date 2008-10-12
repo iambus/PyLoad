@@ -38,6 +38,10 @@ clean dead reference in repository (p3)
 
 command line tool (p3)
 
+support GZip coder
+support composite coder
+support stateful coder
+
 Minor:
 
 Stopping Proxy (p3) (finished)
