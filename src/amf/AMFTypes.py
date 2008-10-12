@@ -87,6 +87,7 @@ class TraitRef(AMF3Type):
 	def __init__(self, trait, index):
 		AMF3Type.__init__(self)
 		assert isinstance(trait, Trait)
+		assert type(index) == int
 		self.trait = trait
 		self.refindex = index
 	def get_referenced(self):
@@ -144,6 +145,11 @@ class DynamicObject(Object):
 class ExtObject(Object):
 	def __init__(self, trait):
 		Object.__init__(self, trait)
+	def get_value(self):
+		return self.members[0]
+	def set_value(self, value):
+		assert len(self.members) == 0, 'Often the value of ext-object should be set only once. If you set it twice, we have to clear the members first in the code of set_value.'
+		self.members.append(value)
 	def __str__(self):
 		trait = self.trait.get_referenced()
 		assert trait.__class__ == TraitExt
@@ -154,6 +160,7 @@ class ExtObject(Object):
 class ObjectRef(AMF3Type):
 	def __init__(self, object, index):
 		AMF3Type.__init__(self)
+		assert type(index) == int
 		self.object = object
 		self.refindex = index
 	def __str__(self):
@@ -182,6 +189,7 @@ class ArrayRef(AMF3Type):
 	def __init__(self, array, index):
 		AMF3Type.__init__(self)
 		assert isinstance(array, Array)
+		assert type(index) == int
 		self.array = array
 		self.refindex = index
 	def __str__(self):

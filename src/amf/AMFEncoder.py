@@ -4,9 +4,13 @@ from AMFTypes import *
 
 
 class AMFEncoder:
-	def __init__(self, fp, packet):
-		self.fp = fp
+	def __init__(self, packet, fp):
 		self.packet = packet
+		if fp != None:
+			self.fp = fp
+		else:
+			import cStringIO
+			self.fp = cStringIO.StringIO()
 
 		self.string_reference_table = []
 		self.trait_reference_table = []
@@ -39,6 +43,9 @@ class AMFEncoder:
 			self.write_u32(-1)
 			self.write_value(message.value)
 			self.switch_to_amf0()
+
+		if hasattr(self.fp, 'getvalue'):
+			return self.fp.getvalue()
 	# }}}
 	########################################
 	# {{{ write basic types
@@ -305,7 +312,7 @@ if __name__ == '__main__':
 	packet = decoder.decode()
 	#print packet
 	fp = StringIO()
-	encoder = AMFEncoder(fp, packet)
+	encoder = AMFEncoder(packet, fp)
 	encoder.encode()
 	v = fp.getvalue()
 	fp = open('x', 'wb')

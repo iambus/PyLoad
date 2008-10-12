@@ -70,7 +70,7 @@ class TestPrimitive(unittest.TestCase):
 		bits = bits.lstrip('0')
 		import StringIO
 		output = StringIO.StringIO()
-		encoder = AMFEncoder(output, None)
+		encoder = AMFEncoder(None, output)
 		encoder.write_u29(i)
 		self.assertEquals(output.getvalue(), bits2str(bits))
 		output.close()
