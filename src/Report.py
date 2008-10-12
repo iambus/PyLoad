@@ -3,6 +3,8 @@ import sqlite3
 import threading
 from Queue import Queue
 
+import datetime
+
 class Report:
 	def __init__(self, path = ':memory:'):
 		''' The path is the location of SQLite3 database.
@@ -19,6 +21,8 @@ class Report:
 	def start(self, hits = (), summary = ''):
 		self.finished = False
 		self.queue = Queue()
+
+		self.start_time = datetime.datetime.now()
 
 		reporter = self
 		class ReporterThread(threading.Thread):
@@ -71,14 +75,16 @@ class Report:
 		assert self.queue.empty()
 
 	def add_hits(self, hits):
-		self.connection.executemany('insert into hits(hitid, start, end) values (?, ?, ?)', hits)
-		hits_v = []
+		hits2 = []
 		for hit in hits:
 			a = hit[0]
-			b = hit[1] + (hit[2] - hit[1]) / 2
-			v = hit[2] - hit[1]
-			c = v.seconds * 1000 + v.microseconds/1000
-			hits_v.append((a, b, c))
+			b = hit[1] - self.start_time
+			b = b.seconds * 1000 + b.microseconds/1000
+			c = hit[2] - self.start_time
+			c = c.seconds * 1000 + c.microseconds/1000
+			hits2.append((a, b, c))
+		self.connection.executemany('insert into hits(hitid, start, end) values (?, ?, ?)', hits2)
+		hits_v = [(hit[0], (hit[1]+hit[2])/2, hit[2] - hit[1]) for hit in hits2]
 		self.connection.executemany('insert into hits_v(hitid, time, response_time) values (?, ?, ?)', hits_v)
 
 	def post_hits(self, hits):
