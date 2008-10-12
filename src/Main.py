@@ -7,7 +7,9 @@ import EditTab
 import PlayTab
 
 import Record
-import Project
+from Project import Project
+from Report import Report
+import ReportManager
 
 import Proxy
 
@@ -16,9 +18,9 @@ class ColoredPanel(wx.Window):
 		wx.Window.__init__(self, parent, -1, style = wx.SIMPLE_BORDER)
 		self.SetBackgroundColour(color)
 
-
+# {{{ NoteBook
 class NoteBook(wx.Toolbook):
-	def __init__(self, parent, id, project = None):
+	def __init__(self, parent, id, project = None, reporter = None):
 		wx.Toolbook.__init__(self, parent, id, style=wx.BK_TOP)
 
 
@@ -35,7 +37,7 @@ class NoteBook(wx.Toolbook):
 		self.editTab.recordPanel.SetMirrorOf(self.recordTab.tree)
 		self.recordTab.tree.AddObserver(self.editTab.specialsPanel.UpdateAll)
 
-		self.playTab = PlayTab.PlayTab(self, project)
+		self.playTab = PlayTab.PlayTab(self, project, reporter)
 		self.AddPage(self.playTab, 'Play', imageId=-1)
 		self.playTab.ResetSize()
 
@@ -59,20 +61,23 @@ class NoteBook(wx.Toolbook):
 				win.SetSize(event.GetSize())
 			p.Bind(wx.EVT_SIZE, OnCPSize)
 			yield p
-
+# }}}
 
 import wx.lib.newevent
 (PlayEvent, EVT_PLAY_STOPPED) = wx.lib.newevent.NewEvent()
 
 class MainFrame(wx.Frame):
 
+	# {{{ init
 	def __init__(self):
 		wx.Frame.__init__(self, None, -1, "PyLoad", size=(800, 600))
 
-		self.project = Project.Project()
+		self.InitProject()
+		self.project = Project()
+		self.report = Report('reports/last-report.db')
 		self.path = None
 
-		self.nb = NoteBook(self, -1, self.project)
+		self.nb = NoteBook(self, -1, self.project, self.report)
 
 		self.InitIcons()
 		self.UseMenuBar()
@@ -85,6 +90,11 @@ class MainFrame(wx.Frame):
 		self.nb.recordTab.tree.project = self.project
 		self.nb.editTab.specialsPanel.project = self.project
 		self.proxy = None
+
+	def InitProject(self):
+		import os, os.path
+		if not os.path.exists('reports'):
+			os.mkdir('reports')
 
 	def InitIcons(self):
 		self.newIcon = wx.ArtProvider_GetBitmap(wx.ART_NEW, wx.ART_OTHER, (16, 16))
@@ -107,7 +117,7 @@ class MainFrame(wx.Frame):
 
 		self.terminateIcon = IconImages.getTerminateBitmap()
 		self.terminateIconOff = IconImages.getTerminateOffBitmap()
-
+	# }}}
 
 	# {{{ Menu
 	def menuData(self):
@@ -233,6 +243,7 @@ class MainFrame(wx.Frame):
 		return toolbar.AddLabelTool(wx.NewId(), label, icon1, icon2, shortHelp=label)
 	# }}}
 
+	# {{{ Event handlers
 	def OnRecord(self, event):
 		self.toolbar.EnableTool(self.toolStart.GetId(), 0)
 		self.toolbar.EnableTool(self.toolStop.GetId(), 1)
@@ -277,6 +288,7 @@ class MainFrame(wx.Frame):
 		menu.FindItemByPosition(3).Enable(True)
 		menu.FindItemByPosition(4).Enable(False)
 
+		self.SaveReport()
 
 	def OnRecordViewSelected(self, event):
 		self.nb.SetSelection(0)
@@ -327,6 +339,8 @@ class MainFrame(wx.Frame):
 			self.proxy.join()
 			self.proxy = None
 		self.Destroy()
+	
+	# }}}
 
 	def UnloadAll(self):
 		self.nb.recordTab.Unload()
@@ -367,6 +381,15 @@ class MainFrame(wx.Frame):
 		self.SetTitle(path + ' - PyLoad')
 
 	def Play(self):
+		import datetime
+		startTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+		policyPanel = self.nb.playTab.policyPanel
+		userCount = policyPanel.userField.GetValue()
+		iterationCount = policyPanel.iterationField.GetValue()
+		specialLabel = policyPanel.specialField.GetData().label
+		summary = 'Start Time: %s\nUser Count: %s\nIteration Count: %s\nSpecial: %s' % (startTime, userCount, iterationCount, specialLabel)
+		ReportManager.start_report(self.report, self.project, summary=summary)
+
 		func = self.PlayInCurrentThread
 		import threading
 		class ProxyThread(threading.Thread):
@@ -381,6 +404,11 @@ class MainFrame(wx.Frame):
 		self.nb.playTab.Play()
 		wx.PostEvent(self, PlayEvent())
 
+	def SaveReport(self):
+		self.report.finish()
+		filename = 'reports/%s.db' % datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+		import shutil
+		shutil.copyfile(self.report.path, filename)
 
 def Main():
 	import sys

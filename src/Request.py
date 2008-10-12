@@ -7,6 +7,8 @@ import re
 
 import Template
 
+import datetime
+
 import Logger
 log = Logger.getLogger()
 
@@ -92,7 +94,9 @@ class Request:
 			req = urllib2.Request(url=url, headers=headers)
 
 		resp = requester(req)
+		start_time = datetime.datetime.now()#XXX: is it a good place?
 		rawbody = resp.read()
+		end_time = datetime.datetime.now()
 
 		response = Response()
 		response.rawbody = rawbody
@@ -100,7 +104,7 @@ class Request:
 		response.url = resp.geturl()
 		response.info = resp.info()
 		response.headers = resp.info().headers
-		return response
+		return (response, start_time, end_time)
 
 	def parse_r_n(self, reqstr):
 		m = re.match(r'(.*)\r\n((?:.*\r\n)+)\r\n(.*)$', reqstr)

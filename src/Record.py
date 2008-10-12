@@ -103,9 +103,12 @@ class Hit(Player, PropertyMixin):
 		if basescope == None:
 			self.request.play()
 		else:
-			response = self.request.play(basescope.get_variables())
+			response, start_time, end_time = self.request.play(basescope.get_variables())
 			response.body = self.decode_body(response.rawbody, self.resp_handler.coder)
 			basescope.assign('response', response)
+			reporter = basescope.lookup('reporter')
+			if reporter:
+				reporter.post_hit(self.uuid, start_time, end_time)
 
 
 class Page(Player):

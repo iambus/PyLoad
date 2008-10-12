@@ -24,6 +24,12 @@ class User(Player):
 		if scope == None:
 			scope = Scope()
 		assert self.scripts == [] and self.childern == []
+		global_reporter = scope.lookup('global_reporter')
+		if global_reporter:
+			reporter = global_reporter.get_reporter()
+			scope['reporter'] = reporter
+		else:
+			reporter = None
 		if self.iteration_factory:
 			self.before(scope)
 			for i in range(self.iteration_count):
@@ -36,6 +42,8 @@ class User(Player):
 				self.childern.append(self.player)
 			Player.play(self, scope)
 			self.childern = []
+		if reporter:
+			reporter.commit()
 
 class Global(Player):
 	def __init__(self):
@@ -95,7 +103,7 @@ class TimeBasedPlayPolicy:
 		raise NotImplementedError('Time Based Policy is not supported now.')
 
 class IterationBasedPlayPolicy:
-	def __init__(self, player, user_count, iteration_count, user_factory, iteration_factory, global_factory):
+	def __init__(self, player, user_count, iteration_count, user_factory, iteration_factory, global_factory, reporter = None):
 		self.player = player
 		self.user_count = user_count
 		self.iteration_count = iteration_count
@@ -103,11 +111,14 @@ class IterationBasedPlayPolicy:
 		self.iteration_factory = iteration_factory
 		self.global_factory = global_factory
 
+		self.reporter = reporter
 
 	def play_in_single_thread(self, scope = None):
 		g = self.global_factory.create()
 		users = []
 		scope = Scope()
+		if self.reporter:
+			scope['global_reporter'] = self.reporter
 		g.before(scope)
 		for i in range(self.user_count):
 			user = self.user_factory.create()
@@ -121,7 +132,10 @@ class IterationBasedPlayPolicy:
 	def play_in_multiple_threads(self, scope = None):
 		g = self.global_factory.create()
 		users = []
-		g.before()
+		scope = Scope()
+		if self.reporter:
+			scope['global_reporter'] = self.reporter
+		g.before(scope)
 		for i in range(self.user_count):
 			user = self.user_factory.create()
 			user.player = self.player
@@ -129,10 +143,10 @@ class IterationBasedPlayPolicy:
 			user.iteration_factory = self.iteration_factory
 			user = UserThread(user)
 			users.append(user)
-			user.play(g.scope)
+			user.play(scope)
 		for user in users:
 			user.join()
-		g.after()
+		g.after(scope)
 
 	play = play_in_multiple_threads
 
