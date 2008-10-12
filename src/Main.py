@@ -123,10 +123,10 @@ class MainFrame(wx.Frame):
 	def menuData(self):
 		return [
 				("&File", (
-					("&New\tCtrl+N", "Save file", self.OnNew),
-					("&Open\tCtrl+O", "Save file", self.OnOpen),
-					("&Save\tCtrl+S", "Save file", self.OnSave),
-					("Save &As", "Save file", self.OnSaveAs),
+					("&New\tCtrl+N", "New Project", self.OnNew),
+					("&Open\tCtrl+O", "Open Project", self.OnOpen),
+					("&Save\tCtrl+S", "Save Project", self.OnSave),
+					("Save &As", "Save Project As...", self.OnSaveAs),
 					("", "", ""),
 					("E&xit", "Exit", self.OnExit),
 					("", "", ""),
@@ -134,10 +134,10 @@ class MainFrame(wx.Frame):
 				("&Operation", 
 					(
 					("Record\tF5", "Record", self.OnRecord, True, self.startIcon, self.stopIconOff),
-					("Stop Recoding\tF6", "Record", self.OnStop, False, self.stopIcon, self.stopIconOff),
+					("Stop Recoding\tF6", "Stop Recording", self.OnStop, False, self.stopIcon, self.stopIconOff),
 					("", "", ""),
-					("Run\tF7", "Run", self.OnRun, True, self.runIcon, self.runIconOff),
-					("Terminate\tF8", "Terminate", self.OnTerminate, False, self.terminateIcon, self.terminateIconOff),
+					("Play\tF7", "Play", self.OnRun, True, self.runIcon, self.runIconOff),
+					("Terminate\tF8", "Stop Playing", self.OnTerminate, False, self.terminateIcon, self.terminateIconOff),
 					)),
 				("&View", 
 					(
@@ -324,6 +324,7 @@ class MainFrame(wx.Frame):
 			self.LoadProjectFrom(path)
 
 	def OnSave(self, event):
+		self.nb.playTab.Save()
 		self.SaveProjectTo(self.path)
 
 	def OnSaveAs(self, event):
@@ -386,7 +387,8 @@ class MainFrame(wx.Frame):
 		policyPanel = self.nb.playTab.policyPanel
 		userCount = policyPanel.userField.GetValue()
 		iterationCount = policyPanel.iterationField.GetValue()
-		specialLabel = policyPanel.specialField.GetData().label
+		special = policyPanel.specialField.GetData()
+		specialLabel = special.label if special else '<empty>'
 		summary = 'Start Time: %s\nUser Count: %s\nIteration Count: %s\nSpecial: %s' % (startTime, userCount, iterationCount, specialLabel)
 		ReportManager.start_report(self.report, self.project, summary=summary)
 

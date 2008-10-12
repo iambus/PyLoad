@@ -13,6 +13,10 @@ class Project:
 		self.user_factory = None
 		self.iteration_factory = None
 
+		self.user_count = 1
+		self.iteration_count = 1
+		self.current_special = None
+
 		self.repository_internal = Repository.get_global_repository().data
 
 	def add_record(self, record):
@@ -43,6 +47,9 @@ class Project:
 			self.global_factory = p.global_factory
 			self.user_factory = p.user_factory
 			self.iteration_factory = p.iteration_factory
+			self.user_count = p.user_count
+			self.iteration_count = p.iteration_count
+			self.current_special = p.current_special
 			self.repository_internal = p.repository_internal
 
 		finally:

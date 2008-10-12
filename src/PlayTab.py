@@ -36,6 +36,16 @@ class Choice(wx.Choice):
 	def OnSelected(self, event):
 		self.selected = self.values[event.Selection]
 
+	def SetData(self, selected):
+		for i in range(len(self.values)):
+			if self.values[i] is selected:
+				self.SetSelection(i)
+				self.selected = selected
+				break
+		else:
+			self.selected = None
+			self.Clear()
+
 class PolicyPanel(wx.Panel):
 	def __init__(self, parent):
 		wx.Panel.__init__(self, parent, -1)
@@ -178,6 +188,10 @@ class PlayTab(wx.Panel):
 		self.userFactory = self.project.user_factory
 		self.iterationFactory = self.project.iteration_factory
 
+		self.policyPanel.userField.SetValue(self.project.user_count)
+		self.policyPanel.iterationField.SetValue(self.project.iteration_count)
+		self.policyPanel.specialField.SetData(self.project.current_special)
+
 	def Play(self):
 		if self.policyPanel.specialField.GetData() == None:
 			return
@@ -199,6 +213,14 @@ class PlayTab(wx.Panel):
 				reporter = reporter
 				)
 		policy.play()
+
+		# save policy to project after played
+		self.Save()
+
+	def Save(self):
+		self.project.user_count = self.policyPanel.userField.GetValue()
+		self.project.iteration_count = self.policyPanel.iterationField.GetValue()
+		self.project.current_special = self.policyPanel.specialField.GetData()
 
 
 if __name__ == '__main__':
