@@ -21,8 +21,7 @@ class User(Player):
 		self.iteration_factory = iteration_factory
 
 	def play(self, scope = None):
-		if scope == None:
-			scope = Scope()
+		scope = Scope(scope)
 		assert self.scripts == [] and self.childern == []
 		global_reporter = scope.lookup('global_reporter')
 		if global_reporter:
