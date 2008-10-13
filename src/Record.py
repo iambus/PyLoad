@@ -68,6 +68,8 @@ class Hit(Player, PropertyMixin):
 
 		self.request = Request(self.url, self.oreqstr)
 
+		self.set_label()
+
 	def get_reqstr(self):
 		log.debug('get reqstr')
 		return self.reqstr
@@ -84,7 +86,10 @@ class Hit(Player, PropertyMixin):
 		return coder.decode(body)
 	def encode(self, exp, coder):
 		header, body = self.split_header_and_body(exp)
-		return header + coder.encode(body)
+		rawbody = coder.encode(body)
+		assert type(rawbody) == str
+		rawheader = header.encode('utf-8')
+		return rawheader + rawbody
 	def split_header_and_body(self, whole):
 		index = whole.find('\r\n\r\n')
 		if index != -1:
@@ -98,6 +103,13 @@ class Hit(Player, PropertyMixin):
 		header = whole[0:index]
 		body = whole[index:]
 		return header, body
+
+	def set_label(self):
+		#TODO: generalize it
+		import re
+		m = re.search(r'<member [^<>]*name="operation">([^<>]+)</member>', self.reqstr)
+		if m:
+			self.label = m.group(1)
 
 	def playmain(self, basescope=None):
 		if basescope == None:
