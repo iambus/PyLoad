@@ -111,13 +111,16 @@ class EditorPanel(wx.Panel):
 		self.saveButton.Disable()
 
 	def OnSearch(self, event):
-		print 'search'
+		raise NotImplementedError()
 
 	def Unload(self):
 		self.binding = None
 		self.path = None
 		self.temppath = None
 		self.saveButton.Disable()
+
+		self.editor.EmptyUndoBuffer()
+
 
 	def Load(self, path = None):
 		assert self.path == None or self.temppath == None
@@ -134,6 +137,11 @@ class EditorPanel(wx.Panel):
 			fp = open(self.temppath, 'rb')
 			self.editor.SetValue(fp.read())
 			fp.close()
+
+		self.saveButton.Disable()
+
+		self.editor.EmptyUndoBuffer()
+		self.editor.SetSavePoint()
 
 	def Save(self):
 		assert self.temppath == None
