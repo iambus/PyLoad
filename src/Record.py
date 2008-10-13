@@ -66,7 +66,7 @@ class Hit(Player, PropertyMixin):
 		if self.respstr:
 			self.respstr = self.decode(self.respstr, self.resp_handler.coder)
 
-		self.request = Request(self.url, self.reqstr)
+		self.request = Request(self.url, self.oreqstr)
 
 	def get_reqstr(self):
 		log.debug('get reqstr')
