@@ -1,7 +1,25 @@
 
+import threading
 
-#TODO: thread-safe
 class It:
+	'Thread-safe'
+	def __init__(self, seq):
+		self.iterator = iter(seq)
+		self.lock = threading.Lock()
+
+	def __call__(self):
+		lock = self.lock
+		lock.acquire()
+		try:
+			return self.iterator.next()
+		except StopIteration:
+			self.lock = None
+			return None
+		finally:
+			lock.release()
+
+class LocalIt:
+	'Thread-unsafe'
 	def __init__(self, seq):
 		self.iterator = iter(seq)
 
