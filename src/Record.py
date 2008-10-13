@@ -77,7 +77,6 @@ class Hit(Player, PropertyMixin):
 	def set_reqstr(self, reqstr):
 		log.debug('set reqstr')
 		self.reqstr = reqstr
-		self.request.set_reqstr(self.encode(reqstr, self.req_handler.coder))
 
 	def decode(self, raw, coder):
 		header, body = self.split_header_and_body(raw)
@@ -115,6 +114,10 @@ class Hit(Player, PropertyMixin):
 		if basescope == None:
 			self.request.play()
 		else:
+			variables = basescope.get_variables()
+			reqstr = Template.subst(self.reqstr, variables)
+			self.request.set_reqstr(self.encode(reqstr, self.req_handler.coder))
+
 			response, start_time, end_time = self.request.play(basescope.get_variables())
 			response.body = self.decode_body(response.rawbody, self.resp_handler.coder)
 			basescope.assign('response', response)
