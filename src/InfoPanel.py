@@ -91,5 +91,6 @@ if __name__ == '__main__':
 				)
 		#p.LoadFields(fields)
 		p.Load(Record.Hit('x'))
+		#p.Load(Record.Page('p'))
 	Test.TestPanel(InfoPanel, callback)
 

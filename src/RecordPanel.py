@@ -195,6 +195,26 @@ class RecordPanel(wx.Panel):
 
 		wx.CallAfter(DoDragDrop) # can't call dropSource.DoDragDrop here..
 
+	def OnNewPage(self, event):
+		assert not self.isMirror
+
+		recordItem = self.tree.GetSelection()
+		record = self.tree.GetPyData(recordItem)
+		if not isinstance(record, Record.Record):
+			return
+
+		page = Record.Page('<None>')
+		page.label = 'New Page'
+		#XXX: pages, or childern?
+		record.pages.append(page)
+
+		pageItem = self.tree.AppendItem(recordItem, page.label)
+		self.tree.SetPyData(pageItem, page)
+		self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
+		self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
+		self.tree.Expand(recordItem)
+
+		self.NotifyObservers()
 
 	def OnDeleteItem(self, event):
 		item = self.tree.GetSelection()
@@ -250,10 +270,14 @@ class RecordPanel(wx.Panel):
 		if not hasattr(self, "popupID1"):
 			self.popupID1 = wx.NewId()
 			self.popupID2 = wx.NewId()
+			self.popupID3 = wx.NewId()
 			self.Bind(wx.EVT_MENU, self.OnDuplicateItem, id=self.popupID1)
 			self.Bind(wx.EVT_MENU, self.OnDeleteItem, id=self.popupID2)
+			self.Bind(wx.EVT_MENU, self.OnNewPage, id=self.popupID3)
 
 		menu = wx.Menu()
+		if isinstance(self.tree.GetPyData(item), Record.Record):
+			menu.Append(self.popupID3, "New Page")
 		menu.Append(self.popupID1, "Duplicate")
 		menu.Append(self.popupID2, "Delete")
 

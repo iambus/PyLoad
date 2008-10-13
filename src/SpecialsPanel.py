@@ -186,11 +186,10 @@ class SpecialsPanel(wx.Panel):
 		menu.Append(self.popupID1, "New Special")
 		if item:
 			if self.UnderModifiable(item):
-				menu.Append(self.popupID2, "Delete")
-
 				if self.IsCloneable(item):
 					menu.Append(self.popupID3, "Duplicate")
 					#menu.FindItemByPosition(2).Enable(False)
+				menu.Append(self.popupID2, "Delete")
 
 		self.PopupMenu(menu)
 		menu.Destroy()

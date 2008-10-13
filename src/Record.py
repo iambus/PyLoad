@@ -129,19 +129,18 @@ class Hit(Player, PropertyMixin):
 class Page(Player):
 	def __init__(self, path):
 		Player.__init__(self)
-		self.time = None
+		self.time = datetime.datetime.now()
+		self.timestr = self.time.strftime('%Y-%m-%d %H:%M:%S')
 		self.path = path
 		self.label = path
 		self.hits = []
 		self.childern = self.hits
 
+
 	def add_hit(self, hit):
 		# Return True if this hit is in page
 		if self.path == hit.page:
 			self.hits.append(hit)
-			if self.time == None:
-				self.time = datetime.datetime.now()
-				self.timestr = self.time.strftime('%Y-%m-%d %H:%M:%S')
 			return True
 		else:
 			return False
