@@ -43,7 +43,7 @@ class NoteBook(wx.Toolbook):
 
 		self.editTab.specialsPanel.onNewSpecialCallback = self.playTab.policyPanel.UpdateSpecials
 
-		colourList = [ "Result", ]
+		colourList = [ "Report", ]
 		g = self.makeColorPanel()
 		for colour in colourList:
 			win = g.next()
@@ -144,7 +144,7 @@ class MainFrame(wx.Frame):
 					("Record\tCtrl+1", "Record", self.OnRecordViewSelected),
 					("Edit\tCtrl+2", "Edit", self.OnEditViewSelected),
 					("Play\tCtrl+3", "Play", self.OnPlayViewSelected),
-					("Result\tCtrl+4", "Result", self.OnResultViewSelected),
+					("Report\tCtrl+4", "Report", self.OnReportViewSelected),
 					)),
 				("&Help", (
 					("&About", "", self.OnAll),
@@ -299,7 +299,7 @@ class MainFrame(wx.Frame):
 	def OnPlayViewSelected(self, event):
 		self.nb.SetSelection(2)
 
-	def OnResultViewSelected(self, event):
+	def OnReportViewSelected(self, event):
 		self.nb.SetSelection(3)
 
 	def OnAll(self, event):
