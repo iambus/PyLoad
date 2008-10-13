@@ -55,14 +55,14 @@ class Request:
 			log.error("Can't parse request:[[[%s]]]" % repr(reqstr))
 			return
 
-		(self.request_line, self.headers, self.body) = x
+		(self.request_line, headers_list, self.body) = x
 		self.method = re.match(r'\S+', self.request_line).group()
 
 		if self.method == 'GET':
 			assert self.body == ''
 
 		headers = {}
-		for k, v in headers.items():
+		for k, v in headers_list:
 			if k.lower() == 'content-length':
 				continue
 			elif k.lower() == 'cookie':
