@@ -187,8 +187,10 @@ class SpecialsPanel(wx.Panel):
 		if item:
 			if self.UnderModifiable(item):
 				menu.Append(self.popupID2, "Delete")
-				menu.Append(self.popupID3, "Duplicate (Not implemented)")
-				menu.FindItemByPosition(2).Enable(False)
+
+				if self.IsCloneable(item):
+					menu.Append(self.popupID3, "Duplicate")
+					#menu.FindItemByPosition(2).Enable(False)
 
 		self.PopupMenu(menu)
 		menu.Destroy()
@@ -206,7 +208,9 @@ class SpecialsPanel(wx.Panel):
 			self.DeleteItem(item)
 
 	def OnDuplicateItem(self, event):
-		raise NotImplementedError()
+		item = self.tree.GetSelection()
+		if item:
+			self.DuplicateItem(item)
 	# }}}
 
 	# {{{ Add new nodes
@@ -357,6 +361,29 @@ class SpecialsPanel(wx.Panel):
 			self.project.remove_special(data)
 
 		self.NotifyObserver()
+	# }}}
+
+	# {{{ Duplicating nodes
+	def DuplicateItem(self, oldItem):
+		oldData = self.tree.GetPyData(oldItem)
+		parentItem = self.tree.GetItemParent(oldItem)
+		parentData = self.tree.GetPyData(parentItem)
+
+		import Clone
+		newData = Clone.clone_for_special(oldData)
+		if not newData:
+			# item is not cloneable
+			return
+
+		if parentData:
+			childern = parentData.childern
+		else:
+			childern = self.project.specials
+
+		index = childern.index(oldData)
+		childern.insert(index+1, newData)
+
+		self.InsertData(parentItem, oldItem, newData)
 	# }}}
 
 	# {{{ Load kinds of Data (the data to be loaded should have been added as parent node's child)
@@ -564,6 +591,11 @@ class SpecialsPanel(wx.Panel):
 	def UnderModifiable(self, item):
 		parentItem = self.tree.GetItemParent(item)
 		return self.IsModifiable(parentItem)
+
+	def IsCloneable(self, item):
+		uncloneable = (Record.Record, Record.Page, Record.Hit)
+		data = self.tree.GetPyData(item)
+		return data.__class__ not in uncloneable
 
 if __name__ == '__main__':
 	import Test

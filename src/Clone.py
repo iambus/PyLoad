@@ -54,6 +54,54 @@ def clone(src):
 	set_uuid(dest)
 	return dest
 
+
+def clone_for_special(src):
+	from Record import Record, Page, Hit
+	from Player import Player
+
+	cloneable = []
+	uncloneable = [Record, Page, Hit]
+
+	if src.__class__ in uncloneable:
+		return None
+
+	def replace_with_uuid(node):
+		assert node.__class__ not in uncloneable
+		if isinstance(node, Player):
+			for i in range(len(node.childern)):
+				if node.childern[i].__class__ in uncloneable:
+					node.childern[i] = node.childern[i].uuid
+				else:
+					replace_with_uuid(node.childern[i])
+			for i in range(len(node.scripts)):
+				if node.scripts[i].__class__ in uncloneable:
+					node.scripts[i] = node.scripts[i].uuid
+				else:
+					replace_with_uuid(node.scripts[i])
+
+	def replace_uuid_back(node):
+		import Repository
+		assert node.__class__ not in uncloneable
+		if isinstance(node, Player):
+			for i in range(len(node.childern)):
+				if type(node.childern[i]) in (str, unicode):
+					node.childern[i] = Repository.lookup(node.childern[i])
+				else:
+					replace_uuid_back(node.childern[i])
+			for i in range(len(node.scripts)):
+				if type(node.scripts[i]) in (str, unicode):
+					node.scripts[i] = Repository.lookup(node.scripts[i])
+				else:
+					replace_uuid_back(node.scripts[i])
+
+	replace_with_uuid(src)
+	dest = clone(src)
+	replace_uuid_back(src)
+	replace_uuid_back(dest)
+
+	return dest
+
+
 if __name__ == '__main__':
 	import Player
 	player = Player.Player()

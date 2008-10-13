@@ -7,7 +7,7 @@ Tree Editor
 	delete (finished)
 	drag (finished)
 	duplicate for records (p2) (finished)
-	duplicate for specials (p3)
+	duplicate for specials (p3) (finished)
 
 Infotab (p2) (finised)
 extractor (p3)
