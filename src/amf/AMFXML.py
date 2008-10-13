@@ -29,7 +29,7 @@ class ToXML:
 
 		headers = self.create_child(root, 'headers')
 		for header in packet.headers:
-			header_node = self.create_child(headers, header.header_name)
+			header_node = self.create_child(headers, 'header')
 			self.create_text_node(header_node, 'name', header.header_name)
 			must_understand = self.create_child(header_node, 'must-understand')
 			self.set_text(must_understand, header.must_understand)
@@ -47,8 +47,12 @@ class ToXML:
 	##################################################
 
 	def set_text(self, node, value):
-		value = self.doc.createTextNode(str(value))
-		node.appendChild(value)
+		value = str(value)
+		if len(value) > 40 and ('<' in value) and (']]>' not in value):
+			text_node = self.doc.createCDATASection(value)
+		else:
+			text_node = self.doc.createTextNode(value)
+		node.appendChild(text_node)
 
 	def create_child(self, parent, tag):
 		node = self.doc.createElement(tag)
