@@ -38,16 +38,7 @@ class ControllersPanel(wx.Panel):
 		self.list.Bind(wx.EVT_LIST_BEGIN_DRAG, self.OnBeginDrag)
 
 		#
-		import Repository
-		mapping = [
-				Repository.register_object(Player.Script),
-				Repository.register_object(Controller.If),
-				Repository.register_object(Controller.Loop),
-				Repository.register_object(Controller.Block),
-				]
-		def GetUserData(index):
-			return mapping[index]
-		self.list.GetUserData = GetUserData
+		self.BindGetUserData()
 
 	def OnBeginDrag(self, event):
 		item = event.GetItem()
@@ -68,6 +59,24 @@ class ControllersPanel(wx.Panel):
 		wx.CallAfter(DoDragDrop) # can't call dropSource.DoDragDrop here..
 
 
+	def BindGetUserData(self):
+		import Repository
+		mapping = self.RegisterControllers()
+		def GetUserData(index):
+			return mapping[index]
+		self.list.GetUserData = GetUserData
+
+	def RegisterControllers(self):
+		import Repository
+		return [
+				Repository.register_object(Player.Script),
+				Repository.register_object(Controller.If),
+				Repository.register_object(Controller.Loop),
+				Repository.register_object(Controller.Block),
+				]
+
+	def Reload(self):
+		self.BindGetUserData()
 
 
 if __name__ == '__main__':

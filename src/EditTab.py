@@ -59,6 +59,7 @@ class EditTab(wx.Panel):
 
 	def Reload(self):
 		self.specialsPanel.Reload()
+		self.controllersPanel.Reload()
 
 if __name__ == '__main__':
 	app = wx.PySimpleApp()
