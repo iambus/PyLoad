@@ -48,6 +48,7 @@ Stopping Proxy (p3) (finished)
 EditorPanel disable button, disable editing (p3)
 better editor (finished)
 editor loading it slow (p3)
+buf fix: clear modify for editor before loading another node (p3)
 add script/if/loop to pop menu (p3)
 better response (p2) (finished)
 
