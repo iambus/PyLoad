@@ -18,6 +18,23 @@ class Response:
 		self.body = None
 		self.headers = None
 
+	def find(self, pattern, n = 0, flag = 0):
+		try:
+			m = re.search(pattern, self.body, flag)
+			if m:
+				return m.group(n)
+		except Exception, e:
+			log.exception(e)
+
+	def find_all(self, pattern, flag = 0):
+		try:
+			return re.findall(pattern, self.body, flag)
+		except Exception, e:
+			log.exception(e)
+
+	def xfind(self, xpath):
+		raise NotImplementedError('XPath is not supported yet')
+
 
 class Request:
 	def __init__(self, url, reqstr = None):
@@ -62,9 +79,6 @@ class Request:
 		self.parse()
 
 	def play(self, variables = {}):
-		reqstr = Template.subst(self.reqstr, variables)
-		self.parse(reqstr)
-
 		url = self.url
 		data = self.body
 		headers = self.headers
@@ -93,7 +107,11 @@ class Request:
 		else:
 			req = urllib2.Request(url=url, headers=headers)
 
-		resp = requester(req)
+		try:
+			resp = requester(req)
+		except urllib2.URLError, e:
+			log.error('Request error: %s\nURL: %s\nHeaders: %s' % (req, url, headers))
+			raise e
 		start_time = datetime.datetime.now()#XXX: is it a good place?
 		rawbody = resp.read()
 		end_time = datetime.datetime.now()
