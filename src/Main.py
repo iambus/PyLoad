@@ -112,8 +112,8 @@ class MainFrame(wx.Frame):
 		self.stopIcon = IconImages.getStopBitmap()
 		self.stopIconOff = IconImages.getStopOffBitmap()
 
-		self.runIcon = IconImages.getRunBitmap()
-		self.runIconOff = IconImages.getRunOffBitmap()
+		self.playIcon = IconImages.getRunBitmap()
+		self.playIconOff = IconImages.getRunOffBitmap()
 
 		self.terminateIcon = IconImages.getTerminateBitmap()
 		self.terminateIconOff = IconImages.getTerminateOffBitmap()
@@ -136,7 +136,7 @@ class MainFrame(wx.Frame):
 					("Record\tF5", "Record", self.OnRecord, True, self.startIcon, self.stopIconOff),
 					("Stop Recoding\tF6", "Stop Recording", self.OnStop, False, self.stopIcon, self.stopIconOff),
 					("", "", ""),
-					("Play\tF7", "Play", self.OnRun, True, self.runIcon, self.runIconOff),
+					("Play\tF7", "Play", self.OnPlay, True, self.playIcon, self.playIconOff),
 					("Terminate\tF8", "Stop Playing", self.OnTerminate, False, self.terminateIcon, self.terminateIconOff),
 					)),
 				("&View", 
@@ -219,8 +219,8 @@ class MainFrame(wx.Frame):
 
 		toolbar.AddSeparator()
 
-		run = self.createTool(toolbar, "Run", self.runIcon, self.runIconOff)
-		self.Bind(wx.EVT_MENU, self.OnRun, run)
+		play = self.createTool(toolbar, "Play", self.playIcon, self.playIconOff)
+		self.Bind(wx.EVT_MENU, self.OnPlay, play)
 
 		terminate = self.createTool(toolbar, "Terminate", self.terminateIcon, self.terminateIconOff)
 		self.Bind(wx.EVT_MENU, self.OnTerminate, terminate)
@@ -228,13 +228,13 @@ class MainFrame(wx.Frame):
 		self.toolbar = toolbar
 		self.toolStart = start
 		self.toolStop = stop
-		self.toolRun = run
+		self.toolPlay = play
 		self.toolTerminate = terminate
 
 		self.toolbar.EnableTool(self.toolStart.GetId(), 1)
 		self.toolbar.EnableTool(self.toolStop.GetId(), 0)
 
-		self.toolbar.EnableTool(self.toolRun.GetId(), 1)
+		self.toolbar.EnableTool(self.toolPlay.GetId(), 1)
 		self.toolbar.EnableTool(self.toolTerminate.GetId(), 0)
 
 		toolbar.Realize()
@@ -272,8 +272,8 @@ class MainFrame(wx.Frame):
 		Proxy.end_catch()
 
 
-	def OnRun(self, event):
-		self.toolbar.EnableTool(self.toolRun.GetId(), 0)
+	def OnPlay(self, event):
+		self.toolbar.EnableTool(self.toolPlay.GetId(), 0)
 		self.toolbar.EnableTool(self.toolTerminate.GetId(), 1)
 		menu = self.GetMenuBar().GetMenu(1)
 		menu.FindItemByPosition(3).Enable(False)
@@ -282,7 +282,7 @@ class MainFrame(wx.Frame):
 		self.Play()
 
 	def OnTerminate(self, event):
-		self.toolbar.EnableTool(self.toolRun.GetId(), 1)
+		self.toolbar.EnableTool(self.toolPlay.GetId(), 1)
 		self.toolbar.EnableTool(self.toolTerminate.GetId(), 0)
 		menu = self.GetMenuBar().GetMenu(1)
 		menu.FindItemByPosition(3).Enable(True)
