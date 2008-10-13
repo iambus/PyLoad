@@ -4,7 +4,8 @@ from AMFTypes import *
 
 
 class AMFEncoder:
-	def __init__(self, packet, fp):
+	def __init__(self, packet, fp = None):
+		assert isinstance(packet, AMFPacket)
 		self.packet = packet
 		if fp != None:
 			self.fp = fp
