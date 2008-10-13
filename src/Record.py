@@ -48,7 +48,7 @@ class Hit(Player, PropertyMixin):
 
 		self.label = url
 
-		self.req_hanlder = ContentTypeHandler.ContentTypeHandler()
+		self.req_handler = ContentTypeHandler.ContentTypeHandler()
 		self.resp_handler = ContentTypeHandler.ContentTypeHandler()
 
 	def finish(self):
