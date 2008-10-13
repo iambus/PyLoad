@@ -25,6 +25,7 @@ ClassToLabels = {
 #	Player.Script : ('Category',),
 #	Controller.If : ('Category',),
 #	Controller.Loop : ('Category',),
+#	Controller.Block : ('Category',),
 #	Special.Special : ('Category',),
 #	PlayPolicy.Factory : ('Category',),
 }

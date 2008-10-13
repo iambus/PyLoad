@@ -62,6 +62,7 @@ ClassToTabs = {
 	Player.Script : ('Script',),
 	Controller.If : ('Before', 'Condition', 'After',),
 	Controller.Loop : ('Before', 'Condition', 'After',),
+	Controller.Block : ('Before', 'After',),
 	Special.Special : ('Before', 'After'),
 	PlayPolicy.Factory : ('Before', 'After'),
 		}

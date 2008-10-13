@@ -16,6 +16,10 @@ class Group(Player, Controller):
 	def __init__(self):
 		pass
 
+class Block(Player, Controller):
+	def __init__(self):
+		Player.__init__(self)
+
 class If(Player, Controller):
 	def __init__(self, condition = 'True'):
 		Player.__init__(self)

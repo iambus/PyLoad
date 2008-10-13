@@ -113,6 +113,8 @@ class SpecialsPanel(wx.Panel):
 		self.ifOpenIcon = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_QUESTION, wx.ART_OTHER, iconSize))
 		self.loopIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_REDO,      wx.ART_OTHER, iconSize))
 		self.loopOpenIcon = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_REDO, wx.ART_OTHER, iconSize))
+		self.blockIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize))
+		self.blockOpenIcon = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, iconSize))
 
 		self.tree.SetImageList(iconList)
 		self.iconList = iconList
@@ -248,7 +250,7 @@ class SpecialsPanel(wx.Panel):
 		targetData = self.tree.GetPyData(targetItem)
 
 		#TODO: can we introduce a "subable" interface?
-		subable = (Special, Controller.If, Controller.Loop)
+		subable = (Special, Controller.If, Controller.Loop, Controller.Block)
 		unsubable = (Record.Record, Record.Page, Record.Hit, Player.Script)
 
 		if targetData.__class__ in subable:
@@ -295,7 +297,7 @@ class SpecialsPanel(wx.Panel):
 		targetParentData = self.tree.GetPyData(targetParentItem)
 
 		#TODO: can we introduce a "subable" interface?
-		subable = (Special, Controller.If, Controller.Loop)
+		subable = (Special, Controller.If, Controller.Loop, Controller.Block)
 		unsubable = (Record.Record, Record.Page, Record.Hit, Player.Script)
 
 		if sourceParentData.__class__ in unsubable or targetParentData.__class__ in unsubable:
@@ -394,6 +396,7 @@ class SpecialsPanel(wx.Panel):
 				Player.Script : self.LoadScript,
 				Controller.If : self.LoadIf,
 				Controller.Loop : self.LoadLoop,
+				Controller.Block : self.LoadBlock,
 				}
 		mappings[data.__class__](item, data)
 
@@ -462,6 +465,16 @@ class SpecialsPanel(wx.Panel):
 			self.LoadData(subItem, child)
 
 		self.tree.Expand(subItem)
+
+	def LoadBlock(self, item, blockData):
+		subItem = self.tree.AppendItem(item, blockData.label)
+		self.tree.SetPyData(subItem, blockData)
+		self.tree.SetItemImage(subItem, self.blockIcon, wx.TreeItemIcon_Normal)
+
+		for child in blockData.childern:
+			self.LoadData(subItem, child)
+
+		self.tree.Expand(subItem)
 	# }}}
 
 	# {{{ Insert kinds of Data AFTER a node (the data to be loaded should have been added as parent node's child)
@@ -475,6 +488,7 @@ class SpecialsPanel(wx.Panel):
 				Player.Script : self.InsertScript,
 				Controller.If : self.InsertIf,
 				Controller.Loop : self.InsertLoop,
+				Controller.Block : self.InsertBlock,
 				Special : self.InsertSpecial,
 				}
 		mappings[data.__class__](item, prev, data)
@@ -542,6 +556,16 @@ class SpecialsPanel(wx.Panel):
 		self.tree.SetItemImage(subItem, self.loopIcon, wx.TreeItemIcon_Normal)
 
 		for child in loopData.childern:
+			self.LoadData(subItem, child)
+
+		self.tree.Expand(subItem)
+
+	def InsertBlock(self, item, prev, blockData):
+		subItem = self.tree.InsertItem(item, prev, blockData.label)
+		self.tree.SetPyData(subItem, blockData)
+		self.tree.SetItemImage(subItem, self.blockIcon, wx.TreeItemIcon_Normal)
+
+		for child in blockData.childern:
 			self.LoadData(subItem, child)
 
 		self.tree.Expand(subItem)

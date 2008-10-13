@@ -22,11 +22,13 @@ class ControllersPanel(wx.Panel):
 		self.imagelist.Add(wx.ArtProvider_GetBitmap(wx.ART_NEW, wx.ART_OTHER, (16,16)))
 		self.imagelist.Add(wx.ArtProvider_GetBitmap(wx.ART_QUESTION, wx.ART_OTHER, (16,16)))
 		self.imagelist.Add(wx.ArtProvider_GetBitmap(wx.ART_REDO, wx.ART_OTHER, (16,16)))
+		self.imagelist.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, (16,16)))
 
 		self.list.SetImageList(self.imagelist, wx.IMAGE_LIST_SMALL)
 		self.list.InsertImageStringItem(0, 'SCRIPT', 0)
 		self.list.InsertImageStringItem(1, 'IF', 1)
 		self.list.InsertImageStringItem(2, 'LOOP', 2)
+		self.list.InsertImageStringItem(3, 'BLOCK', 3)
 
 		# layout
 		import Layout
@@ -41,6 +43,7 @@ class ControllersPanel(wx.Panel):
 				Repository.register_object(Player.Script),
 				Repository.register_object(Controller.If),
 				Repository.register_object(Controller.Loop),
+				Repository.register_object(Controller.Block),
 				]
 		def GetUserData(index):
 			return mapping[index]
