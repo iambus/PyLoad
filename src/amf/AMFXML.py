@@ -19,6 +19,8 @@ class ToXML:
 		self.doc = minidom.Document()
 		doc = self.doc
 
+		packet = self.packet
+
 		root = doc.createElement('packet')
 		doc.appendChild(root)
 
