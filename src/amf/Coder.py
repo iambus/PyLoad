@@ -8,7 +8,7 @@ class SimpleAMFCoder:
 	def encode(cls, xml):
 		fromxml = FromXML(xml)
 		packet = fromxml.get_packet()
-		encoder = AMFEncoder(xml)
+		encoder = AMFEncoder(packet)
 		return encoder.encode()
 	@classmethod
 	def decode(cls, raw):
