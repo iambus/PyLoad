@@ -89,6 +89,9 @@ class CodeCtrl(stc.StyledTextCtrl):
         self.SetTabWidth(4)             # Proscribed tab size for wx
         #self.SetUseTabs(False)
 
+        # No right-edge mode indicator
+        self.SetEdgeMode(stc.STC_EDGE_NONE)
+
         # show line numbers
         self.SetMarginType(1, wx.stc.STC_MARGIN_NUMBER)
         self.SetMarginSensitive(1, True)
