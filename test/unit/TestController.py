@@ -33,6 +33,16 @@ class TestIf(unittest.TestCase):
 		self.If = If('x == 5')
 		self.If.play()
 
+	def testGlobalVariables(self):
+		scope = Scope()
+		scope['i'] = 1
+		self.If = If('i')
+		self.If.add_child(Script('j = i'))
+		self.If.add_child(Script('i = 0'))
+		self.If.afterscript = Script('assert i == 0')
+		self.If.play(Scope(scope))
+		self.assertEquals(scope['i'], 0)
+
 class TestLoop(unittest.TestCase):
 	def setUp(self):
 		self.loop = Loop('x < 10')
@@ -68,6 +78,7 @@ class TestLoop(unittest.TestCase):
 		self.loop.play(scope)
 		self.assertEqual(scope.lookup('x'), 3)
 		self.assertEqual(scope.lookup('y'), 3)
+
 
 class TestBreak(unittest.TestCase):
 	def setUp(self):

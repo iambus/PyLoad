@@ -25,7 +25,7 @@ class Scope:
 		assert type(name) == str or type(name) == unicode
 		if self.assign_existed(name, value):
 			return
-		elif self.base and self.base.assign_existed(name, value):
+		elif self.base != None and self.base.assign_existed(name, value):
 			return
 		else:
 			self.variables[name] = value
@@ -34,6 +34,8 @@ class Scope:
 		if self.variables.has_key(name):
 			self.variables[name] = value
 			return True
+		elif self.base != None:
+			return self.base.assign_existed(name, value)
 		else:
 			return False
 
@@ -103,9 +105,9 @@ class Life:
 
 if __name__ == '__main__':
 	s1 = Scope()
-	s1.assign('x', 1)
-	s1.assign('x2', 2)
 	s2 = Scope(s1)
-	s2.assign('y', 4)
-	print s2.lookup('x')
+	s3 = Scope(s2)
+	s1.assign('x', 1)
+	s3.assign('x', 3)
+	print s1.lookup('x')
 

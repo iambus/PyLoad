@@ -77,6 +77,16 @@ y2 = -1
 		self.assertEqual(s1['x'], None)
 		self.assertEqual(s3['x'], 2)
 
+	def testLevel3_2(self):
+		s1 = Scope.Scope()
+		s1['x'] = 2
+		s2 = Scope.Scope(s1)
+		s3 = Scope.Scope(s2)
+		s3['x'] = 1
+		self.assertEqual(s3.variables, {})
+		self.assertEqual(s1['x'], 1)
+		self.assertEqual(s3['x'], 1)
+
 class TestLife(unittest.TestCase):
 	def setUp(self):
 		self.life = Scope.Life()
