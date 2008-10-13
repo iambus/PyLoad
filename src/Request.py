@@ -107,7 +107,7 @@ class Request:
 		return (response, start_time, end_time)
 
 	def parse_r_n(self, reqstr):
-		m = re.match(r'(.*)\r\n((?:.*\r\n)+)\r\n(.*)$', reqstr)
+		m = re.match(r'\A(.*)\r\n((?:.*\r\n)+)\r\n((?:.|\r|\n)*)\Z', reqstr)
 		if m == None:
 			return
 		request_line = m.group(1)
@@ -116,7 +116,7 @@ class Request:
 		return (request_line, headers, body)
 
 	def parse_n(self, reqstr):
-		m = re.match(r'(.*)\n((?:.*\n)+)\n(.*)$', reqstr)
+		m = re.match(r'\A(.*)\n((?:.*\n)+)\n((?:.|\r|\n)*)\Z', reqstr)
 		if m == None:
 			log.error("Can't parse request:[[[%s]]]" % repr(reqstr))
 			return
