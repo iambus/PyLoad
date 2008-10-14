@@ -23,10 +23,10 @@ def play_project(project, reporter = None):
 	iteration_factory = project.iteration_factory
 	global_factory = project.global_factory
 
-	from Report import Report
-	if type(reporter) in (str, unicode):
-		reporter = Report(reporter)
 	if reporter != None:
+		from Report import Report
+		if type(reporter) in (str, unicode):
+			reporter = Report(reporter)
 		assert isinstance(reporter, Report)
 
 		import datetime
@@ -96,7 +96,9 @@ def test():
 
 	project = load_project('workflow.pkl')
 	project.user_count = 3
-	play_project(project, 'b-report.db')
+	project.iteration_count = 10
+	#play_project(project, 'b-report.db')
+	play_project(project)
 
 if __name__ == '__main__':
 	#main()
