@@ -58,7 +58,20 @@ class Report:
 
 		cursor.execute('create table hits (hitid, start timestamp, end timestamp)')
 		cursor.execute('create table hits_v (hitid, time timestamp, response_time)')
-		cursor.execute('create view one as select hits_v.hitid as id, hits_info.label as label, hits_v.response_time as time from hits_v, hits_info where hits_v.hitid = hits_info.hitid')
+		cursor.execute('''create view one as
+				select
+					hits_v.hitid as id,
+					hits_info.label as label,
+					hits_v.response_time as time
+				from hits_v, hits_info where hits_v.hitid = hits_info.hitid''')
+		cursor.execute('''create view summary as
+				select
+					id,
+					one.label as label,
+					avg(time) as avg,
+					max(time) as max,
+					min(time) as min
+				from one group by id''')
 
 		cursor.close()
 
