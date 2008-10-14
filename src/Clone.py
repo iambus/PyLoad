@@ -7,7 +7,7 @@ def simple_clone(src):
 def simple_deep_clone(src):
 	return copy.deepcopy(src)
 
-def clone(src):
+def clone(src, repository = None):
 	dest = copy.deepcopy(src)
 	seen = []
 
@@ -37,7 +37,10 @@ def clone(src):
 			return
 		seen.append(obj)
 		if isinstance(obj, Repository.Mixin):
-			obj.register_self()
+			if repository:
+				obj.register_self_in(repository)
+			else:
+				obj.register_self()
 		if c == dict:
 			for k, v in obj.items():
 				set_uuid(k)
