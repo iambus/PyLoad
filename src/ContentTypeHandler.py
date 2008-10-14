@@ -1,16 +1,15 @@
 
 import re
 import Coder
-from editor.Syntax import Syntax
-import editor.syntax.default
-import editor.syntax.html
-import editor.syntax.xml
-import editor.syntax.python
 
 # immutable: dirty hack
 # XXX: how to implement an immutable instance in Python?
 class ContentTypeHandler(tuple):
-	def __new__(self, coder = Coder.EmptyCoder, syntax = editor.syntax.default):
+	def __new__(self, coder = Coder.EmptyCoder, syntax = None):
+		if syntax == None:
+			import editor.syntax.default
+			syntax = editor.syntax.default
+		from editor.Syntax import Syntax
 		return tuple.__new__(self, (coder, Syntax(syntax)))
 
 	def get_coder(self):
@@ -36,15 +35,20 @@ class ContentTypeHandler(tuple):
 	def __deepcopy__(self, ignored):
 		return ContentTypeHandler(self.coder, self.syntax)
 
-mapping = {
-		'default' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.default),
-		'html' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.html),
-		'xml' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.xml),
-		'amf' : ContentTypeHandler(Coder.AMFCoder, editor.syntax.xml),
-		'python' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.python),
-		}
 
 def get_handler(content):
+	import editor.syntax.default
+	import editor.syntax.html
+	import editor.syntax.xml
+	import editor.syntax.python
+	mapping = {
+			'default' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.default),
+			'html' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.html),
+			'xml' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.xml),
+			'amf' : ContentTypeHandler(Coder.AMFCoder, editor.syntax.xml),
+			'python' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.python),
+			}
+
 	m = re.search(r'^content-type:\s*(.*)', content, re.I|re.M)
 	if m:
 		type = m.group(1)
