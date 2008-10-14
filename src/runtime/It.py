@@ -8,6 +8,9 @@ class It:
 		self.lock = threading.Lock()
 
 	def __call__(self):
+		if self.lock == None:
+			# stopped
+			return None
 		lock = self.lock
 		lock.acquire()
 		try:
