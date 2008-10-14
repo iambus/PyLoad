@@ -148,13 +148,11 @@ class Record(Player, PropertyMixin):
 	def __init__(self):
 		Player.__init__(self)
 		PropertyMixin.__init__(self)
-		self.hits = []
 		self.pages = []
 		self.childern = self.pages
 	
 	def add_hit(self, hit):
 		# Return True if page alread exists
-		self.hits.append(hit)
 		if len(self.pages) and self.pages[-1].add_hit(hit):
 			return True
 		else:
