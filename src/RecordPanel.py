@@ -260,6 +260,35 @@ class RecordPanel(wx.Panel):
 
 	def OnHit(self, event):
 		self.AppendHit(event.hit, event.isNewHit)
+
+
+	def OnRenameHost(self, event):
+		dialog = wx.TextEntryDialog(
+				self, 'Please enter new host/port for this item:',
+				'Change Host')
+		#dialog.SetValue('<host>:<port>')
+		host = dialog.GetValue() if dialog.ShowModal() == wx.ID_OK else None
+		dialog.Destroy()
+
+		if host == None or host == '':
+			return
+
+		import re
+		if not re.match(r'^[\w\d.-@%~]+(:\d+)?$', host):
+			dialog = wx.MessageDialog(self, 'The host/port is not valid. Operation will be ignored.',
+								   'Bad host/port',
+								   wx.OK | wx.ICON_WARNING
+								   #wx.YES_NO | wx.NO_DEFAULT | wx.CANCEL | wx.ICON_INFORMATION
+								   )
+			dialog.ShowModal()
+			dialog.Destroy()
+			return
+
+
+		item = self.tree.GetSelection()
+		data = self.tree.GetPyData(item)
+		data.set_host(host)
+
 	# }}}
 
 	########################################
@@ -274,15 +303,18 @@ class RecordPanel(wx.Panel):
 			self.popupID1 = wx.NewId()
 			self.popupID2 = wx.NewId()
 			self.popupID3 = wx.NewId()
+			self.popupID4 = wx.NewId()
 			self.Bind(wx.EVT_MENU, self.OnDuplicateItem, id=self.popupID1)
 			self.Bind(wx.EVT_MENU, self.OnDeleteItem, id=self.popupID2)
 			self.Bind(wx.EVT_MENU, self.OnNewPage, id=self.popupID3)
+			self.Bind(wx.EVT_MENU, self.OnRenameHost, id=self.popupID4)
 
 		menu = wx.Menu()
 		if isinstance(self.tree.GetPyData(item), Record.Record):
 			menu.Append(self.popupID3, "New Page")
 		menu.Append(self.popupID1, "Duplicate")
 		menu.Append(self.popupID2, "Delete")
+		menu.Append(self.popupID4, "Change Host")
 
 		self.PopupMenu(menu)
 		menu.Destroy()

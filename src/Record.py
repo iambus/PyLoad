@@ -77,6 +77,14 @@ class Hit(Player, PropertyMixin):
 		log.debug('set reqstr')
 		self.reqstr = reqstr
 
+	def set_host(self, host):
+		import urlparse
+		parts = list(urlparse.urlsplit(self.url))
+		parts[1] = host
+		self.url = urlparse.urlunsplit(parts)
+		self.request.url = self.url
+
+	# {{{ encode / decode
 	def decode(self, raw, coder):
 		header, body = self.split_header_and_body(raw)
 		return header + coder.decode(body)
@@ -85,7 +93,11 @@ class Hit(Player, PropertyMixin):
 	def encode(self, exp, coder):
 		header, body = self.split_header_and_body(exp)
 		rawbody = coder.encode(body)
+		if type(rawbody) == unicode:
+			# FIXME: Not good
+			rawbody = rawbody.encode('utf-8')
 		assert type(rawbody) == str
+		# FIXME: Not good
 		rawheader = header.encode('utf-8')
 		return rawheader + rawbody
 	def split_header_and_body(self, whole):
@@ -101,6 +113,7 @@ class Hit(Player, PropertyMixin):
 		header = whole[0:index]
 		body = whole[index:]
 		return header, body
+	# }}}
 
 	def set_label(self):
 		#TODO: generalize it
@@ -135,7 +148,6 @@ class Page(Player):
 		self.hits = []
 		self.childern = self.hits
 
-
 	def add_hit(self, hit):
 		# Return True if this hit is in page
 		if self.path == hit.page:
@@ -143,6 +155,10 @@ class Page(Player):
 			return True
 		else:
 			return False
+
+	def set_host(self, host):
+		for h in self.hits:
+			h.set_host(host)
 
 class Record(Player, PropertyMixin):
 	def __init__(self):
@@ -165,6 +181,10 @@ class Record(Player, PropertyMixin):
 		assert len(self.pages), 'There is no page yet!'
 		return self.pages[-1]
 
+	def set_host(self, host):
+		for p in self.pages:
+			p.set_host(host)
+
 
 if __name__ == '__main__':
 	r = Record()
@@ -175,3 +195,4 @@ if __name__ == '__main__':
 	print r.label
 
 
+# vim: foldmethod=marker:

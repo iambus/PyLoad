@@ -63,7 +63,7 @@ class Request:
 
 		headers = {}
 		for k, v in headers_list:
-			if k.lower() == 'content-length':
+			if k.lower() in ('content-length', 'host'):
 				continue
 			elif k.lower() == 'cookie':
 				headers['Cookie'] = v
