@@ -27,7 +27,7 @@ class LocalRepository:
 		assert type(uuid) == str
 		self.data.mappings[uuid] = v
 
-class Repository:
+class SharedRepository:
 	def __init__(self):
 		import threading
 		self.lock = threading.Lock()
@@ -56,6 +56,8 @@ class Repository:
 			self.data.mappings[uuid] = v
 		finally:
 			self.lock.release()
+
+Repository = SharedRepository
 
 ##################################################
 

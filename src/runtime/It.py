@@ -1,7 +1,7 @@
 
 import threading
 
-class It:
+class SharedIt:
 	'Thread-safe'
 	def __init__(self, seq):
 		self.iterator = iter(seq)
@@ -31,6 +31,8 @@ class LocalIt:
 			return self.iterator.next()
 		except StopIteration:
 			return None
+
+It = SharedIt
 
 if __name__ == '__main__':
 	it = It([1, 2, 3])
