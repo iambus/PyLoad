@@ -10,7 +10,7 @@ fileHandler.setFormatter(fileFormatter)
 console = logging.StreamHandler()
 consoleFormatter = logging.Formatter('%(asctime)s,%(msecs)03d %(levelname)-8s [%(module)s] %(message)s', '%H:%M:%S')
 console.setFormatter(consoleFormatter)
-console.setLevel(logging.FATAL)
+console.setLevel(logging.ERROR)
 
 logger = logging.getLogger()
 logger.setLevel(level)
