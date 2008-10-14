@@ -70,7 +70,8 @@ class Report:
 					one.label as label,
 					avg(time) as avg,
 					max(time) as max,
-					min(time) as min
+					min(time) as min,
+					count(time) as count
 				from one group by id''')
 
 		cursor.close()
