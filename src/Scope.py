@@ -57,9 +57,14 @@ class Scope:
 
 	def execute(self, script):
 		variables = self.get_variables()
-		exec script in variables
-		for k, v in variables.items():
-			self[k] = v
+		try:
+			exec script in variables
+			for k, v in variables.items():
+				self[k] = v
+		except Exception, e:
+			#TODO: use a better approach...
+			print 'Error when executing script:\n%s' % script
+			raise e
 
 	def eval(self, script):
 		try:
