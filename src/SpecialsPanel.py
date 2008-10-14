@@ -296,6 +296,13 @@ class SpecialsPanel(wx.Panel):
 		sourceParentData = self.tree.GetPyData(sourceParentItem)
 		targetParentData = self.tree.GetPyData(targetParentItem)
 
+		p = targetParentItem
+		while p != self.root:
+			if p == sourceItem:
+				# can't move father node under a child node
+				return
+			p = self.tree.GetItemParent(p)
+
 		#TODO: can we introduce a "subable" interface?
 		subable = (Special, Controller.If, Controller.Loop, Controller.Block)
 		unsubable = (Record.Record, Record.Page, Record.Hit, Player.Script)
