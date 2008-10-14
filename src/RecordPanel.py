@@ -109,6 +109,8 @@ class RecordPanel(wx.Panel):
 
 	def InitMirror(self):
 		self.tree.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnBeginDragMirror)
+		self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginEdit, self.tree)
+		self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndEdit, self.tree)
 		self.is_in_loading = False
 
 	# }}}
@@ -147,7 +149,8 @@ class RecordPanel(wx.Panel):
 
 
 	def OnBeginEdit(self, event):
-		item = event.GetItem()
+		if self.isMirror:
+			event.Veto()
 
 	def OnEndEdit(self, event):
 		if event.EditCancelled:
