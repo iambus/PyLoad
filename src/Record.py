@@ -15,13 +15,12 @@ log = Logger.getLogger()
 
 from Repository import uuid, register
 
+#FIXME: bad name, and bad existence
 class PropertyMixin:
 	def __init__(self):
 		self.time = datetime.datetime.now()
 		self.timestr = self.time.strftime('%Y-%m-%d %H:%M:%S')
 		self.label = self.timestr
-		self.foldername = self.time.strftime('%Y%m%d-%H%M%S') + ('-%06d-%s' % (self.time.microsecond, self.uuid))
-		self.filename = self.foldername + '.txt'
 
 
 class Hit(Player, PropertyMixin):
@@ -176,7 +175,5 @@ if __name__ == '__main__':
 	print r.uuid
 	print r.time
 	print r.label
-	print r.foldername
-	print r.filename
 
 
