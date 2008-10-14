@@ -6,6 +6,12 @@ from AMFXML import ToXML, FromXML
 class SimpleAMFCoder:
 	@classmethod
 	def encode(cls, xml):
+		#TODO: give messageId an uniq uuid
+		#import uuid
+		#messageId = str(uuid.uuid1())
+		#import re
+		#xml = re.sub(r'"messageId">[^<>]+</member>', r'"messageId">'+messageId+r'</member>', xml)
+
 		fromxml = FromXML(xml)
 		packet = fromxml.get_packet()
 		encoder = AMFEncoder(packet)
