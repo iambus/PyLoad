@@ -1,62 +1,6 @@
 
 
 ##################################################
-# Deprecated
-def uuid_generator_generator():
-	'Internal usage'
-	import threading
-	lock = threading.Lock()
-
-	def uuid_generator():
-		i = 0
-		while i < 999999:
-			yield 'u%05d' % i
-			i = i + 1
-		assert False, 'Max uuid reached'
-
-	guuid = uuid_generator()
-
-	def uuid():
-		lock.acquire()
-		try:
-			return guuid.next()
-		finally:
-			lock.release()
-
-	return uuid
-
-# Deprecated
-def table_generator():
-	'Internal usage'
-	import threading
-	lock = threading.Lock()
-	mappings = {}
-	
-	def lookup(uuid):
-		assert type(uuid) == str
-		lock.acquire()
-		try:
-			return mappings[uuid]
-		finally:
-			lock.release()
-	
-	def register(uuid, v):
-		assert type(uuid) == str
-		lock.acquire()
-		try:
-			mappings[uuid] = v
-		finally:
-			lock.release()
-
-	return (lookup, register)
-
-# Deprecated
-class Repository:
-	def __init__(self):
-		self.uuid = uuid_generator_generator()
-		self.lookup, self.register = table_generator()
-
-##################################################
 
 class RepositoryInternal:
 	def __init__(self):
