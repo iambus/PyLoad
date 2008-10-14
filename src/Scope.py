@@ -63,7 +63,7 @@ class Scope:
 				self[k] = v
 		except Exception, e:
 			#TODO: use a better approach...
-			print 'Error when executing script:\n%s' % script
+			#print 'Error when executing script:\n%s' % script
 			raise e
 
 	def eval(self, script):
