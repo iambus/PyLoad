@@ -57,7 +57,12 @@ class Report:
 			cursor.execute('insert into hits_info(hitid, label, url) values (?, ?, ?)', hit)
 
 		cursor.execute('create table hits (hitid, start timestamp, end timestamp)')
-		cursor.execute('create table hits_v (hitid, time timestamp, response_time)')
+		cursor.execute('''create view hits_v as
+				select
+					hits.hitid as hitid,
+					(start + end)/2 as timestamp,
+					(end - start) as response_time
+				from hits''')
 		cursor.execute('''create view one as
 				select
 					hits_v.hitid as id,
@@ -92,15 +97,13 @@ class Report:
 	def add_hits(self, hits):
 		hits2 = []
 		for hit in hits:
-			a = hit[0]
-			b = hit[1] - self.start_time
-			b = b.seconds * 1000 + b.microseconds/1000
-			c = hit[2] - self.start_time
-			c = c.seconds * 1000 + c.microseconds/1000
-			hits2.append((a, b, c))
+			id = hit[0]
+			start = hit[1] - self.start_time
+			start = start.seconds * 1000 + start.microseconds/1000
+			end = hit[2] - self.start_time
+			end = end.seconds * 1000 + end.microseconds/1000
+			hits2.append((id, start, end))
 		self.connection.executemany('insert into hits(hitid, start, end) values (?, ?, ?)', hits2)
-		hits_v = [(hit[0], (hit[1]+hit[2])/2, hit[2] - hit[1]) for hit in hits2]
-		self.connection.executemany('insert into hits_v(hitid, time, response_time) values (?, ?, ?)', hits_v)
 
 	def post_hits(self, hits):
 		if not self.finished:
