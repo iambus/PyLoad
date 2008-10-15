@@ -98,7 +98,6 @@ class TestPrimitive(unittest.TestCase):
 #		self.assertU29Encode(-268435456, '1100 0001 1111 1111 1111 1111 1111 1111')
 #		self.assertU29Encode(268435455, '1100 0000 1000 0001 1000 0001 1000 0000')
 
-print hex(bits2int('00011111 11100000 00000000 00000000'))
 
 if __name__ == '__main__':
 	unittest.main()
