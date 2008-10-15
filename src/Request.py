@@ -87,7 +87,7 @@ class Request:
 		cookie = variables.get('cookie')
 		if browser and hasattr(browser, 'open'):
 			if headers.has_key('Cookie'):
-				del headers['Cookie']
+				del headers['Cookie'] # if this line raises Exception, then it may be a muti-threads bug...
 			requester = browser.open
 		#XXX: maybe not a good idea
 		elif browser and hasattr(browser, 'urlopen'):
