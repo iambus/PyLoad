@@ -65,7 +65,6 @@ class Hit(Player, PropertyMixin):
 		if self.respstr:
 			self.respstr = self.decode(self.respstr, self.resp_handler.coder)
 
-		self.request = Request(self.url, self.oreqstr)
 
 		self.set_label()
 
@@ -82,7 +81,6 @@ class Hit(Player, PropertyMixin):
 		parts = list(urlparse.urlsplit(self.url))
 		parts[1] = host
 		self.url = urlparse.urlunsplit(parts)
-		self.request.url = self.url
 
 	# {{{ encode / decode
 	def decode(self, raw, coder):
@@ -124,13 +122,14 @@ class Hit(Player, PropertyMixin):
 
 	def playmain(self, basescope=None):
 		if basescope == None:
-			self.request.play()
+			request = Request(self.url, self.oreqstr)
+			request.play()
 		else:
 			variables = basescope.get_variables()
 			reqstr = Template.subst(self.reqstr, variables)
-			self.request.set_reqstr(self.encode(reqstr, self.req_handler.coder))
+			request = Request(self.url, self.encode(reqstr, self.req_handler.coder))
 
-			response, start_time, end_time = self.request.play(basescope.get_variables())
+			response, start_time, end_time = request.play(basescope.get_variables())
 			response.body = self.decode_body(response.rawbody, self.resp_handler.coder)
 			basescope.assign('response', response)
 			reporter = basescope.lookup('reporter')
