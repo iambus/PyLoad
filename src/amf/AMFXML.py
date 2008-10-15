@@ -35,6 +35,9 @@ class ToXML:
 			self.set_text(must_understand, header.must_understand)
 			self.create_value_node(header_node, header.value)
 
+			self.complex_object_set = set()
+			self.trait_set = set()
+
 		messages = self.create_child(root, 'messages')
 		for message in packet.messages:
 			message_node = self.create_child(messages, 'message')
@@ -42,6 +45,8 @@ class ToXML:
 			self.create_text_node(message_node, 'response-uri', message.response_uri)
 			self.create_value_node(message_node, message.value)
 
+			self.complex_object_set = set()
+			self.trait_set = set()
 
 
 	##################################################
@@ -260,8 +265,11 @@ class FromXML:
 			name_node, must_understand_node, value_node = self.get_childern(header_node)
 			header.header_name = self.get_text(name_node)
 			header.must_understand = bool(self.get_text(must_understand_node))
-			header.value_node = self.get_value(value_node)
+			header.value = self.get_value(value_node)
 			packet.headers.append(header)
+
+			self.complex_object_table = {}
+			self.trait_table = {}
 			
 		for message_node in self.get_childern(messages_node):
 			message = MessageType()
@@ -271,11 +279,25 @@ class FromXML:
 			message.value = self.get_value(value_node)
 			packet.messages.append(message)
 
+			self.complex_object_table = {}
+			self.trait_table = {}
+
 	def get_childern(self, node):
 		return node.childNodes[1::2]
 
 	def get_text(self, node):
-		return node.firstChild.data if node.firstChild else ''
+		if node.firstChild:
+			node = node.firstChild
+			# XXX: why do I need to strip it?
+			text = node.data.strip()
+			if text == '':
+				# FIXME: Not a good logical
+				if isinstance(node.nextSibling, minidom.CDATASection):
+					node = node.nextSibling
+					text = node.data
+		else:
+			text = ''
+		return text
 
 	##################################################
 	def get_value(self, node):
@@ -454,13 +476,14 @@ if __name__ == '__main__':
 	fp = open('login-response.txt', 'rb')
 	fp = open('client-ping.txt', 'rb')
 	fp = open('client-ping-response.txt', 'rb')
+	fp = open('7.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	toxml = ToXML(packet)
 	xml = toxml.get_xml()
 	print xml
-	fromxml = FromXML(xml)
-	print fromxml.get_packet()
+	#fromxml = FromXML(xml)
+	#print fromxml.get_packet()
 
 
 # vim: foldmethod=marker:

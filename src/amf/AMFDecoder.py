@@ -30,6 +30,11 @@ class AMFDecoder:
 			header.must_understand = self.read_byte() != 0
 			header.header_length = self.read_u32()
 			header.value = self.read_value()
+
+			self.trait_reference_table = []
+			self.string_reference_table = []
+			self.complex_object_reference_table = []
+
 			packet.headers.append(header)
 			self.switch_to_amf0()
 
@@ -43,14 +48,15 @@ class AMFDecoder:
 			message.message_length = self.read_u32()
 			#TODO: use messsage-length for assert
 			message.value = self.read_value()
+
+			self.trait_reference_table = []
+			self.string_reference_table = []
+			self.complex_object_reference_table = []
+
 			packet.messages.append(message)
 			self.switch_to_amf0()
 
 		assert self.fp.read() == '', 'Decode error: something left in stream...'
-
-		packet.string_reference_table = self.string_reference_table
-		packet.trait_reference_table = self.trait_reference_table
-		packet.complex_object_reference_table = self.complex_object_reference_table
 
 		return packet
 	# }}}
@@ -325,6 +331,9 @@ if __name__ == '__main__':
 	fp = open('login-response.txt', 'rb')
 	fp = open('client-ping.txt', 'rb')
 	fp = open('client-ping-response.txt', 'rb')
+	fp = open('5.txt', 'rb')
+	fp = open('6.txt', 'rb')
+	fp = open('7.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	print packet

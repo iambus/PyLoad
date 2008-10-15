@@ -160,6 +160,7 @@ class ExtObject(Object):
 class ObjectRef(AMF3Type):
 	def __init__(self, object, index):
 		AMF3Type.__init__(self)
+		assert isinstance(object, Object)
 		assert type(index) == int
 		self.object = object
 		self.refindex = index
@@ -239,11 +240,6 @@ class AMFPacket:
 		self.headers = []
 		self.message_count = None
 		self.messages = []
-
-		self.trait_reference_table = None
-		self.string_reference_table = None
-		self.complex_object_reference_table = None
-
 	def __str__(self):
 		h = ''
 		for header in self.headers:

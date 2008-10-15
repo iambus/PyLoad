@@ -31,6 +31,13 @@ class AMFEncoder:
 		self.write_u16(len(packet.headers))
 
 		for header in packet.headers:
+			self.string_reference_table = []
+			self.trait_reference_table = []
+			self.complex_object_reference_table = []
+			self.string_rref_table = {}
+			self.trait_rref_table = {}
+			self.complex_rref_table = {}
+
 			self.write_utf8(header.header_name)
 			self.write_byte(int(header.must_understand))
 			self.write_u32(-1)
@@ -39,6 +46,13 @@ class AMFEncoder:
 
 		self.write_u16(len(packet.messages))
 		for message in packet.messages:
+			self.string_reference_table = []
+			self.trait_reference_table = []
+			self.complex_object_reference_table = []
+			self.string_rref_table = {}
+			self.trait_rref_table = {}
+			self.complex_rref_table = {}
+
 			self.write_utf8(message.target_uri)
 			self.write_utf8(message.response_uri)
 			self.write_u32(-1)

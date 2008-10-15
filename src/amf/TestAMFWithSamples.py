@@ -70,7 +70,6 @@ itria\x02\x03\x06I649FDA27-1D0A-3A78-B34F\
 -199A490800EF\x04\x00\x06I78D7B35B-F2E9-C\
 8CE-D342-D53FF8536EBD";
 
-
 # login response
 def get_data_4():
 	return \
@@ -169,6 +168,270 @@ ssEnvironment\x01\x01\n3\x01`jp\x05Bq\xcdSn\x1b0\x00\x068\
 ed-4c6213d6ae7f\x01\n\x05\x01\x01\x04\x1f\x06\x17/vtbe197\
 358\x06 \x01\x03";
 
+def get_data_5():
+	return \
+"\x00\x03\x00\x00\x00\x03\x00\x0c/21/onResult\x00\x00\xff\xff\xff\xff\x11\n\x81\x03Uf\
+lex.messaging.messages.Acknowled\
+geMessage\x17destination\x0fheaders\x1bco\
+rrelationId\x13messageId\x13timestamp\x11\
+clientId\x15timeToLive\tbody\x01\n\x03\x01\x06IFE\
+EE411E-CB62-557B-43CA-FF9899AD0E\
+6B\x06ICC0391B8-C70A-BF93-9FE3-A930\
+6F9A0489\x05Bq\xcf\xf9\x89\xabp\x00\x06ICBF4AA6C-780B\
+-A12F-15F4-33C3C5BF062C\x05\x00\x00\x00\x00\x00\x00\x00\x00\
+\n\x07Cflex.messaging.io.ArrayCollec\
+tion\t\x05\x01\n\t\t\x01\x01\n\t\t\x01\x01\x00\x0c/22/onResult\x00\
+\x00\xff\xff\xff\xff\x11\n\x81\x03Uflex.messaging.message\
+s.AcknowledgeMessage\x17destination\
+\x0fheaders\x1bcorrelationId\x13messageId\
+\x13timestamp\x11clientId\x15timeToLive\tb\
+ody\x01\n\x03\x01\x06I22A93C75-A8C2-22FA-49D7\
+-FF989A1ACA37\x06ICC03922B-8608-AF0\
+6-FD25-6261E2D687F5\x05Bq\xcf\xf9\x89\xae`\x00\x06ICB\
+F4AA6C-780B-A12F-15F4-33C3C5BF06\
+2C\x05\x00\x00\x00\x00\x00\x00\x00\x00\n3Ccom.vitria.m3oui.c\
+ore.ListWrapper\ttype\tdata\x0fversio\
+n\x06\x07ALL\n\x07Cflex.messaging.io.Array\
+Collection\t\x05\x01\n\x82\x037com.vitria.m3ou\
+i.core.Model\x11lcStatus\x19lcStatusDa\
+te\x15lcStatusBy\x1a\x11lockedBy\x11category\
+\x15properties\x05id\x15references\x11conten\
+ts\x1bremovedRefers\x19lcStatusNote\x0bfl\
+ags\tpath\tname\x19removedProps\x01\x05\x00\x00\x00\x00\
+\x00\x00\x00\x00\x01\x06\rFolder\x01\x01\nS\x01\x17vt:lastDate\x19v\
+t:firstUser\x17vt:lastUser\x0fvtui:KS\x19\
+vt:firstDate\x05Bq\xcd\xaa$Op\x00\x06\x13vtbaadmin\
+\x06P\x06\x0fProcess\x05Bq\xcd\xaa$Op\x00\x06I8ef7ecb5-c\
+68f-4362-adde-96117ada0bbe\x01\n\x05\x01\x01\x04\
+\x02\x06{/vtworkflow35379135/vtProcess\
+1355134543/vtResolution393434316\
+\x06\x15Resolution\x01\n\x11\x01\x05\x00\x00\x00\x00\x00\x00\x00\x00\x01\x06D\x01\x01\n\x15\
+\x05Bq\xcd\xaa$c\xe0\x00\x06P\x06P\x06R\x05Bq\xcd\xaa$c\xe0\x00\x06Ieb7408\
+1f-c233-4ee7-9b08-0b25f2ca1c29\x01\n\
+\x05\x01\x01\x04\x12\x06}/vtworkflow35379135/vtPro\
+cess1355134543/vtSubprocess14623\
+24145\x06\x15Subprocess\x01\x04\x00\x00\x0c/23/onResu\
+lt\x00\x00\xff\xff\xff\xff\x11\n\x81\x03Uflex.messaging.mess\
+ages.AcknowledgeMessage\x17destinat\
+ion\x0fheaders\x1bcorrelationId\x13messag\
+eId\x13timestamp\x11clientId\x15timeToLiv\
+e\tbody\x01\n\x03\x01\x06I42BD44E7-9127-231D-6\
+3EE-FF989A1A6E40\x06ICC03930E-930E-\
+220A-1599-B861B68248B2\x05Bq\xcf\xf9\x89\xb40\x00\x06\
+ICBF4AA6C-780B-A12F-15F4-33C3C5B\
+F062C\x05\x00\x00\x00\x00\x00\x00\x00\x00\n3Ccom.vitria.m3ou\
+i.core.ListWrapper\ttype\tdata\x0fver\
+sion\x06\x07ALL\n\x07Cflex.messaging.io.Ar\
+rayCollection\t\x01\x01\x04\x00";
+
+def get_data_6():
+	return \
+'\x00\x03\x00\x00\x00\x02\x00\x0c/44/onResult\x00\x00\xff\xff\xff\xff\x11\n\x81\x03Uf\
+lex.messaging.messages.Acknowled\
+geMessage\x17destination\x0fheaders\x1bco\
+rrelationId\x13messageId\x13timestamp\x11\
+clientId\x15timeToLive\tbody\x01\n\x03\x01\x06I3A\
+471483-65B8-7EB3-5B52-FF9DBEA2BB\
+EE\x06ICC1024F6-C10E-1A4B-2719-9FF6\
+2894FCF5\x05Bq\xcf\xf9\xdc\x15\x10\x00\x06ICC10226F-C82A\
+-6723-42B9-30D1FB54D53C\x05\x00\x00\x00\x00\x00\x00\x00\x00\
+\x06\x99W<?xml version="1.0" encoding=\
+"UTF-8"?>\r\n<events>\r\n<event name\
+="workflow.task.server.taskcreat\
+ion" label="Task Creation">\r\n<ac\
+tion name="notifyManager" label=\
+"Notify Manager"/>\r\n<action name\
+="notifyPerformer" label="Notify\
+ Task Performer"/>\r\n<action name\
+="setPriority" label="Escalate T\
+ask"/>\r\n</event>\r\n<event name="w\
+orkflow.activity.server.taskassi\
+gnbymanager,workflow.task.server\
+.posttaskreassign" label="Task A\
+ssignment">\r\n<action name="notif\
+yManager" label="Notify Manager"\
+/>\r\n<action name="notifyPerforme\
+r" label="Notify Task Performer"\
+/>\r\n<action name="setPriority" l\
+abel="Escalate Task"/>\r\n</event>\
+\r\n<event name="workflow.task.ser\
+ver.updatedoc" label="Task Updat\
+e">\r\n<action name="notifyManager\
+" label="Notify Manager"/>\r\n<act\
+ion name="notifyPerformer" label\
+="Notify Task Performer"/>\r\n<act\
+ion name="setPriority" label="Es\
+calate Task"/>\r\n</event>\r\n<event\
+ name="workflow.task.server.sett\
+asknotes" label="Add Note">\r\n<ac\
+tion name="notifyManager" label=\
+"Notify Manager"/>\r\n<action name\
+="notifyPerformer" label="Notify\
+ Task Performer"/>\r\n<action name\
+="setPriority" label="Escalate T\
+ask"/>\r\n</event>\r\n<event name="w\
+orkflow.task.server.taskcompleti\
+on,workflow.task.server.taskclos\
+ing" label="Task Closed">\r\n<acti\
+on name="notifyManager" label="N\
+otify Manager"/>\r\n<action name="\
+notifyPerformer" label="Notify T\
+ask Performer"/>\r\n<action name="\
+setPriority" label="Escalate Tas\
+k"/>\r\n</event>\r\n<event name="wor\
+kflow.task.server.resume" label=\
+"Task Resume">\r\n<action name="no\
+tifyManager" label="Notify Manag\
+er"/>\r\n<action name="notifyPerfo\
+rmer" label="Notify Task Perform\
+er"/>\r\n<action name="setPriority\
+" label="Escalate Task"/>\r\n</eve\
+nt>\r\n</events>\x00\x0c/45/onResult\x00\x00\xff\xff\
+\xff\xff\x11\n\x81\x03Uflex.messaging.messages.A\
+cknowledgeMessage\x17destination\x0fhe\
+aders\x1bcorrelationId\x13messageId\x13ti\
+mestamp\x11clientId\x15timeToLive\tbody\
+\x01\n\x03\x01\x06IC877BBBE-5490-023A-A52B-FF\
+9DC10343AA\x06ICC10251D-D10F-D09B-4\
+C23-7133604765C3\x05Bq\xcf\xf9\xdc\x16\x10\x00\x06ICBF4A\
+A6C-780B-A12F-15F4-33C3C5BF062C\x05\
+\x00\x00\x00\x00\x00\x00\x00\x00\n3Ccom.vitria.m3oui.core\
+.ListWrapper\ttype\tdata\x0fversion\x06\x07\
+ALL\n\x07Cflex.messaging.io.ArrayCol\
+lection\t\x0b\x01\n\x82\x037com.vitria.m3oui.c\
+ore.Model\x11lcStatus\x19lcStatusDate\x15\
+lcStatusBy\x1a\x11lockedBy\x11category\x15pr\
+operties\x05id\x15references\x11contents\x1b\
+removedRefers\x19lcStatusNote\x0bflags\
+\tpath\tname\x19removedProps\x01\x05\x00\x00\x00\x00\x00\x00\x00\
+\x00\x01\x06\rFolder\x01\x01\nc\x01\x17vt:lastDate\x19vt:f\
+irstUser\x17vt:lastUser\x0fvtui:KS\x19vt:\
+firstDate\x0fvtui:BE\x05Bq\xcd\xaa%\xb2\xb0\x00\x06\x13vtba\
+admin\x06R\x06\rSchema\x05Bq\xcd\xaa%\xb2\xb0\x00\x06\x11workfl\
+ow\x06Icef11c11-0b97-4de0-b92e-c41f\
+6c098b82\x01\n\x05\x01\x01\x04\x10\x06{/vtworkflow3537\
+9135/vtSchema1824120383/vtConstr\
+aint1803088381\x06\x15Constraint\x01\n\x11\x01\x05\x00\
+\x00\x00\x00\x00\x00\x00\x00\x01\x06D\x01\x01\n\x15\x05Bq\xcd\xaa/\xd5\xf0\x00\x06R\x06R\x06T\x05Bq\
+\xcd\xaa/\xd5\xf0\x00\x06V\x06I514f5a43-ca43-4a49-a3b\
+2-08fc6d8667fc\x01\n\x05\x01\x01\x04\x10\x06u/vtworkfl\
+ow35379135/vtSchema1824120383/vt\
+DBSchema831433793\x06\x11DBSchema\x01\n\x11\x01\x05\
+\x00\x00\x00\x00\x00\x00\x00\x00\x01\x06D\x01\x01\n\x15\x05Bq\xcd\xaa%\xd3\xe0\x00\x06R\x06R\x06T\x05B\
+q\xcd\xaa%\xd3\xe0\x00\x06V\x06Ib63c002a-f9d0-402c-aa\
+1a-77b0a2923a81\x01\n\x05\x01\x01\x04\x10\x06u/vtworkf\
+low35379135/vtSchema1824120383/v\
+tDocument926364987\x06\x11Document\x01\n\x11\x01\
+\x05\x00\x00\x00\x00\x00\x00\x00\x00\x01\x06D\x01\x01\n\x15\x05Bq\xcd\xaa,\xf7\x00\x00\x06R\x06R\x06T\x05\
+Bq\xcd\xaa,\xf7\x00\x00\x06V\x06I2f7407b4-b100-4361-9\
+786-f4bf832d3975\x01\n\x05\x01\x01\x04\x10\x06m/vtwork\
+flow35379135/vtSchema1824120383/\
+vtEvent67338874\x06\x0bEvent\x01\n\x11\x01\x05\x00\x00\x00\x00\x00\
+\x00\x00\x00\x01\x06D\x01\x01\n\x15\x05Bq\xcd\xaa/\xc1p\x00\x06R\x06R\x06T\x05Bq\xcd\xaa/\xc1\
+p\x00\x06V\x06I06beb778-d1f4-4d5f-aa11-ad\
+d9552b917b\x01\n\x05\x01\x01\x04\x10\x06i/vtworkflow35\
+379135/vtSchema1824120383/vtTask\
+2599333\x06\tTask\x01\x04\x01';
+
+def get_data_7():
+	return \
+'\x00\x03\x00\x00\x00\x02\x00\r/104/onResult\x00\x00\xff\xff\xff\xff\x11\n\x81\x03U\
+flex.messaging.messages.Acknowle\
+dgeMessage\x17destination\x0fheaders\x1bc\
+orrelationId\x13messageId\x13timestamp\
+\x11clientId\x15timeToLive\tbody\x01\n\x03\x01\x06I9\
+D69A2B8-62A8-D883-C5A1-FFBD95042\
+8C3\x06ICC5DDDDF-2708-2A40-E373-371\
+7995AD576\x05Bq\xcf\xfb\xd9qp\x00\x06ICC5CDDEA-402\
+A-CB67-8C32-5D41C1D9810F\x05\x00\x00\x00\x00\x00\x00\x00\
+\x00\n#\x01chttp://schema.vitria.com/mo\
+del/TaskHeader:XSDTYPEuhttp://sa\
+mples.vitria.com/OrderFulfillmen\
+t/Payment:XSDTYPE\nCKcom.vitria.m\
+3oui.schema.NSComplexType\x17comple\
+xType\x13isBuildIn\x1fpersistencetype\x0b\
+qname\x06\x92#<xs:complexType xmlns:xs\
+="http://www.w3.org/2001/XMLSche\
+ma" xmlns:ecore="http://www.ecli\
+pse.org/emf/2002/Ecore" xmlns:tn\
+s="http://schema.vitria.com/mode\
+l" name="TaskHeader" targetNames\
+pace="http://schema.vitria.com/m\
+odel">\r\n    <xs:sequence>\r\n    <\
+xs:element maxOccurs="1" minOccu\
+rs="1" name="id" type="xs:string\
+"/>\r\n    <xs:element maxOccurs="\
+1" minOccurs="1" name="businessE\
+nvironment" type="xs:string"/>\r\n\
+    <xs:element maxOccurs="1" mi\
+nOccurs="1" name="caseID" type="\
+xs:string"/>\r\n    <xs:element ma\
+xOccurs="1" minOccurs="1" name="\
+activity" type="xs:string"/>\r\n  \
+  <xs:element maxOccurs="1" minO\
+ccurs="1" name="performer" type=\
+"xs:string"/>\r\n    <xs:element m\
+axOccurs="1" minOccurs="1" name=\
+"description" type="xs:string"/>\
+\r\n    <xs:element maxOccurs="1" \
+minOccurs="1" name="priority" ty\
+pe="xs:int"/>\r\n    <xs:element m\
+axOccurs="1" minOccurs="0" name=\
+"state" type="xs:string"/>\r\n    \
+<xs:element maxOccurs="1" minOcc\
+urs="1" name="endReason" type="x\
+s:string"/>\r\n    <xs:element max\
+Occurs="1" minOccurs="0" name="d\
+ueDate" type="xs:dateTime"/>\r\n  \
+  <xs:element maxOccurs="1" minO\
+ccurs="0" name="createTime" type\
+="xs:dateTime"/>\r\n    </xs:seque\
+nce>\r\n  </xs:complexType>\x02\x06\x07LOB\x06\
+Shttp://schema.vitria.com/model/\
+TaskHeader\n\r\x06\x88[<xsd:complexType \
+xmlns:xsd="http://www.w3.org/200\
+1/XMLSchema" xmlns="http://sampl\
+es.vitria.com/OrderFulfillment" \
+xmlns:tns="http://samples.vitria\
+.com/OrderFulfillment" name="Pay\
+ment" targetNamespace="http://sa\
+mples.vitria.com/OrderFulfillmen\
+t">\r\n        <xsd:sequence>\r\n   \
+         <xsd:element name="orde\
+rID" type="xsd:string"/>\r\n      \
+      <xsd:element name="method"\
+ type="xsd:string"/>\r\n          \
+  <xsd:element name="option" typ\
+e="xsd:string"/>\r\n            <x\
+sd:element name="amount" type="x\
+sd:float"/>\r\n        </xsd:seque\
+nce>\r\n    </xsd:complexType>\x02\x06(\x06\
+ehttp://samples.vitria.com/Order\
+Fulfillment/Payment\x00\r/105/onResu\
+lt\x00\x00\xff\xff\xff\xff\x11\n\x81\x03Uflex.messaging.mess\
+ages.AcknowledgeMessage\x17destinat\
+ion\x0fheaders\x1bcorrelationId\x13messag\
+eId\x13timestamp\x11clientId\x15timeToLiv\
+e\tbody\x01\n\x03\x01\x06I785C19CB-E5AA-9720-2\
+CE1-FFBD9504561B\x06ICC5DE08D-300F-\
+33E5-F0E3-D5EACEEBB59D\x05Bq\xcf\xfb\xd9\x83\x00\x00\x06\
+ICC5CEEE1-831E-EE85-6870-B6D514B\
+D74F2\x05\x00\x00\x00\x00\x00\x00\x00\x00\n\x07Cflex.messaging.\
+io.ArrayCollection\t-\x01\nS3com.vitr\
+ia.m3oui.sum.User\x0bphone\risUser\x0be\
+mail\tname\x05id\x01\x03\x01\x01\x06\rwf0011\n\r\x01\x03\x01\x01\x06\r\
+wf0016\n\r\x01\x03\x01\x01\x06\rwf0000\n\r\x01\x03\x01\x06+Vitri\
+a BA system user\x06\x15vtbasystem\n\r\x01\x03\
+\x01\x01\x06\rwf0010\n\r\x01\x03\x01\x01\x06\rwf0014\n\r\x01\x03\x01\x01\x06\r\
+wf0019\n\r\x01\x03\x01\x01\x06\rwf0012\n\r\x01\x03\x01\x01\x06\rwf00\
+04\n\r\x01\x03\x01\x01\x06\rwf0015\n\r\x01\x03\x01\x01\x06\rwf0006\n\r\
+\x01\x03\x01\x01\x06\rwf0017\n\r\x01\x03\x01\x01\x06\rwf0003\n\r\x01\x03\x01\x01\
+\x06\rwf0018\n\r\x01\x03\x01\x01\x06\rwf0007\n\r\x01\x03\x01\x06/Vit\
+ria BA administrator\x06\x13vtbaadmin\n\
+\r\x01\x03\x01\x01\x06\rwf0002\n\r\x01\x03\x01\x01\x06\rwf0001\n\r\x01\x03\x01\
+\x01\x06\rwf0005\n\r\x01\x03\x01\x01\x06\rwf0013\n\r\x01\x03\x01\x01\x06\rw\
+f0009\n\r\x01\x03\x01\x01\x06\rwf0008';
+
 # }}}
 
 ##################################################
@@ -180,6 +443,9 @@ class TestSample(unittest.TestCase):
 				get_data_2(),
 				get_data_3(),
 				get_data_4(),
+				get_data_5(),
+				#get_data_6(),
+				#get_data_7(),
 				]
 	def assertRawPacketEqual(self, r1, r2):
 		self.assertEqual(len(r1), len(r2))
