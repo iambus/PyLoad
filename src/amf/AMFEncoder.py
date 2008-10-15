@@ -5,7 +5,7 @@ from AMFTypes import *
 
 class AMFEncoder:
 	def __init__(self, packet, fp = None):
-		assert isinstance(packet, AMFPacket)
+		assert isinstance(packet, AMFPacket) or packet == None, 'packet must be an AMFPacket instance, or None (only for test usage)'
 		self.packet = packet
 		if fp != None:
 			self.fp = fp
