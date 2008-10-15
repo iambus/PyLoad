@@ -33,6 +33,29 @@ class String:
 	def __repr__(self):
 		return repr(self.string)
 
+class Date(AMF3Type):
+	def __init__(self, double):
+		AMF3Type.__init__(self)
+		self.double = double
+	def __str__(self):
+		return self.double
+	def __repr__(self):
+		return repr(self.double)
+
+class DateRef(AMF3Type):
+	def __init__(self, date, index):
+		AMF3Type.__init__(self)
+		assert isinstance(date, Date)
+		assert type(index) == int
+		self.date = date
+		self.refindex = index
+	def __str__(self):
+		return str(self.date)
+	def __repr__(self):
+		return str(self)
+	def get_id(self):
+		return refindex
+
 class Trait(AMF3Type):
 	def __init__(self, classname):
 		AMF3Type.__init__(self)

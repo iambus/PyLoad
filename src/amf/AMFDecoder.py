@@ -154,6 +154,21 @@ class AMFDecoder:
 		class_name = self.read_utf8()
 		print class_name
 
+	def read_date(self):
+		u = self.read_u29()
+
+		if u & 1 == 0:
+			index = u >> 1
+			# XXXXXXXXXXXXXXXXXXXXXXXXXXXX 0
+			# U29O-ref
+			return DateRef(self.complex_object_reference_table[index], index)
+		else:
+			# 0000000000000000000000000000 1
+			# U29D-value
+			assert u == 1, 'The high 28 bits should not be used'
+			date = Date(self.read_double())
+			return self.put_date(date)
+
 	def read_array(self):
 		u = self.read_u29()
 
@@ -284,6 +299,11 @@ class AMFDecoder:
 		self.complex_object_reference_table.append(array)
 		return ArrayRef(array, index)
 
+	def put_date(self, date):
+		index = len(self.complex_object_reference_table)
+		self.complex_object_reference_table.append(date)
+		return DateRef(date, index)
+
 	# }}}
 	########################################
 
@@ -309,6 +329,7 @@ class AMFDecoder:
 				0x04: self.read_u29,
 				0x05: self.read_double,
 				0x06: self.read_utf8_vr,
+				0x08: self.read_date,
 				0x09: self.read_array,
 				0x0a: self.read_object,
 			   }

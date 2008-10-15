@@ -432,6 +432,30 @@ ria BA administrator\x06\x13vtbaadmin\n\
 \x01\x06\rwf0005\n\r\x01\x03\x01\x01\x06\rwf0013\n\r\x01\x03\x01\x01\x06\rw\
 f0009\n\r\x01\x03\x01\x01\x06\rwf0008';
 
+
+def get_data_8():
+	return \
+"\x00\x03\x00\x00\x00\x01\x00\x0b/5/onResult\x00\x00\xff\xff\xff\xff\x11\n\x81\x03Ufl\
+ex.messaging.messages.Acknowledg\
+eMessage\x17destination\x0fheaders\x1bcor\
+relationId\x13messageId\x13timestamp\x11c\
+lientId\x15timeToLive\tbody\x01\n\x03\x01\x06I2B3\
+E2367-B662-133E-D612-005FD693E8F\
+C\x06ICDE9FB98-E00C-EE23-1111-6E968\
+3D729AC\x05Bq\xd0\x05\xfdn\x00\x00\x06ICDE9FB01-8209-\
+96A0-FACD-F282BF63ADB2\x05\x00\x00\x00\x00\x00\x00\x00\x00\n\
+\x07Cflex.messaging.io.ArrayCollect\
+ion\t\x03\x01\nCUcom.vitria.m3oui.calend\
+ar.BusinessCalendar\rconfig!paren\
+tCalendarId\x05id\x15resourceId\nsScom.\
+vitria.m3oui.calendar.BCConfigur\
+ation\x11holidays#workingDayEndDate\
+'workingDayStartDate\x0fweekend\tnam\
+e\x15timezoneId\x19overtimeDays\n\t\t\x01\x01\x08\x01\
+A~\xe6(\x00\x00\x00\x00\x08\x01\x00\x00\x00\x00\x00\x00\x00\x00\n\t\t\x05\x01\x04\x01\x04\x07\x06\x01\x063(\
+GMT+08:00) Asia/Shanghai\n\t\t\x01\x01\x04\x00\x04\
+\x01\x06\x0fDefault";
+
 # }}}
 
 ##################################################
@@ -446,6 +470,7 @@ class TestSample(unittest.TestCase):
 				get_data_5(),
 				#get_data_6(),
 				#get_data_7(),
+				get_data_8(),
 				]
 	def assertRawPacketEqual(self, r1, r2):
 		self.assertEqual(len(r1), len(r2))

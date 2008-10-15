@@ -82,6 +82,7 @@ class ToXML:
 				FALSE       : self.create_false_node,
 				TRUE        : self.create_true_node,
 				StrictArray : self.create_strict_array_node,
+				DateRef     : self.create_date_node,
 				ObjectRef   : self.create_object_node,
 				ArrayRef    : self.create_array_node,
 				}
@@ -97,6 +98,19 @@ class ToXML:
 		node.setAttribute('class', StrictArray.__name__)
 		for i in array.array:
 			self.create_value_node(node, i)
+		return node
+
+	def create_date_node(self, parent, dateref, tag = None):
+		assert isinstance(dateref, DateRef)
+		if tag == None:
+			tag = 'float'
+		date = dateref.date
+		refindex = dateref.refindex
+
+		node = self.create_child(parent, tag)
+		node.setAttribute('class', date.__class__.__name__)
+		node.setAttribute('id', str(refindex))
+		self.set_text(node, date.double)
 		return node
 
 	def create_object_node(self, parent, objref, tag = None):
@@ -312,6 +326,7 @@ class FromXML:
 				'false'         : self.get_false,
 				'true'          : self.get_true,
 				'StrictArray'   : self.get_strict_array,
+				'Date'          : self.get_date,
 				'StaticObject'  : self.get_static_object,
 				'DynamicObject' : self.get_dynamic_object,
 				'ExtObject'     : self.get_ext_object,
@@ -460,6 +475,15 @@ class FromXML:
 				array.assoc.append((name, value))
 			return ArrayRef(array, refindex)
 
+	def get_date(self, node):
+		refindex = int(node.getAttribute('id'))
+		if self.complex_object_table.has_key(refindex):
+			date = self.complex_object_table[refindex]
+			return DateRef(date, refindex)
+		else:
+			date = Date(float(self.get_text(node)))
+			self.complex_object_table[refindex] = date
+			return DateRef(date, refindex)
 
 	##################################################
 	def get_packet(self):

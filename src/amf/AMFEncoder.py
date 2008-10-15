@@ -158,6 +158,17 @@ class AMFEncoder:
 		for i in array:
 			self.write_value(i)
 
+	def write_date(self, dateref):
+		index = self.put_date(dateref)
+		if index != None:
+			# date-ref
+			u = index << 1
+			self.write_u29(u)
+		else:
+			u = 1
+			self.write_u29(u)
+			self.write_double(dateref.date.double)
+
 	def write_array(self, arrayref):
 		index = self.put_array(arrayref)
 		if index != None:
@@ -252,9 +263,14 @@ class AMFEncoder:
 		return self.put_complext_object(objref)
 
 	def put_array(self, arrayref):
-		'return index if the object already registered (which means the index should be used as reference)'
+		'return index if the array already registered (which means the index should be used as reference)'
 		assert isinstance(arrayref, ArrayRef)
 		return self.put_complext_object(arrayref)
+
+	def put_date(self, dateref):
+		'return index if the date already registered (which means the index should be used as reference)'
+		assert isinstance(dateref, DateRef)
+		return self.put_complext_object(dateref)
 
 	def put_complext_object(self, ref):
 		if self.complex_rref_table.has_key(ref.refindex):
@@ -297,6 +313,7 @@ class AMFEncoder:
 				float    : ('\x05', self.write_double),
 				str      : ('\x06', self.write_utf8_vr),
 				unicode  : ('\x06', self.write_utf8_vr),
+				DateRef  : ('\x08', self.write_date),
 				ArrayRef : ('\x09', self.write_array),
 				ObjectRef: ('\x0a', self.write_object),
 				}
