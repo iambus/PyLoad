@@ -13,6 +13,9 @@ respcallback = lambda x: False
 
 running = 1
 
+default_port = 8008
+use_port = default_port
+
 STOPPING_URL = 'http://stop.it:0/'
 
 class StoppingFlag(Exception):
@@ -204,8 +207,10 @@ class ThreadingHTTPServer (SocketServer.ThreadingMixIn,
     pass
 
 
-def start(port=8008):
+def start(port=default_port):
     log.info('Started')
+
+    global use_port = port
 
     HandlerClass = ProxyHandler
     ServerClass = ThreadingHTTPServer
@@ -222,7 +227,7 @@ def start(port=8008):
         httpd.handle_request()
     log.info('Stopped')
 
-def thread_start(port=8008):
+def thread_start(port=default_port):
     import threading
     class ProxyThread(threading.Thread):
         def __init__(self, name='ListenThread'):
@@ -238,7 +243,7 @@ def stop():
     running = 0
     log.info('Stopping')
     import urllib
-    proxies = {'http': 'http://localhost:8008'}
+    proxies = {'http': 'http://localhost:'+use_port}
     try:
         urllib.urlopen(STOPPING_URL, proxies=proxies)
     except:
