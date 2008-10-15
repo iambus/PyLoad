@@ -244,7 +244,7 @@ def stop():
     running = 0
     log.info('Stopping')
     import urllib
-    proxies = {'http': 'http://localhost:'+use_port}
+    proxies = {'http': 'http://localhost:%s'%use_port}
     try:
         urllib.urlopen(STOPPING_URL, proxies=proxies)
     except:
