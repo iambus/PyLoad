@@ -54,6 +54,7 @@ class ToXML:
 	def set_text(self, node, value):
 		value = str(value)
 		if len(value) > 40 and ('<' in value) and (']]>' not in value):
+			# FIXME: how to reserve \r?
 			text_node = self.doc.createCDATASection(value)
 		else:
 			text_node = self.doc.createTextNode(value)
@@ -292,6 +293,7 @@ class FromXML:
 			text = node.data.strip()
 			if text == '':
 				# FIXME: Not a good logical
+				# FIXME: how to reserve \r?
 				if isinstance(node.nextSibling, minidom.CDATASection):
 					node = node.nextSibling
 					text = node.data
