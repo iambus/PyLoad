@@ -210,7 +210,8 @@ class ThreadingHTTPServer (SocketServer.ThreadingMixIn,
 def start(port=default_port):
     log.info('Started')
 
-    global use_port = port
+    global use_port
+    use_port = port
 
     HandlerClass = ProxyHandler
     ServerClass = ThreadingHTTPServer
