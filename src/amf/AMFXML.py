@@ -52,7 +52,14 @@ class ToXML:
 	##################################################
 
 	def set_text(self, node, value):
-		value = str(value)
+		try:
+			value = str(value)
+		except UnicodeEncodeError:
+			if type(value) == unicode:
+				# keep it as unicode
+				pass
+			else:
+				raise
 		if len(value) > 40 and ('<' in value) and (']]>' not in value):
 			# FIXME: how to reserve \r?
 			text_node = self.doc.createCDATASection(value)
@@ -74,17 +81,18 @@ class ToXML:
 	def create_value_node(self, parent, value, tag = None):
 		t = value.__class__
 		funcs = {
-				str         : self.create_str_node,
-				unicode     : self.create_str_node,
-				int         : self.create_int_node,
-				float       : self.create_float_node,
-				NULL        : self.create_null_node,
-				FALSE       : self.create_false_node,
-				TRUE        : self.create_true_node,
-				StrictArray : self.create_strict_array_node,
-				DateRef     : self.create_date_node,
-				ObjectRef   : self.create_object_node,
-				ArrayRef    : self.create_array_node,
+				str          : self.create_str_node,
+				unicode      : self.create_str_node,
+				int          : self.create_int_node,
+				float        : self.create_float_node,
+				NULL         : self.create_null_node,
+				FALSE        : self.create_false_node,
+				TRUE         : self.create_true_node,
+				StrictArray  : self.create_strict_array_node,
+				DateRef      : self.create_date_node,
+				ObjectRef    : self.create_object_node,
+				ArrayRef     : self.create_array_node,
+				ByteArrayRef : self.create_byte_array_node,
 				}
 		assert funcs.has_key(t), 'Type %s is not supported' % t
 		func = funcs[t]
@@ -196,6 +204,22 @@ class ToXML:
 				self.create_value_node(assoc_node, v, k)
 		return node
 
+	def create_byte_array_node(self, parent, arrayref, tag = None):
+		assert isinstance(arrayref, ByteArrayRef)
+		array = arrayref.array
+		refindex = arrayref.refindex
+		if tag == None:
+			tag = array.__class__.__name__
+		node = self.create_child(parent, tag)
+		node.setAttribute('class', array.__class__.__name__)
+		node.setAttribute('id', str(refindex))
+		if refindex in self.complex_object_set:
+			# no nothing if the array has been defined somewhere
+			pass
+		else:
+			self.set_text(node, array.content.encode('string_escape'))
+		return node
+
 	def create_str_node(self, parent, value, tag):
 		if tag == None:
 			tag = 'string'
@@ -264,7 +288,7 @@ class FromXML:
 		self.from_xml()
 
 	def from_xml(self):
-		self.doc = minidom.parseString(self.xml)
+		self.doc = minidom.parseString(self.xml.encode('utf-8'))
 		doc = self.doc
 		self.packet = AMFPacket()
 		packet = self.packet
@@ -331,6 +355,7 @@ class FromXML:
 				'DynamicObject' : self.get_dynamic_object,
 				'ExtObject'     : self.get_ext_object,
 				'Array'         : self.get_array,
+				'ByteArray'     : self.get_byte_array,
 				}
 		assert funcs.has_key(class_type), 'unkown class %s' % class_type
 		func = funcs[class_type]
@@ -485,6 +510,16 @@ class FromXML:
 			self.complex_object_table[refindex] = date
 			return DateRef(date, refindex)
 
+	def get_byte_array(self, node):
+		refindex = int(node.getAttribute('id'))
+		if self.complex_object_table.has_key(refindex):
+			array = self.complex_object_table[refindex]
+			return ByteArrayRef(array, refindex)
+		else:
+			array = ByteArray(self.get_text(node).decode('string_escape'))
+			self.complex_object_table[refindex] = array
+			return ByteArrayRef(array, refindex)
+
 	##################################################
 	def get_packet(self):
 		assert self.packet != None, "Don't call get_xml twice"
@@ -503,11 +538,12 @@ if __name__ == '__main__':
 	fp = open('client-ping.txt', 'rb')
 	fp = open('client-ping-response.txt', 'rb')
 	fp = open('7.txt', 'rb')
+	fp = open('9.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	toxml = ToXML(packet)
 	xml = toxml.get_xml()
-	print xml
+	#print xml
 	#fromxml = FromXML(xml)
 	#print fromxml.get_packet()
 

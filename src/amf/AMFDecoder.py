@@ -196,6 +196,7 @@ class AMFDecoder:
 			assert len(array.assoc) == 0 or len(array.list) == 0
 			return aref
 
+	# {{{ read_object
 	def read_object(self):
 		u = self.read_u29()
 		if u & 1 == 0:
@@ -283,6 +284,21 @@ class AMFDecoder:
 					obj.members.append(member_value)
 
 				return objref
+	# }}}
+
+	def read_byte_array(self):
+		u = self.read_u29()
+
+		if u & 1 == 0:
+			index = u >> 1
+			# XXXXXXXXXXXXXXXXXXXXXXXXXXXX 0
+			# U29O-ref
+			return ByteArrayRef(self.complex_object_reference_table[index], index)
+		else:
+			array_length = u >> 1
+			array_content = self.fp.read(array_length)
+			array = ByteArray(array_content)
+			return self.put_complex_object(array, ByteArrayRef)
 
 	def put_trait(self, trait):
 		index = len(self.trait_reference_table)
@@ -303,6 +319,11 @@ class AMFDecoder:
 		index = len(self.complex_object_reference_table)
 		self.complex_object_reference_table.append(date)
 		return DateRef(date, index)
+
+	def put_complex_object(self, obj, refclass):
+		index = len(self.complex_object_reference_table)
+		self.complex_object_reference_table.append(obj)
+		return refclass(obj, index)
 
 	# }}}
 	########################################
@@ -332,6 +353,7 @@ class AMFDecoder:
 				0x08: self.read_date,
 				0x09: self.read_array,
 				0x0a: self.read_object,
+				0x0c: self.read_byte_array,
 			   }
 		return funs[x]()
 
@@ -355,8 +377,9 @@ if __name__ == '__main__':
 	fp = open('5.txt', 'rb')
 	fp = open('6.txt', 'rb')
 	fp = open('7.txt', 'rb')
+	fp = open('9.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
-	print packet
+	#print packet
 
 # vim: foldmethod=marker:

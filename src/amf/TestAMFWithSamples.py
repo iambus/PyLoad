@@ -458,6 +458,12 @@ GMT+08:00) Asia/Shanghai\n\t\t\x01\x01\x04\x00\x04\
 
 # }}}
 
+def get_data_from_file(path):
+	fp = open(path, 'rb')
+	bytes = fp.read()
+	fp.close()
+	return bytes
+
 ##################################################
 
 class TestSample(unittest.TestCase):
@@ -471,22 +477,75 @@ class TestSample(unittest.TestCase):
 				#get_data_6(),
 				#get_data_7(),
 				get_data_8(),
+				get_data_from_file('9.txt'),
+				get_data_from_file('10.txt'),
+				get_data_from_file('11.txt'),
 				]
 	def assertRawPacketEqual(self, r1, r2):
 		self.assertEqual(len(r1), len(r2))
 
+	def runEncoderDecoder(self, sample):
+		decoder = AMFDecoder(sample)
+		packet = decoder.decode()
+		encoder = AMFEncoder(packet)
+		result = encoder.encode()
+
+		self.assertRawPacketEqual(sample, result)
+
+	def runEncoderDecoder2(self, sample):
+		decoder = AMFDecoder(sample)
+		packet = decoder.decode()
+		encoder = AMFEncoder(packet)
+		sample2 = encoder.encode()
+
+		decoder = AMFDecoder(sample2)
+		packet = decoder.decode()
+		encoder = AMFEncoder(packet)
+		sample3 = encoder.encode()
+		self.assertEqual(sample2, sample3)
+
+	def runEncoderDecoderXML(self, sample):
+		decoder = AMFDecoder(sample)
+		packet = decoder.decode()
+		toxml = ToXML(packet)
+		xml = toxml.get_xml()
+		fromxml = FromXML(xml)
+		new_packet = fromxml.get_packet()
+		encoder = AMFEncoder(new_packet)
+		result = encoder.encode()
+
+		self.assertRawPacketEqual(sample, result)
+
+	def runEncoderDecoderXML2(self, sample):
+		decoder = AMFDecoder(sample)
+		packet = decoder.decode()
+		toxml = ToXML(packet)
+		xml = toxml.get_xml()
+		fromxml = FromXML(xml)
+		new_packet = fromxml.get_packet()
+		encoder = AMFEncoder(new_packet)
+		sample2 = encoder.encode()
+
+		decoder = AMFDecoder(sample2)
+		packet = decoder.decode()
+		toxml = ToXML(packet)
+		xml = toxml.get_xml()
+		fromxml = FromXML(xml)
+		new_packet = fromxml.get_packet()
+		encoder = AMFEncoder(new_packet)
+		sample3 = encoder.encode()
+
+		self.assertEqual(sample2, sample3)
+
+	def testAllByEncoderDecoder(self):
+		for sample in self.samples:
+			self.runEncoderDecoder(sample)
+			self.runEncoderDecoder2(sample)
+
 	def testAll(self):
 		for sample in self.samples:
-			decoder = AMFDecoder(sample)
-			packet = decoder.decode()
-			toxml = ToXML(packet)
-			xml = toxml.get_xml()
-			fromxml = FromXML(xml)
-			new_packet = fromxml.get_packet()
-			encoder = AMFEncoder(new_packet)
-			result = encoder.encode()
-
-			self.assertRawPacketEqual(sample, result)
+			self.runEncoderDecoderXML(sample)
+			self.runEncoderDecoderXML2(sample)
 
 
 ##################################################

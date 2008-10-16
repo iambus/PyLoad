@@ -191,6 +191,7 @@ class AMFEncoder:
 			for item in list_values:
 				self.write_value(item)
 
+	# {{{ write_object
 	def write_object(self, objref):
 		index = self.put_object(objref)
 		obj = objref.object
@@ -246,6 +247,19 @@ class AMFEncoder:
 					self.write_utf8_vr('')
 				else:
 					raise TypeError('Unknown object type: %s, trait: %s' % (obj.__class__, trait.__class__))
+	# }}}
+
+	def write_byte_array(self, arrayref):
+		assert isinstance(arrayref, ByteArrayRef), 'Expected ByteArrayRef, but received %s' % arrayref.__class__
+		index = self.put_byte_array(arrayref)
+		if index != None:
+			u = index << 1
+			self.write_u29(u)
+		else:
+			array = arrayref.array
+			u = (len(array.content) << 1) | 1
+			self.write_u29(u)
+			self.fp.write(array.content)
 
 	def put_trait(self, traitref):
 		'return index if the trait already registered (which means the index should be used as reference)'
@@ -271,6 +285,10 @@ class AMFEncoder:
 		'return index if the date already registered (which means the index should be used as reference)'
 		assert isinstance(dateref, DateRef)
 		return self.put_complext_object(dateref)
+
+	def put_byte_array(self, arrayref):
+		assert isinstance(arrayref, ByteArrayRef)
+		return self.put_complext_object(arrayref)
 
 	def put_complext_object(self, ref):
 		if self.complex_rref_table.has_key(ref.refindex):
@@ -306,16 +324,17 @@ class AMFEncoder:
 	def write_value3(self, value):
 		t = value.__class__
 		funs = {
-				NULL     : ('\x01', self.write_null),
-				FALSE    : ('\x02', self.write_false),
-				TRUE     : ('\x03', self.write_true),
-				int      : ('\x04', self.write_u29),
-				float    : ('\x05', self.write_double),
-				str      : ('\x06', self.write_utf8_vr),
-				unicode  : ('\x06', self.write_utf8_vr),
-				DateRef  : ('\x08', self.write_date),
-				ArrayRef : ('\x09', self.write_array),
-				ObjectRef: ('\x0a', self.write_object),
+				NULL        : ('\x01', self.write_null),
+				FALSE       : ('\x02', self.write_false),
+				TRUE        : ('\x03', self.write_true),
+				int         : ('\x04', self.write_u29),
+				float       : ('\x05', self.write_double),
+				str         : ('\x06', self.write_utf8_vr),
+				unicode     : ('\x06', self.write_utf8_vr),
+				DateRef     : ('\x08', self.write_date),
+				ArrayRef    : ('\x09', self.write_array),
+				ObjectRef   : ('\x0a', self.write_object),
+				ByteArrayRef: ('\x0c', self.write_byte_array),
 				}
 		assert funs.has_key(t), '%s is not supported in AMF3' % t
 		b, func = funs[t]
@@ -340,6 +359,7 @@ if __name__ == '__main__':
 	fp = open('login-response.txt', 'rb')
 	fp = open('client-ping.txt', 'rb')
 	fp = open('client-ping-response.txt', 'rb')
+	fp = open('9.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	#print packet

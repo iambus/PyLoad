@@ -223,6 +223,31 @@ class ArrayRef(AMF3Type):
 	def get_id(self):
 		return refindex
 
+class ByteArray(AMF3Type):
+	def __init__(self, content):
+		AMF3Type.__init__(self)
+		assert isinstance(content, str)
+		self.content = content
+	def __str__(self):
+		return 'ByteArray={%s}' % repr(self.content)
+	def __repr__(self):
+		return str(self)
+
+class ByteArrayRef(AMF3Type):
+	def __init__(self, array, index):
+		AMF3Type.__init__(self)
+		assert isinstance(array, ByteArray)
+		assert type(index) == int
+		self.array = array
+		self.refindex = index
+	def __str__(self):
+		return str(self.array)
+	def __repr__(self):
+		return str(self)
+	def get_id(self):
+		return refindex
+
+# AMF0
 class StrictArray(AMF0Type):
 	def __init__(self, array):
 		AMF0Type.__init__(self)
