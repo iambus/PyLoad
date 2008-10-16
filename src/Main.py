@@ -274,14 +274,15 @@ class MainFrame(wx.Frame):
 
 	def OnPlay(self, event):
 		self.toolbar.EnableTool(self.toolPlay.GetId(), 0)
-		self.toolbar.EnableTool(self.toolTerminate.GetId(), 1)
+		self.toolbar.EnableTool(self.toolTerminate.GetId(), 0) # TODO: enable it after function implemented
 		menu = self.GetMenuBar().GetMenu(1)
 		menu.FindItemByPosition(3).Enable(False)
-		menu.FindItemByPosition(4).Enable(True)
+		menu.FindItemByPosition(4).Enable(False) # TODO: enable it after function implemented
 		
 		self.Play()
 
 	def OnTerminate(self, event):
+		raise NotImplementedError('Terminate is not implemented yet')
 		self.toolbar.EnableTool(self.toolPlay.GetId(), 1)
 		self.toolbar.EnableTool(self.toolTerminate.GetId(), 0)
 		menu = self.GetMenuBar().GetMenu(1)
