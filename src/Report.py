@@ -3,7 +3,7 @@ import sqlite3
 import threading
 from Queue import Queue
 
-import datetime
+import time
 
 class Report:
 	def __init__(self, path = ':memory:'):
@@ -22,7 +22,7 @@ class Report:
 		self.finished = False
 		self.queue = Queue()
 
-		self.start_time = datetime.datetime.now()
+		self.start_time = time.clock()
 
 		reporter = self
 		class ReporterThread(threading.Thread):
@@ -98,10 +98,8 @@ class Report:
 		hits2 = []
 		for hit in hits:
 			id = hit[0]
-			start = hit[1] - self.start_time
-			start = start.seconds * 1000 + start.microseconds/1000
-			end = hit[2] - self.start_time
-			end = end.seconds * 1000 + end.microseconds/1000
+			start = int((hit[1] - self.start_time)*1000)
+			end = int((hit[2] - self.start_time)*1000)
 			hits2.append((id, start, end))
 		self.connection.executemany('insert into hits(hitid, start, end) values (?, ?, ?)', hits2)
 
