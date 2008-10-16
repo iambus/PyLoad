@@ -282,7 +282,7 @@ class MainFrame(wx.Frame):
 		self.Play()
 
 	def OnTerminate(self, event):
-		raise NotImplementedError('Terminate is not implemented yet')
+		#raise NotImplementedError('Terminate is not implemented yet')
 		self.toolbar.EnableTool(self.toolPlay.GetId(), 1)
 		self.toolbar.EnableTool(self.toolTerminate.GetId(), 0)
 		menu = self.GetMenuBar().GetMenu(1)
