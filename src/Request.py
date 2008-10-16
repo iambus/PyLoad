@@ -107,14 +107,14 @@ class Request:
 		else:
 			req = urllib2.Request(url=url, headers=headers)
 
-		start_time = datetime.datetime.now()#XXX: is it a good place?
+		start_time = datetime.datetime.now() #XXX: is it a good place?
 		try:
 			resp = requester(req)
 		except urllib2.URLError, e:
 			log.error('Request error: %s\nURL: %s\nHeaders: %s' % (req, url, headers))
 			raise e
+		end_time = datetime.datetime.now() #XXX: is it a good place?
 		rawbody = resp.read()
-		end_time = datetime.datetime.now()
 
 		response = Response()
 		response.rawbody = rawbody
