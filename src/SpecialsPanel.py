@@ -311,7 +311,11 @@ class SpecialsPanel(wx.Panel):
 			return
 
 		if sourceData.__class__ == Special:
-			self.MoveAfter(sourceItem, targetItem)
+			if targetData.__class__ == Special:
+				self.MoveAfter(sourceItem, targetItem)
+			else:
+				# You can only move a special after another special
+				pass
 		elif targetData.__class__ in subable:
 			self.MoveUnder(sourceItem, targetItem)
 		else:
