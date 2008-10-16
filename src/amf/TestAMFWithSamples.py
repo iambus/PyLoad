@@ -480,6 +480,13 @@ class TestSample(unittest.TestCase):
 				get_data_from_file('9.txt'),
 				get_data_from_file('10.txt'),
 				get_data_from_file('11.txt'),
+				get_data_from_file('12.txt'),
+				]
+
+		# data that contains \r can't be handled very well
+		self.samples2 = [
+				get_data_6(),
+				get_data_7(),
 				]
 	def assertRawPacketEqual(self, r1, r2):
 		self.assertEqual(len(r1), len(r2))
@@ -542,11 +549,20 @@ class TestSample(unittest.TestCase):
 			self.runEncoderDecoder(sample)
 			self.runEncoderDecoder2(sample)
 
-	def testAll(self):
+	def testAllWithXML(self):
 		for sample in self.samples:
 			self.runEncoderDecoderXML(sample)
 			self.runEncoderDecoderXML2(sample)
 
+	def test2AllByEncoderDecoder(self):
+		for sample in self.samples2:
+			#self.runEncoderDecoder(sample)
+			self.runEncoderDecoder2(sample)
+
+	def test2AllWithXML(self):
+		for sample in self.samples2:
+			#self.runEncoderDecoderXML(sample)
+			self.runEncoderDecoderXML2(sample)
 
 ##################################################
 

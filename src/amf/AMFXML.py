@@ -201,7 +201,8 @@ class ToXML:
 				self.create_value_node(list_node, i)
 			assoc_node = self.create_child(node, 'assoc-items')
 			for k, v in array.assoc:
-				self.create_value_node(assoc_node, v, k)
+				item_node = self.create_value_node(assoc_node, v, 'item')
+				item_node.setAttribute('key', k)
 		return node
 
 	def create_byte_array_node(self, parent, arrayref, tag = None):
@@ -217,7 +218,9 @@ class ToXML:
 			# no nothing if the array has been defined somewhere
 			pass
 		else:
-			self.set_text(node, array.content.encode('string_escape'))
+			data = array.content.encode('string_escape')
+			node.setAttribute('length', str(len(data)))
+			self.set_text(node, data)
 		return node
 
 	def create_str_node(self, parent, value, tag):
@@ -495,7 +498,7 @@ class FromXML:
 			for item in self.get_childern(list_node):
 				array.list.append(self.get_value(item))
 			for item in self.get_childern(assoc_node):
-				name = item.getAttribute('name')
+				name = item.getAttribute('key')
 				value = self.get_value(item)
 				array.assoc.append((name, value))
 			return ArrayRef(array, refindex)

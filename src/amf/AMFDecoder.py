@@ -184,7 +184,6 @@ class AMFDecoder:
 			aref = self.put_array(array)
 
 			name = self.read_utf8_vr()
-			assert name == '', 'Please review the code and make sure the associative array is supported correctly'
 			while name != '':
 				value = self.read_value()
 				array.assoc.append((name, value))
@@ -378,6 +377,7 @@ if __name__ == '__main__':
 	fp = open('6.txt', 'rb')
 	fp = open('7.txt', 'rb')
 	fp = open('9.txt', 'rb')
+	fp = open('12.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	#print packet
