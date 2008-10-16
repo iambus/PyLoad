@@ -249,6 +249,19 @@ class AMFEncoder:
 					raise TypeError('Unknown object type: %s, trait: %s' % (obj.__class__, trait.__class__))
 	# }}}
 
+	def write_xml(self, xmlref):
+		assert isinstance(xmlref, XMLRef)
+		index = self.put_xml(xmlref)
+		if index != None:
+			u = index << 1
+			self.write_u29(u)
+		else:
+			content = xmlref.xml.content
+			bytes = content.encode('utf-8')
+			u = (len(bytes) << 1) | 1
+			self.write_u29(u)
+			self.fp.write(bytes)
+
 	def write_byte_array(self, arrayref):
 		assert isinstance(arrayref, ByteArrayRef), 'Expected ByteArrayRef, but received %s' % arrayref.__class__
 		index = self.put_byte_array(arrayref)
@@ -256,10 +269,10 @@ class AMFEncoder:
 			u = index << 1
 			self.write_u29(u)
 		else:
-			array = arrayref.array
-			u = (len(array.content) << 1) | 1
+			content = arrayref.array.content
+			u = (len(content) << 1) | 1
 			self.write_u29(u)
-			self.fp.write(array.content)
+			self.fp.write(content)
 
 	def put_trait(self, traitref):
 		'return index if the trait already registered (which means the index should be used as reference)'
@@ -285,6 +298,10 @@ class AMFEncoder:
 		'return index if the date already registered (which means the index should be used as reference)'
 		assert isinstance(dateref, DateRef)
 		return self.put_complext_object(dateref)
+
+	def put_xml(self, xmlref):
+		assert isinstance(xmlref, XMLRef)
+		return self.put_complext_object(xmlref)
 
 	def put_byte_array(self, arrayref):
 		assert isinstance(arrayref, ByteArrayRef)
@@ -331,9 +348,11 @@ class AMFEncoder:
 				float       : ('\x05', self.write_double),
 				str         : ('\x06', self.write_utf8_vr),
 				unicode     : ('\x06', self.write_utf8_vr),
+				#XMLDocRef   : ('\x07', self.write_xml_doc),
 				DateRef     : ('\x08', self.write_date),
 				ArrayRef    : ('\x09', self.write_array),
 				ObjectRef   : ('\x0a', self.write_object),
+				XMLRef      : ('\x0b', self.write_xml),
 				ByteArrayRef: ('\x0c', self.write_byte_array),
 				}
 		assert funs.has_key(t), '%s is not supported in AMF3' % t
@@ -359,7 +378,7 @@ if __name__ == '__main__':
 	fp = open('login-response.txt', 'rb')
 	fp = open('client-ping.txt', 'rb')
 	fp = open('client-ping-response.txt', 'rb')
-	fp = open('9.txt', 'rb')
+	fp = open('13.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	#print packet

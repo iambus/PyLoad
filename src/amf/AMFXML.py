@@ -92,6 +92,7 @@ class ToXML:
 				DateRef      : self.create_date_node,
 				ObjectRef    : self.create_object_node,
 				ArrayRef     : self.create_array_node,
+				XMLRef       : self.create_xml_node,
 				ByteArrayRef : self.create_byte_array_node,
 				}
 		assert funcs.has_key(t), 'Type %s is not supported' % t
@@ -196,6 +197,7 @@ class ToXML:
 			# no nothing if the array has been defined somewhere
 			pass
 		else:
+			self.complex_object_set.add(refindex)
 			list_node = self.create_child(node, 'list-items')
 			for i in array.list:
 				self.create_value_node(list_node, i)
@@ -215,13 +217,31 @@ class ToXML:
 		node.setAttribute('class', array.__class__.__name__)
 		node.setAttribute('id', str(refindex))
 		if refindex in self.complex_object_set:
-			# no nothing if the array has been defined somewhere
+			# no nothing if the byte-array has been defined somewhere
 			pass
 		else:
+			self.complex_object_set.add(refindex)
 			data = array.content.encode('string_escape')
 			node.setAttribute('length', str(len(data)))
 			self.set_text(node, data)
 		return node
+
+	def create_xml_node(self, parent, xmlref, tag = None):
+		assert isinstance(xmlref, XMLRef)
+		xml_obj = xmlref.xml
+		refindex = xmlref.refindex
+		if tag == None:
+			tag = xml_obj.__class__.__name__
+		node = self.create_child(parent, tag)
+		node.setAttribute('class', xml_obj.__class__.__name__)
+		node.setAttribute('id', str(refindex))
+		if refindex in self.complex_object_set:
+			# no nothing if the xml has been defined somewhere
+			pass
+		else:
+			self.complex_object_set.add(refindex)
+			self.set_text(node, xml_obj.content)
+			return node
 
 	def create_str_node(self, parent, value, tag):
 		if tag == None:
@@ -359,6 +379,7 @@ class FromXML:
 				'ExtObject'     : self.get_ext_object,
 				'Array'         : self.get_array,
 				'ByteArray'     : self.get_byte_array,
+				'XML'           : self.get_xml,
 				}
 		assert funcs.has_key(class_type), 'unkown class %s' % class_type
 		func = funcs[class_type]
@@ -513,6 +534,14 @@ class FromXML:
 			self.complex_object_table[refindex] = date
 			return DateRef(date, refindex)
 
+	def get_xml(self, node):
+		refindex = int(node.getAttribute('id'))
+		if self.complex_object_table.has_key(refindex):
+			return ByteArrayRef(self.complex_object_table[refindex], refindex)
+		else:
+			xml_obj = XML(self.get_text(node))
+			return XMLRef(xml_obj, refindex)
+
 	def get_byte_array(self, node):
 		refindex = int(node.getAttribute('id'))
 		if self.complex_object_table.has_key(refindex):
@@ -525,7 +554,7 @@ class FromXML:
 
 	##################################################
 	def get_packet(self):
-		assert self.packet != None, "Don't call get_xml twice"
+		assert self.packet != None, "Don't call get_packet twice"
 		#TODO: clean the object
 		packet = self.packet
 		self.packet = None

@@ -148,11 +148,8 @@ class AMFDecoder:
 			array.append(self.read_value())
 		return StrictArray(array)
 
-	#AMF0
-	def read_typed_object(self):
-		raise NotImplementedError()
-		class_name = self.read_utf8()
-		print class_name
+
+	#AMF3
 
 	def read_date(self):
 		u = self.read_u29()
@@ -285,6 +282,19 @@ class AMFDecoder:
 				return objref
 	# }}}
 
+	def read_xml(self):
+		u = self.read_u29()
+
+		if u & 1 == 0:
+			index = u >> 1
+			# XXXXXXXXXXXXXXXXXXXXXXXXXXXX 0
+			# U29O-ref
+			return XMLRef(self.complex_object_reference_table[index], index)
+		else:
+			xml_length = u >> 1
+			xml_content = self.read_utf8_n(xml_length)
+			return self.put_complex_object(XML(xml_content), XMLRef)
+
 	def read_byte_array(self):
 		u = self.read_u29()
 
@@ -320,6 +330,7 @@ class AMFDecoder:
 		return DateRef(date, index)
 
 	def put_complex_object(self, obj, refclass):
+		assert isinstance(obj, AMF3Type)
 		index = len(self.complex_object_reference_table)
 		self.complex_object_reference_table.append(obj)
 		return refclass(obj, index)
@@ -349,9 +360,11 @@ class AMFDecoder:
 				0x04: self.read_u29,
 				0x05: self.read_double,
 				0x06: self.read_utf8_vr,
+				#0x07: self.read_xml_doc,
 				0x08: self.read_date,
 				0x09: self.read_array,
 				0x0a: self.read_object,
+				0x0b: self.read_xml,
 				0x0c: self.read_byte_array,
 			   }
 		return funs[x]()
@@ -378,6 +391,7 @@ if __name__ == '__main__':
 	fp = open('7.txt', 'rb')
 	fp = open('9.txt', 'rb')
 	fp = open('12.txt', 'rb')
+	fp = open('13.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	#print packet

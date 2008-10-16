@@ -247,6 +247,30 @@ class ByteArrayRef(AMF3Type):
 	def get_id(self):
 		return refindex
 
+class XML(AMF3Type):
+	def __init__(self, content):
+		AMF3Type.__init__(self)
+		assert isinstance(content, str) or isinstance(content, unicode)
+		self.content = content
+	def __str__(self):
+		return 'XML={%s}' % repr(self.content)
+	def __repr__(self):
+		return str(self)
+
+class XMLRef(AMF3Type):
+	def __init__(self, xml, index):
+		AMF3Type.__init__(self)
+		assert isinstance(xml, XML)
+		assert type(index) == int
+		self.xml = xml
+		self.refindex = index
+	def __str__(self):
+		return str(self.xml)
+	def __repr__(self):
+		return str(self)
+	def get_id(self):
+		return refindex
+
 # AMF0
 class StrictArray(AMF0Type):
 	def __init__(self, array):
