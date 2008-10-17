@@ -52,9 +52,13 @@ class Hit(Player, PropertyMixin):
 
 	def finish(self):
 		assert self.oreqstr == None, 'finish twice!'
-		# TODO: detect coders
+
 		self.oreqstr = self.reqstr
 		self.orespstr = self.respstr
+		# TODO: don't decode big response
+		if self.respstr and len(self.respstr) > 1*1000*1000:
+			log.warning('The response content is too large! Length: %d' % len(self.respstr))
+#			self.respstr = None
 
 		self.req_handler = ContentTypeHandler.get_handler(self.reqstr)
 		if self.respstr:
