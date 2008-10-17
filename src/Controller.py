@@ -1,9 +1,8 @@
 
 from Player import *
+from Errors import ControlFlag
 
 ##################################################
-class ControlFlag(Exception):
-	pass
 
 class Break(ControlFlag):
 	pass

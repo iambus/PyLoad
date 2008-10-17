@@ -13,7 +13,7 @@ respcallback = lambda x: False
 
 running = 1
 
-default_port = 8008
+default_port = 9008
 use_port = default_port
 
 STOPPING_URL = 'http://stop.it:0/'

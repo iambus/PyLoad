@@ -1,16 +1,17 @@
 
 import re
 import Coder
+import Validator
 
 # immutable: dirty hack
 # XXX: how to implement an immutable instance in Python?
 class ContentTypeHandler(tuple):
-	def __new__(self, coder = Coder.EmptyCoder, syntax = None):
+	def __new__(self, coder = Coder.EmptyCoder, syntax = None, validator = Validator.DefaultResponseValidator):
 		if syntax == None:
 			import editor.syntax.default
 			syntax = editor.syntax.default
 		from editor.Syntax import Syntax
-		return tuple.__new__(self, (coder, Syntax(syntax)))
+		return tuple.__new__(self, (coder, Syntax(syntax), validator))
 
 	def get_coder(self):
 		return self.coder
@@ -26,6 +27,8 @@ class ContentTypeHandler(tuple):
 			return self[0]
 		if name == 'syntax':
 			return self[1]
+		if name == 'validator':
+			return self[2]
 		raise AttributeError("No attribute "+name)
 
 	def __setattr__(self, name, v):
@@ -45,7 +48,7 @@ def get_handler(content):
 			'default' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.default),
 			'html' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.html),
 			'xml' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.xml),
-			'amf' : ContentTypeHandler(Coder.AMFCoder, editor.syntax.xml),
+			'amf' : ContentTypeHandler(Coder.AMFCoder, editor.syntax.xml, Validator.AMFResponseValidator),
 			'python' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.python),
 			'bin' : ContentTypeHandler(Coder.BinCoder, editor.syntax.python),
 			}

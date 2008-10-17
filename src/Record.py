@@ -140,6 +140,20 @@ class Hit(Player, PropertyMixin):
 			if reporter:
 				reporter.post_hit(self.uuid, start_time, end_time)
 
+			handler = self.resp_handler or self.req_handler
+			if len(handler) == 2:
+				# older version of ContentTypeHandler doesn't have validators
+				# for back compatibility, we re-set handlers
+				self.req_handler = ContentTypeHandler.get_handler(self.oreqstr)
+				if self.orespstr:
+					self.resp_handler = ContentTypeHandler.get_handler(self.orespstr)
+				handler = self.resp_handler or self.req_handler
+			try:
+				import Errors
+				handler.validator.validate(response)
+			except Errors.ValidationError, e:
+				raise Errors.TerminateIteration('ValidationError: %s' % e)
+
 
 class Page(Player):
 	def __init__(self, path):

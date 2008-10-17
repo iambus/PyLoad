@@ -3,6 +3,11 @@ from Scope import Scope
 from Player import Player, Script
 import Repository
 
+import Errors
+
+import Logger
+log = Logger.getLogger()
+
 class Iteration(Player):
 	def __init__(self, player = None):
 		Player.__init__(self)
@@ -10,7 +15,10 @@ class Iteration(Player):
 	def play(self, scope = None):
 		assert self.scripts == [] and self.childern == []
 		self.childern = [self.player]
-		Player.play(self, scope)
+		try:
+			Player.play(self, scope)
+		except Errors.TerminateIteration, e:
+			log.exception(e)
 		self.childern = []
 
 class User(Player):
