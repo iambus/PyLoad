@@ -59,6 +59,33 @@ STRINGEOL : "fore:#f08060,back:$back,face:$font,eol,size:$size"
 # Don't know what it is
 PREPROCESSOR : "fore:red,back:$back,face:$font,size:$size"
 
+
+# For HTML and XML
+OTHER : "fore:#ffffff,back:$back,face:$font,size:$size"
+SCRIPT : "fore:#ffffff,back:$back,face:$font,size:$size"
+TAGUNKNOWN : "fore:#ffffff,back:$back,face:$font,size:$size"
+ATTRIBUTEUNKNOWN : "fore:#ffffff,back:$back,face:$font,size:$size"
+
+#ATTRIBUTE : "fore:#ffffff,back:$back,face:$font,size:$size"
+#ATTRIBUTEUNKNOWN : "fore:#ffffff,back:$back,face:$font,size:$size"
+CDATA : "fore:#80c0e0,back:$back,face:$font,size:$size"
+#COMMENT : "fore:#ffffff,back:$back,face:$font,size:$size"
+#DEFAULT : "fore:#ffffff,back:$back,face:$font,size:$size"
+#DOUBLESTRING : "fore:#ffffff,back:$back,face:$font,size:$size"
+#ENTITY : "fore:#ffffff,back:$back,face:$font,size:$size"
+#NUMBER : "fore:#ffffff,back:$back,face:$font,size:$size"
+#OTHER : "fore:#ffffff,back:$back,face:$font,size:$size"
+#QUESTION : "fore:#ffffff,back:$back,face:$font,size:$size"
+#SCRIPT : "fore:#ffffff,back:$back,face:$font,size:$size"
+#TAG : "fore:#ffffff,back:$back,face:$font,size:$size"
+#TAGEND : "fore:#ffffff,back:$back,face:$font,size:$size"
+#TAGUNKNOWN : "fore:#ffffff,back:$back,face:$font,size:$size"
+#VALUE : "fore:#ffffff,back:$back,face:$font,size:$size"
+#XCCOMMENT : "fore:#ffffff,back:$back,face:$font,size:$size"
+#XMLEND : "fore:#ffffff,back:$back,face:$font,size:$size"
+#XMLSTART : "fore:#ffffff,back:$back,face:$font,size:$size"
+
+
 ##################################################
 
 CaretForeground : "#00f000"

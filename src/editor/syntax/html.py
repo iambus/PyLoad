@@ -4,7 +4,7 @@ import wx.stc
 LEXER = wx.stc.STC_LEX_HTML
 OPERATOR = -1
 
-Prefix = 'STC_NULL_' # matches nothing
+Prefix = 'STC_H_'
 
 word = ()
 
