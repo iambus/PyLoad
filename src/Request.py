@@ -17,6 +17,10 @@ class Response:
 		self.rawbody = None
 		self.body = None
 		self.headers = None
+		self.info = None
+		self.url = None
+
+		#self.tree = None
 
 	def find(self, pattern, n = 0, flag = 0):
 		try:
@@ -26,14 +30,35 @@ class Response:
 		except Exception, e:
 			log.exception(e)
 
-	def find_all(self, pattern, flag = 0):
+	def findall(self, pattern, flag = 0):
 		try:
 			return re.findall(pattern, self.body, flag)
 		except Exception, e:
 			log.exception(e)
 
+	def xtree(self):
+		from xml.etree import ElementTree
+		try:
+			self.tree = ElementTree.fromstring(self.body)
+			return self.tree
+		except Exception, e:
+			self.tree = None
+			log.error("Can't parse response body as XML tree.\nBody: %s\nReasone: %s" % (self.body, e))
+
 	def xfind(self, xpath):
-		raise NotImplementedError('XPath is not supported yet')
+		tree = self.xtree()
+		if tree:
+			return tree.find(xpath)
+
+	def xfindall(self, xpath):
+		tree = self.xtree()
+		if tree:
+			return tree.findall(xpath)
+
+	def xfindtext(self, xpath):
+		tree = self.xtree()
+		if tree:
+			return tree.findtext(xpath)
 
 
 class Request:
