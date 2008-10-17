@@ -60,6 +60,12 @@ class Response:
 		if tree:
 			return tree.findtext(xpath)
 
+	def save_body(self, path):
+		fp = open(path, 'w')
+		try:
+			fp.write(self.body)
+		finally:
+			fp.close()
 
 class Request:
 	def __init__(self, url, reqstr = None):
