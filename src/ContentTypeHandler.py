@@ -47,9 +47,10 @@ def get_handler(content):
 			'xml' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.xml),
 			'amf' : ContentTypeHandler(Coder.AMFCoder, editor.syntax.xml),
 			'python' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.python),
+			'bin' : ContentTypeHandler(Coder.BinCoder, editor.syntax.python),
 			}
 
-	m = re.search(r'^content-type:\s*(.*)', content, re.I|re.M)
+	m = re.search(r'^content-type:\s*([^\r\n]*)', content, re.I|re.M)
 	if m:
 		type = m.group(1)
 		if   re.search(r'application/x-amf', type, re.I):
@@ -60,6 +61,10 @@ def get_handler(content):
 			return mapping['html']
 		elif re.search(r'text', type, re.I):
 			return mapping['default']
+		elif re.search(r'application/octet-stream', type, re.I):
+			return mapping['bin']
+		elif re.search(r'multipart', type, re.I):
+			return mapping['bin']
 		else:
 			return mapping['default']
 	return ContentTypeHandler()

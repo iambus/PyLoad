@@ -53,6 +53,18 @@ class UnicodeCoder:
 					break
 		return s
 
+class BinCoder:
+	@classmethod
+	def encode(cls, s):
+		import re
+		s = re.sub(r'\s', '', s)
+		return s.decode('string_escape')
+	@classmethod
+	def decode(cls, s):
+		x = dict(map(lambda i: (chr(i), r'\x%02x'%i), range(256)))
+		bin = ''.join(map(lambda c: x[c], s))
+		return '\n'.join([bin[i:i+16*4] for i in range(0, len(bin), 16*4)])
+
 # TODO
 class GZipCoder:
 	pass
@@ -64,4 +76,5 @@ if __name__ == '__main__':
 	print EmptyCoder.decode('x')
 	en = EmptyCoder.encode
 	print en('y')
+	print BinCoder.decode(''.join(map(chr, range(256))))
 
