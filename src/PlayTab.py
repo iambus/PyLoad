@@ -172,6 +172,7 @@ class PlayTab(wx.Panel):
 	def OnTestPlay(self, event):
 		self.selectedFactory.test_play()
 
+	# XXX: why I need this?
 	def ResetSize(self):
 		self.splitter.SetSashPosition(200)
 		self.splitter2.SetSashPosition(120)

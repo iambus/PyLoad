@@ -2,9 +2,10 @@
 import wx
 import IconImages
 
-import RecordTab
-import EditTab
-import PlayTab
+from RecordTab import RecordTab
+from EditTab import EditTab
+from PlayTab import PlayTab
+from ReportTab import ReportTab
 
 import Record
 from Project import Project
@@ -13,6 +14,7 @@ import ReportManager
 
 import Proxy
 
+# For unimplemented panel...
 class ColoredPanel(wx.Window):
 	def __init__(self, parent, color):
 		wx.Window.__init__(self, parent, -1, style = wx.SIMPLE_BORDER)
@@ -26,41 +28,28 @@ class NoteBook(wx.Toolbook):
 
 		self.AssignImageList(wx.ImageList(0,0))
 
-		self.recordTab = RecordTab.RecordTab(self)
+		self.recordTab = RecordTab(self)
 		self.AddPage(self.recordTab, 'Record', imageId=-1)
 		self.recordTab.ResetSize()
 
-		self.editTab = EditTab.EditTab(self)
+		self.editTab = EditTab(self)
 		self.AddPage(self.editTab, 'Edit', imageId=-1)
 		self.editTab.ResetSize()
 
 		self.editTab.recordPanel.SetMirrorOf(self.recordTab.tree)
 		self.recordTab.tree.AddObserver(self.editTab.specialsPanel.UpdateAll)
 
-		self.playTab = PlayTab.PlayTab(self, project, reporter)
+		self.playTab = PlayTab(self, project, reporter)
 		self.AddPage(self.playTab, 'Play', imageId=-1)
 		self.playTab.ResetSize()
 
 		self.editTab.specialsPanel.onNewSpecialCallback = self.playTab.policyPanel.UpdateSpecials
 
-		colourList = [ "Report", ]
-		g = self.makeColorPanel()
-		for colour in colourList:
-			win = g.next()
-			self.AddPage(win, colour, imageId=-1)
+		self.reportTab = ReportTab(self)
+		self.AddPage(self.reportTab, 'Report', imageId=-1)
+		self.reportTab.ResetSize()
 
 
-	def makeColorPanel(self):
-		colourList = [ "Aquamarine", "Blue Violet", "Brown", ]
-		for color in colourList:
-			p = wx.Panel(self, -1)
-			win = ColoredPanel(p, color)
-			p.win = win
-			def OnCPSize(event, win=win):
-				win.SetPosition((0,0))
-				win.SetSize(event.GetSize())
-			p.Bind(wx.EVT_SIZE, OnCPSize)
-			yield p
 # }}}
 
 import wx.lib.newevent
@@ -74,7 +63,8 @@ class MainFrame(wx.Frame):
 
 		self.InitProject()
 		self.project = Project()
-		self.report = Report('reports/last-report.db')
+		self.reportPath = 'reports/last-report.db'
+		self.report = Report(self.reportPath)
 		self.path = None
 
 		self.nb = NoteBook(self, -1, self.project, self.report)
@@ -125,6 +115,7 @@ class MainFrame(wx.Frame):
 				("&File", (
 					("&New\tCtrl+N", "New Project", self.OnNew),
 					("&Open\tCtrl+O", "Open Project", self.OnOpen),
+					("&Report\tCtrl+R", "Open Report", self.OnOpenReport),
 					("&Save\tCtrl+S", "Save Project", self.OnSave),
 					("Save &As", "Save Project As...", self.OnSaveAs),
 					("", "", ""),
@@ -273,6 +264,11 @@ class MainFrame(wx.Frame):
 
 
 	def OnPlay(self, event):
+
+		if self.nb.playTab.policyPanel.specialField.GetData() == None:
+			# nothing to play
+			return
+
 		self.toolbar.EnableTool(self.toolPlay.GetId(), 0)
 		self.toolbar.EnableTool(self.toolTerminate.GetId(), 0) # TODO: enable it after function implemented
 		menu = self.GetMenuBar().GetMenu(1)
@@ -290,6 +286,8 @@ class MainFrame(wx.Frame):
 		menu.FindItemByPosition(4).Enable(False)
 
 		self.SaveReport()
+		self.nb.reportTab.LoadReport(self.reportPath)
+		self.nb.SetSelection(3) # You may not like it.
 
 	def OnRecordViewSelected(self, event):
 		self.nb.SetSelection(0)
@@ -314,7 +312,7 @@ class MainFrame(wx.Frame):
 		wildcard = "pickle (*.pkl)|*.pkl|"     \
 				   "All files (*.*)|*.*"
 		dialog = wx.FileDialog(
-				self, message="Save file as ...", defaultDir="",
+				self, message="Open Project", defaultDir="",
 				defaultFile="", wildcard=wildcard, style=wx.OPEN
 				)
 		dialog.SetFilterIndex(0)
@@ -323,6 +321,22 @@ class MainFrame(wx.Frame):
 		dialog.Destroy()
 		if path:
 			self.LoadProjectFrom(path)
+
+	def OnOpenReport(self, event):
+		path = None
+		wildcard = "sqlite3 (*.db)|*.db|"     \
+				   "All files (*.*)|*.*"
+		dialog = wx.FileDialog(
+				self, message="Open Project", defaultDir="",
+				defaultFile="", wildcard=wildcard, style=wx.OPEN
+				)
+		dialog.SetFilterIndex(0)
+		if dialog.ShowModal() == wx.ID_OK:
+			path = dialog.GetPath()
+		dialog.Destroy()
+		if path:
+			self.nb.reportTab.LoadReport(path)
+			self.nb.SetSelection(3)
 
 	def OnSave(self, event):
 		self.nb.playTab.Save()

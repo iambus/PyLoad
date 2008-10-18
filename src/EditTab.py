@@ -49,6 +49,7 @@ class EditTab(wx.Panel):
 		player = tree.GetPyData(tree.GetSelection())
 		player.play()
 
+	# XXX: why I need this?
 	def ResetSize(self):
 		self.leftsplitter.SetSashPosition(180)
 

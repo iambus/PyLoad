@@ -27,7 +27,7 @@ class ReportTab(wx.Panel):
 		self.list.InsertColumn(5, "Count")
 
 		self.list.SetColumnWidth(0, 60)
-		self.list.SetColumnWidth(1, wx.LIST_AUTOSIZE)
+		self.list.SetColumnWidth(1, 60)
 		self.list.SetColumnWidth(2, 60)
 		self.list.SetColumnWidth(3, 60)
 		self.list.SetColumnWidth(4, 60)
@@ -80,12 +80,16 @@ class ReportTab(wx.Panel):
 			self.list.SetStringItem(index, 4, row[4])
 			self.list.SetStringItem(index, 5, row[5])
 
-		self.list.SetColumnWidth(1, wx.LIST_AUTOSIZE)
+		if len(rows):
+			self.list.SetColumnWidth(1, wx.LIST_AUTOSIZE)
 
 	def LoadChart(self, uid):
 		data = [hit[1:3] for hit in self.data if hit[0] == uid]
 		self.chartPanel.SetData(data)
 
+	# XXX: why I need this?
+	def ResetSize(self):
+		self.splitter.SetSashPosition(120)
 
 	def OnItemSelected(self, event):
 		uid = self.list.GetItemText(event.m_itemIndex)

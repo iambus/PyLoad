@@ -12,11 +12,6 @@ import Record
 import Logger
 log = Logger.getLogger()
 
-class ColoredPanel(wx.Window):
-	def __init__(self, parent, color = 'red'):
-		wx.Window.__init__(self, parent, -1, style = wx.SIMPLE_BORDER)
-		self.SetBackgroundColour(color)
-
 
 ##################################################
 class RecordTab(wx.Panel):
@@ -45,6 +40,7 @@ class RecordTab(wx.Panel):
 
 	########################################
 
+	# XXX: why I need this?
 	def ResetSize(self):
 		self.splitter.SetSashPosition(170)
 
