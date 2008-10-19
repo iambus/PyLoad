@@ -104,6 +104,11 @@ def main():
 
 def run_command(argv):
 	import getopt, sys
+
+	if not argv:
+		usage()
+		sys.exit(2)
+
 	try:
 		optlist, args = getopt.getopt(argv, 'hp:r:c:u:i:o:', [
 				'help',
@@ -201,7 +206,31 @@ def run_command(argv):
 
 
 def usage():
-	raise NotImplementedError()
+	print '''
+  -h, --help         display this help and exit
+  -p, --project      specify the project file path
+  -r, --report       specify the report file path (to save, or to read)
+  -c, --clean        remove unused object in project file
+  -u, --user         specify the user numbers to play
+  -i, --iteration    specify the iteration numbers to play
+  -o, --operation    should be 'play' (default value), 'clean', or 'report'.
+      --show-classes show classes of objects used in project
+
+  Examples:
+  1. To play a project:
+     python CommandLine.py project-name.pkl
+  2. To play a project with user numbers = 10, and iteration numbers = 2:
+     python CommandLine.py -u 10 -i 2 project-name.pkl
+  3. To play a project, and save report to file system:
+     python CommandLine.py -p project-name.pkl -r report-name.db
+  4. To clean useless objects in a project (this makes project file smaller):
+     python CommandLine.py -c project-name.pkl
+  5. To show class usages in a project (for debug purpose):
+     python CommandLine.py --show-classes project-name.pkl
+  6. To display help:
+     python CommandLine.py -h
+
+'''
 
 ##################################################
 
