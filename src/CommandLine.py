@@ -1,4 +1,7 @@
 
+
+##################################################
+
 from Project import Project
 
 def load_project(path):
@@ -82,11 +85,125 @@ def clean_project_in_path(path):
 	new_project = clone_project(project)
 	save_project(new_project, path)
 
+##################################################
+
 def read_report(path):
 	raise NotImplementedError()
 
+##################################################
+
+def show_classes(project):
+	import Repository
+	Repository.trace_classes(project.repository_internal)
+
+##################################################
+
 def main():
+	import sys
+	run_command(sys.argv[1:])
+
+def run_command(argv):
+	import getopt, sys
+	try:
+		optlist, args = getopt.getopt(argv, 'hp:r:c:u:i:o:', [
+				'help',
+				'project=',
+				'report=',
+				'clean',
+				'user=',
+				'iteration=',
+				'operation=',
+				'show-classes', # for debug
+			])
+		optdict = dict(optlist)
+	except getopt.GetoptError:
+		usage()
+		sys.exit(2)
+
+	project_path = None
+	report_path = None
+	if_clean = False
+	user_count = None
+	iteration_count = None
+	operation = None
+
+	if_show_classes = False
+
+	for o, a in optlist:
+		if o in ('-h', '--help'):
+			usage()
+			sys.exit(2)
+		elif o in ('-p', '--project'):
+			project_path = a
+		elif o in ('-r', '--report'):
+			report_path = a
+		elif o in ('-c', '--clean'):
+			if_clean = True
+			if operation == None:
+				operation = 'clean'
+		elif o in ('-u', '--user'):
+			user_count = int(a)
+		elif o in ('-i', '--iteration'):
+			iteration_count = int(a)
+		elif o in ('-o', '--operation'):
+			operation = a
+			if operation not in ('clean', 'play', 'report'):
+				sys.exit('Unknown operation %s. Only clean, play, and report are supported now.' % operation)
+		elif o in ('--show-classes'):
+			if_show_classes = True
+			if operation == None:
+				operation = 'show-classes'
+		else:
+			sys.exit('Unknown option %s' % o)
+
+	if operation == None:
+		operation = 'play'
+
+	if operation == 'report':
+		if report_path == None:
+			if args:
+				report_path = args.pop(0)
+			else:
+				sys.exit('Report path must be specified by option -r or --report=')
+		read_report(report_path)
+		sys.exit()
+
+	if project_path == None:
+		if args:
+			project_path = args.pop(0)
+		else:
+			sys.exit('Project path must be specified by option -p or --project=')
+
+	if args:
+		sys.exit('More arguments than expected: %s' % args)
+
+	if if_clean or operation == 'clean':
+		clean_project_in_path(project_path)
+		if operation == 'clean':
+			sys.exit()
+
+	project = load_project(project_path)
+
+	if if_show_classes or operation == 'show-classes':
+		show_classes(project)
+
+	if operation in ('show-classes'):
+		sys.exit()
+
+	assert operation == 'play', 'Unknown operation: %s. (Should not happen here.)' % operation
+
+	if user_count != None:
+		project.user_count = user_count
+	if iteration_count != None:
+		project.iteration_count = iteration_count
+
+	play_project(project, report_path)
+
+
+def usage():
 	raise NotImplementedError()
+
+##################################################
 
 def test():
 #	project = Project()
@@ -100,7 +217,8 @@ def test():
 	#play_project(project, 'b-report.db')
 	play_project(project)
 
+##################################################
+
 if __name__ == '__main__':
-	#main()
-	test()
+	main()
 
