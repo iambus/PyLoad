@@ -18,7 +18,7 @@ AMF Encoder/Decoder (p1) (finished)
 AMF XML (p1) (finished)
 
 Users (finished)
-Reporter (p1)
+Reporter (p1) (finished)
 
 UI Unit Tests (p4)
 Packages (p4)
@@ -29,14 +29,14 @@ Builtin/Global Variables/Modules for plugin (p4)
 
 Variable Manager (p5)
 
-iteration (p3)
+iteration util (p3)
 threading util (p3)
 
 unicode support/i18n (p4)
 
 clean dead reference in repository (p3)
 
-command line tool (p3)
+command line tool (p3) (finished)
 
 support GZip coder
 support composite coder
@@ -48,7 +48,7 @@ Stopping Proxy (p3) (finished)
 EditorPanel disable button, disable editing (p3)
 better editor (finished)
 editor loading it slow (p3)
-buf fix: clear modify for editor before loading another node (p3)
+buf fix: clear modify for editor before loading another node (p3) (finished)
 add script/if/loop to pop menu (p3)
 better response (p2) (finished)
 
@@ -59,7 +59,7 @@ naming conventions (p2)
 
 Fixing flashing issues of DetailsPanel/InfoPanel (p3)
 Make InfoPanel editable (p3)
-Allow user to change HTTP request host (p3)
+Allow user to change HTTP request host (p3) (finished)
 
 Update unit test since the Scope has been removed from Script/Player (p3)
 
