@@ -99,16 +99,17 @@ class Mixin:
 
 ##################################################
 
-def trace():
+def trace(data = None):
 	'Only for debug usage'
-	global global_repository
-	m = global_repository.data.mappings
+	data = data or global_repository.data
+	m = data.mappings
 	for k, v in sorted(m.items()):
 		print '%6s => %s' % (k, v)
 
-def trace_classes():
+def trace_classes(data = None):
 	'Only for debug usage'
-	m = global_repository.data.mappings
+	data = data or global_repository.data
+	m = data.mappings
 	classes = {}
 	no_classes = []
 	for k, v in m.items():
