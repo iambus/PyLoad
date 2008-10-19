@@ -206,8 +206,7 @@ def run_command(argv):
 
 
 def usage():
-	print '''
-  -h, --help         display this help and exit
+	print '''  -h, --help         display this help and exit
   -p, --project      specify the project file path
   -r, --report       specify the report file path (to save, or to read)
   -c, --clean        remove unused object in project file
@@ -228,9 +227,7 @@ def usage():
   5. To show class usages in a project (for debug purpose):
      python CommandLine.py --show-classes project-name.pkl
   6. To display help:
-     python CommandLine.py -h
-
-'''
+     python CommandLine.py -h'''
 
 ##################################################
 
