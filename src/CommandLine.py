@@ -117,6 +117,7 @@ def run_command(argv):
 				'clean',
 				'user=',
 				'iteration=',
+				'host=',
 				'operation=',
 				'show-classes', # for debug
 			])
@@ -130,6 +131,7 @@ def run_command(argv):
 	if_clean = False
 	user_count = None
 	iteration_count = None
+	host = None
 	operation = None
 
 	if_show_classes = False
@@ -150,6 +152,8 @@ def run_command(argv):
 			user_count = int(a)
 		elif o in ('-i', '--iteration'):
 			iteration_count = int(a)
+		elif o in ('--host'):
+			host = a
 		elif o in ('-o', '--operation'):
 			operation = a
 			if operation not in ('clean', 'play', 'report'):
@@ -201,6 +205,9 @@ def run_command(argv):
 		project.user_count = user_count
 	if iteration_count != None:
 		project.iteration_count = iteration_count
+	if host != None:
+		for record in project.records:
+			record.set_host(host)
 
 	play_project(project, report_path)
 
@@ -212,6 +219,7 @@ def usage():
   -c, --clean        remove unused object in project file
   -u, --user         specify the user numbers to play
   -i, --iteration    specify the iteration numbers to play
+	  --host         specify the server host:port. E.g. localhost:8000
   -o, --operation    should be 'play' (default value), 'clean', or 'report'.
       --show-classes show classes of objects used in project
 
