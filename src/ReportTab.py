@@ -66,7 +66,7 @@ class ReportTab(wx.Panel):
 			if type(v) in [str, unicode]:
 				return v
 			elif type(v) in [float]:
-				return '%.3f' % v
+				return str(int(v))
 			else:
 				return str(v)
 
