@@ -110,7 +110,7 @@ def run_command(argv):
 		sys.exit(2)
 
 	try:
-		optlist, args = getopt.getopt(argv, 'hp:r:c:u:i:o:', [
+		optlist, args = getopt.getopt(argv, 'hp:r:cu:i:o:', [
 				'help',
 				'project=',
 				'report=',
