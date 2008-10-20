@@ -5,7 +5,8 @@ def escape(s):
 
 def subst(template, variables):
 	from string import Template
-	return Template(template).substitute(variables)
+	# TODO: remove safe_
+	return Template(template).safe_substitute(variables)
 
 def eval(template, variables):
 	raise NotImplementedError('eval is not implemented')
