@@ -24,6 +24,8 @@ class LineChart(wx.Panel):
 		self.SetBackgroundColour('WHITE')
 
 		self.times = times
+		if self.times:
+			self.times = sorted(self.times)
 
 		self.xformat = DefaultFormatter
 		self.yformat = DefaultFormatter
@@ -41,7 +43,12 @@ class LineChart(wx.Panel):
 
 		from itertools import groupby
 		from operator import itemgetter
-		self.data = sorted([(i[0]/1000+1, i[1]) for i in self.times])
+
+		if self.times and self.times[-1][0] > 600 * 1000:
+			self.data = sorted([(i[0]/10000+5, i[1]) for i in self.times])
+		else:
+			self.data = sorted([(i[0]/1000+1, i[1]) for i in self.times])
+
 		self.groups = [(k, zip(*g)[1]) for k, g in groupby(self.data, key=itemgetter(0))]
 		self.max = [(k, max(v)) for k, v in self.groups]
 		self.min = [(k, min(v)) for k, v in self.groups]
@@ -135,7 +142,6 @@ class LineChart(wx.Panel):
 		for i in range(self.yi, self.ymax+1, self.yi):
 			y = h * i / self.ymax
 			dc.DrawLine(1, y, -5, y)
-			#dc.DrawText(str(i), -30, y+5)
 			dc.DrawText(self.yformat(i, self.ymax), -30, y)
 
 	def DrawGrid(self, dc):
@@ -161,13 +167,13 @@ class LineChart(wx.Panel):
 
 
 	def DrawData(self, dc):
-		dc.SetPen(wx.Pen('RED'))
+		dc.SetPen(wx.Pen('#ff7272', 2))
 		self.DrawLine(dc, self.max)
 
-		dc.SetPen(wx.Pen('YELLOW'))
+		dc.SetPen(wx.Pen('#E0CD78', 2))
 		self.DrawLine(dc, self.min)
 
-		dc.SetPen(wx.Pen('#0ab1ff'))
+		dc.SetPen(wx.Pen('#8ccbea', 2))
 		self.DrawLine(dc, self.avg)
 
 
@@ -186,6 +192,8 @@ class LineChart(wx.Panel):
 
 	def SetData(self, times):
 		self.times = times
+		if self.times:
+			self.times = sorted(self.times)
 		self.InitData()
 		self.reInitBuffer = True
 
