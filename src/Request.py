@@ -43,7 +43,8 @@ class Response:
 			return self.tree
 		except Exception, e:
 			self.tree = None
-			log.error("Can't parse response body as XML tree.\nBody: %s\nReasone: %s" % (self.body, e))
+			log.error("Can't parse response body as XML tree.\nBody: [see debug log]\nReasone: %s" % e)
+			log.debug("Can't parse response body as XML tree.\nBody: %s\nReasone: %s" % (self.body, e))
 
 	def xfind(self, xpath):
 		tree = self.xtree()
@@ -156,7 +157,7 @@ class Request:
 		return (response, start_time, end_time)
 
 	def parse_r_n(self, reqstr):
-		m = re.match(r'\A(.*)\r\n((?:.*\r\n)+)\r\n((?:.|\r|\n)*)\Z', reqstr)
+		m = re.match(r'\A(.*)\r\n((?:.+\r\n)+)\r\n((?:.|\r|\n)*)\Z', reqstr)
 		if m == None:
 			return
 		request_line = m.group(1)
@@ -165,7 +166,7 @@ class Request:
 		return (request_line, headers, body)
 
 	def parse_n(self, reqstr):
-		m = re.match(r'\A(.*)\n((?:.*\n)+)\n((?:.|\r|\n)*)\Z', reqstr)
+		m = re.match(r'\A(.*)\n((?:.+\n)+)\n((?:.|\r|\n)*)\Z', reqstr)
 		if m == None:
 			log.error("Can't parse request:[[[%s]]]" % repr(reqstr))
 			return
