@@ -35,6 +35,31 @@ class Project:
 		output = open(path, 'wb')
 		try:
 			pickle.dump(self, output)
+		except Exception, e:
+			print '--------------------------------------------------'
+			print '---------- Exception during pickle.dump ----------'
+			print e
+			print '---------- Try to dump in small pieces -----------'
+			def testDump(data, name):
+				print '-------------- Dumping %s... ----------------' % name
+				from cStringIO import StringIO
+				o = StringIO()
+				try:
+					pickle.dump(data, o)
+					print 'Dump %s successfully' % name
+				except:
+					print 'Dump %s error %s' % (name, e)
+				finally:
+					o.close()
+			testDump(self.records, 'records')
+			testDump(self.specials, 'specials')
+			testDump(self.current_special, 'current-special')
+			testDump(self.global_factory, 'global-factory')
+			testDump(self.user_factory, 'user-factory')
+			testDump(self.iteration_factory, 'iteration-factory')
+			testDump(self.repository_internal, 'repository-internal')
+			print '--------------------------------------------------'
+			raise
 		finally:
 			output.close()
 	
