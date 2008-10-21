@@ -18,6 +18,7 @@ class Report:
 		self.finished = False
 		self.queue = None
 
+	# TODO: actually the thread here is not so neccessary. Try to remove it.
 	def start(self, hits = (), summary = ''):
 		self.finished = False
 		self.queue = Queue()
