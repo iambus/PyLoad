@@ -189,7 +189,8 @@ class LineChart(wx.Panel):
 		xv = float(w) / self.xmax
 		yv = float(h) / self.ymax
 
-		dc.DrawSpline([(x*xv, y*yv) for x, y in points])
+		#dc.DrawSpline([(x*xv, y*yv) for x, y in points])
+		dc.DrawLines([(x*xv, y*yv) for x, y in points])
 
 	def SetData(self, times):
 		self.times = times
