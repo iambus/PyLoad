@@ -62,6 +62,8 @@ class BinCoder:
 	@classmethod
 	def decode(cls, s):
 		x = dict(map(lambda i: (chr(i), r'\x%02x'%i), range(256)))
+		printable = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&()*+,-./:;<=>?@[]^_{|}~'
+		x.update(zip(printable, printable))
 		bin = ''.join(map(lambda c: x[c], s))
 		return '\n'.join([bin[i:i+16*4] for i in range(0, len(bin), 16*4)])
 
