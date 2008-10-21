@@ -44,10 +44,11 @@ class LineChart(wx.Panel):
 		from itertools import groupby
 		from operator import itemgetter
 
+		self.data = sorted([(i[0]/1000, i[1]) for i in self.times])
 		if self.times and self.times[-1][0] > 600 * 1000:
-			self.data = sorted([(i[0]/10000+5, i[1]) for i in self.times])
+			self.data = [(i[0] - i[0]%10 + 5, i[1]) for i in self.data]
 		else:
-			self.data = sorted([(i[0]/1000+1, i[1]) for i in self.times])
+			self.data = [(i[0] + 1, i[1]) for i in self.data]
 
 		self.groups = [(k, zip(*g)[1]) for k, g in groupby(self.data, key=itemgetter(0))]
 		self.max = [(k, max(v)) for k, v in self.groups]
@@ -206,9 +207,10 @@ if __name__ == '__main__':
 			(1409, 214), 
 			(1700, 228), 
 			(1850, 238), 
+			(1890, 274),
 			(1960, 272), 
 			(2600, 376), 
-			(1890, 274), )
+			)
 
 	import Test
 	Test.TestPanel(LineChart, lambda p: p.SetData(times))
