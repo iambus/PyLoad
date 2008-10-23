@@ -8,6 +8,7 @@ Tree Editor
 	drag (finished)
 	duplicate for records (p2) (finished)
 	duplicate for specials (p3) (finished)
+	delete mutiple nodes (p3)
 
 Infotab (p2) (finised)
 extractor (p3)
@@ -23,7 +24,7 @@ Reporter (p1) (finished)
 UI Unit Tests (p4)
 Packages (p4)
 Exception Handler (p4)
-Performance (p4)
+Performance (p2)
 
 Builtin/Global Variables/Modules for plugin (p4)
 
@@ -41,6 +42,8 @@ command line tool (p3) (finished)
 support GZip coder
 support composite coder
 support stateful coder
+
+add a request filter (p3)
 
 Minor:
 
