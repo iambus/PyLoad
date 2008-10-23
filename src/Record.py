@@ -73,11 +73,9 @@ class Hit(Player, PropertyMixin):
 		self.set_label()
 
 	def get_reqstr(self):
-		log.debug('get reqstr')
 		return self.reqstr
 
 	def set_reqstr(self, reqstr):
-		log.debug('set reqstr')
 		self.reqstr = reqstr
 
 	def set_host(self, host):
