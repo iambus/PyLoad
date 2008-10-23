@@ -2,6 +2,13 @@
 import re
 import wx
 
+DEFAULT_FONT = 'Courier New'
+
+def CheckFontFace(face):
+	fontAttrs = (10, wx.SWISS, wx.NORMAL, wx.NORMAL, False)
+	font = wx.Font(*fontAttrs)
+	return face if font.SetFaceName(face) else DEFAULT_FONT
+
 def LoadConfigDictFromFile(filepath):
 	try:
 		fp = open(filepath, 'r')
@@ -21,7 +28,10 @@ def LoadConfigDictFromFile(filepath):
 			k = m.group(1)
 			v = m.group(2)
 			v = v.strip('\'\" \t\r')
-			d[k] = v
+			if k == 'font':
+				d[k] = CheckFontFace(v)
+			else:
+				d[k] = v
 		elif style.match(line):
 			m = style.match(line)
 			k = m.group(1)
@@ -54,22 +64,28 @@ def ParseTextAttrToDict(s):
 			d[k] = v
 	return d
 
+def CreateFont(fontAttrs):
+	font = wx.Font(*fontAttrs[:5])
+	if not font.SetFaceName(fontAttrs[5]):
+		font.SetFaceName(DEFAULT_FONT)
+	return font
+
 def ParseFont(s):
 	d = ParseTextAttrToDict(s)
-	fontAttrs = [10, wx.SWISS, wx.NORMAL, wx.NORMAL, False, 'Courier New']
+	fontAttrs = [10, wx.SWISS, wx.NORMAL, wx.NORMAL, False, DEFAULT_FONT]
 
 	if d.has_key('bold'):
 		fontAttrs[3] = wx.BOLD
 	if d.has_key('face'):
 		fontAttrs[5] = d['face']
 
-	return wx.Font(*fontAttrs)
+	return CreateFont(fontAttrs)
 
 def ParseTextAttr(s):
 	d = ParseTextAttrToDict(s)
 	fore = wx.NullColour
 	back = wx.NullColour
-	fontAttrs = [10, wx.SWISS, wx.NORMAL, wx.NORMAL, False, 'Courier New']
+	fontAttrs = [10, wx.SWISS, wx.NORMAL, wx.NORMAL, False, DEFAULT_FONT]
 
 	if d.has_key('bold'):
 		fontAttrs[3] = wx.BOLD
@@ -80,7 +96,7 @@ def ParseTextAttr(s):
 	if d.has_key('back'):
 		back = d['back']
 
-	font = wx.Font(*fontAttrs)
+	font = CreateFont(fontAttrs)
 	return wx.TextAttr(fore, back, font)
 
 
