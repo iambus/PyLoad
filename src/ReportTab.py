@@ -82,6 +82,8 @@ class ReportTab(wx.Panel):
 
 		if len(rows):
 			self.list.SetColumnWidth(1, wx.LIST_AUTOSIZE)
+			if self.list.GetColumnWidth(1) < 60:
+				self.list.SetColumnWidth(1, 60)
 
 	def LoadChart(self, uid):
 		data = [hit[1:3] for hit in self.data if hit[0] == uid]
