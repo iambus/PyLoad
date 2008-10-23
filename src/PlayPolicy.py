@@ -99,7 +99,13 @@ class UserThread(threading.Thread):
 		self.user = user
 
 	def run(self):
-		self.user.play(self.scope)
+		try:
+			self.user.play(self.scope)
+		except Exception, e:
+			import traceback, sys
+			traceback.print_tb( sys.exc_info()[2] )
+			# just print it right now
+			# TODO: notify main thread
 
 	def play(self, scope):
 		self.scope = scope
