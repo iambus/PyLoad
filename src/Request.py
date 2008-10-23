@@ -143,8 +143,8 @@ class Request:
 		try:
 			resp = requester(req)
 		except urllib2.URLError, e:
-			log.error('Request error: %s\nURL: %s\nHeaders: %s' % (req, url, headers))
-			raise e
+			log.error('Request error: %s\nURL: %s\nHeaders: %s\n%s' % (req, url, headers, e))
+			raise
 		end_time = time.clock() #XXX: is it a good place?
 		rawbody = resp.read()
 
