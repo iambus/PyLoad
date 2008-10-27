@@ -68,6 +68,15 @@ class Response:
 		finally:
 			fp.close()
 
+def get_browser(cookie = None):
+	import proxy.Settings
+	proxy_handler = proxy.Settings.get_proxy_hander()
+	if cookie:
+		assert isinstance(cookie, cookielib.CookieJar)
+		return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), proxy_handler)
+	else:
+		return urllib2.build_opener(proxy_handler)
+
 class Request:
 	def __init__(self, url, reqstr = None):
 		self.url = url
@@ -129,10 +138,9 @@ class Request:
 		elif cookie and isinstance(cookie, cookielib.CookieJar):
 			if headers.has_key('Cookie'):
 				del headers['Cookie']
-			opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
-			requester = opener.open
+			requester = get_browser(cookie).open
 		else:
-			requester = urllib2.urlopen
+			requester = get_browser().open
 
 		if data:
 			req = urllib2.Request(url=url, data=data, headers=headers)
