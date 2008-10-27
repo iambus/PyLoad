@@ -1,5 +1,5 @@
 
-import Proxy
+from proxy import Proxy
 
 def callback(hit):
 	if len(hit.oreqstr) > 100 * 1000:

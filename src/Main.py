@@ -12,7 +12,7 @@ from Project import Project
 from Report import Report
 import ReportManager
 
-import Proxy
+from proxy import Proxy
 
 # For unimplemented panel...
 class ColoredPanel(wx.Window):

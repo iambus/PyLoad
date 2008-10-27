@@ -1,4 +1,8 @@
 
+if __name__ == '__main__':
+    import sys
+    sys.path.append('..')
+
 import BaseHTTPServer, select, socket, SocketServer, urlparse
 
 import cStringIO
@@ -272,7 +276,7 @@ def WebFilter(data):
 
 
 def test():
-    start(8008)
+    start(default_port)
 
 def test_thread():
     thread_start()
