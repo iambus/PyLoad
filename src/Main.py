@@ -120,7 +120,6 @@ class MainFrame(wx.Frame):
 					("Save &As", "Save Project As...", self.OnSaveAs),
 					("", "", ""),
 					("E&xit", "Exit", self.OnExit),
-					("", "", ""),
 					)),
 				("&Operation", 
 					(
