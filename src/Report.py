@@ -5,7 +5,7 @@ from Queue import Queue
 
 import time
 
-class Report:
+class ReportBase:
 	def __init__(self, path = ':memory:'):
 		''' The path is the location of SQLite3 database.
 			If path is a string, then the database is created on file system specified by this string.
@@ -18,29 +18,6 @@ class Report:
 		self.finished = False
 		self.queue = None
 
-	# TODO: actually the thread here is not so neccessary. Try to remove it.
-	def start(self, hits = (), summary = ''):
-		self.finished = False
-		self.queue = Queue()
-
-		self.start_time = time.clock()
-
-		reporter = self
-		class ReporterThread(threading.Thread):
-			def __init__(self, name='ReporterThread'):
-				threading.Thread.__init__(self, name=name)
-			def run(self):
-				reporter.run(hits, summary)
-		thread = ReporterThread() 
-		thread.start()
-
-		self.thread = thread
-		return thread
-
-	def run(self, hits, summary):
-		self.init_report(hits, summary)
-		self.receive()
-		self.close_report()
 
 	def init_report(self, hits, summary):
 		if self.path != ':memory:':
@@ -82,7 +59,6 @@ class Report:
 
 		cursor.close()
 
-
 	def close_report(self):
 		self.connection.commit()
 		self.connection.close()
@@ -108,16 +84,6 @@ class Report:
 		if not self.finished:
 			self.queue.put(hits)
 
-	def finish(self):
-		self.queue.put(None)
-		self.finished = True
-		self.thread.join()
-		self.queue.join()
-
-		self.connection = None
-		self.thread = None
-		self.queue = None
-
 	def display(self):
 		if self.path != ':memory:':
 			self.connection = sqlite3.connect(self.path)
@@ -128,6 +94,65 @@ class Report:
 	def get_reporter(self):
 		return ReportPoster(self)
 
+
+class SimpleReport(ReportBase):
+	def __init__(self, path = ':memory:'):
+		ReportBase.__init__(self, path)
+
+	def start(self, hits = (), summary = ''):
+		self.finished = False
+		self.queue = Queue()
+		self.start_time = time.clock()
+
+		self.init_report(hits, summary)
+
+	def finish(self):
+		self.finished = True
+		self.receive()
+		self.close_report()
+		self.queue.join()
+
+		self.connection = None
+		self.queue = None
+
+class ThreadReport(ReportBase):
+	def __init__(self, path = ':memory:'):
+		ReportBase.__init__(self, path)
+
+	def start(self, hits = (), summary = ''):
+		self.finished = False
+		self.queue = Queue()
+		self.start_time = time.clock()
+
+		reporter = self
+		class ReporterThread(threading.Thread):
+			def __init__(self, name='ReporterThread'):
+				threading.Thread.__init__(self, name=name)
+			def run(self):
+				reporter.run(hits, summary)
+		thread = ReporterThread() 
+		thread.start()
+
+		self.thread = thread
+
+	def run(self, hits, summary):
+		self.init_report(hits, summary)
+		self.receive()
+		self.close_report()
+
+	def finish(self):
+		self.queue.put(None)
+		self.finished = True
+		self.thread.join()
+		self.queue.join()
+
+		self.connection = None
+		self.thread = None
+		self.queue = None
+
+
+Report = ThreadReport
+#Report = SimpleReport
 
 class ReportPoster:
 	# not thread-safe
