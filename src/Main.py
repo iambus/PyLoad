@@ -273,7 +273,7 @@ class MainFrame(wx.Frame):
 		menu = self.GetMenuBar().GetMenu(1)
 		menu.FindItemByPosition(3).Enable(False)
 		menu.FindItemByPosition(4).Enable(False) # TODO: enable it after function implemented
-		
+
 		self.Play()
 
 	def OnTerminate(self, event):
@@ -353,6 +353,10 @@ class MainFrame(wx.Frame):
 			Proxy.stop()
 			self.proxy.join()
 			self.proxy = None
+
+		import proxy.TwistedProxy as poster
+		poster.kill_if()
+		
 		self.Destroy()
 	
 	# }}}
@@ -428,6 +432,9 @@ class MainFrame(wx.Frame):
 		shutil.copyfile(self.report.path, filename)
 
 def Main():
+	import proxy.TwistedProxy as poster
+	poster.fork_if()
+		
 	import sys
 	sys.path.append('runtime')
 	sys.path.append('plugin')

@@ -1,6 +1,6 @@
 
 # TODO: automatically set USE_AGENT to False if twisted doesn't existed
-USE_AGENT = False
+USE_AGENT = True
 
 AGENT_HOST = 'localhost'
 AGENT_PORT = 9107
