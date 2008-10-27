@@ -104,6 +104,7 @@ class UserThread(threading.Thread):
 		except Exception, e:
 			import traceback, sys
 			traceback.print_tb( sys.exc_info()[2] )
+			print e
 			# just print it right now
 			# TODO: notify main thread
 
