@@ -36,6 +36,9 @@ class Response:
 		except Exception, e:
 			log.exception(e)
 
+	# for back compatibility
+	find_all = findall
+
 	def xtree(self):
 		from xml.etree import ElementTree
 		try:
