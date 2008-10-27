@@ -64,7 +64,7 @@ class Scope:
 		except Exception, e:
 			#TODO: use a better approach...
 			#print 'Error when executing script:\n%s' % script
-			raise e
+			raise
 
 	def eval(self, script):
 		try:
