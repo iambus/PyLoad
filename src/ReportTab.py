@@ -45,6 +45,8 @@ class ReportTab(wx.Panel):
 
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self.list)
 
+		self.Bind(wx.EVT_LIST_COL_RIGHT_CLICK, self.OnSwitch, self.list)
+
 	def LoadReport(self, path):
 		import sqlite3
 
@@ -52,13 +54,43 @@ class ReportTab(wx.Panel):
 		cursor = connection.cursor()
 
 		cursor.execute('select id, label, avg, max, min, count from summary')
-		self.summary = [row for row in cursor]
-		self.LoadSummary(self.summary)
+		self.hit_summary = [row for row in cursor]
 
 		cursor.execute('select hitid, timestamp, response_time from hits_v order by hitid, timestamp')
-		self.data = [row for row in cursor]
+		self.hit_data = [row for row in cursor]
+
+		try:
+			cursor.execute('select id, label, avg, max, min, count from page_summary')
+			self.page_summary = [row for row in cursor]
+
+			cursor.execute('select pageid, timestamp, response_time from pages_v order by pageid, timestamp')
+			self.page_data = [(row[0], int(row[1]), row[2]) for row in cursor]
+		except:
+			print '[Warning] No page information, always use hits'
+			self.page_summary = self.hit_summary
+			self.page_data = self.hit_data
 
 		cursor.close()
+
+		self.ShowHits()
+
+	def ShowPages(self):
+		self.summary = self.page_summary
+		self.data = self.page_data
+		self.LoadSummary(self.page_summary)
+
+		h = wx.ListItem()
+		h.SetText('PageID')
+		self.list.SetColumn(0, h)
+
+	def ShowHits(self):
+		self.summary = self.hit_summary
+		self.data = self.hit_data
+		self.LoadSummary(self.hit_summary)
+
+		h = wx.ListItem()
+		h.SetText('ID')
+		self.list.SetColumn(0, h)
 
 	def LoadSummary(self, rows):
 		self.list.DeleteAllItems()
@@ -96,6 +128,12 @@ class ReportTab(wx.Panel):
 	def OnItemSelected(self, event):
 		uid = self.list.GetItemText(event.m_itemIndex)
 		self.LoadChart(uid)
+
+	def OnSwitch(self, event):
+		if self.data == self.page_data:
+			self.ShowHits()
+		else:
+			self.ShowPages()
 
 if __name__ == '__main__':
 	import Test

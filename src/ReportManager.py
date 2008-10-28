@@ -5,7 +5,10 @@ import Record
 
 def start_report(reporter, project, summary = ''):
 	hits = {}
+	pages = {}
 	def loop_all(node):
+		if isinstance(node, Record.Page):
+			pages[node.uuid] = (node.uuid, node.label, map(lambda h: h.uuid, node.hits))
 		if isinstance(node, Record.Hit):
 			hits[node.uuid] = (node.uuid, node.label, node.url)
 		elif hasattr(node, 'childern'):
@@ -14,5 +17,5 @@ def start_report(reporter, project, summary = ''):
 	for s in project.specials:
 		loop_all(s)
 
-	reporter.start(hits = hits.values(), summary = summary)
+	reporter.start(hits = hits.values(), pages = pages.values(), summary = summary)
 

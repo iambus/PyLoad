@@ -19,7 +19,7 @@ class ReportBase:
 		self.queue = None
 
 
-	def init_report(self, hits, summary):
+	def init_report(self, hits, pages, summary):
 		if self.path != ':memory:':
 			import os, os.path
 			if os.path.exists(self.path):
@@ -27,13 +27,25 @@ class ReportBase:
 		self.connection = sqlite3.connect(self.path)
 		cursor = self.connection.cursor()
 
+		# Info
 		cursor.execute('create table info (key, content)')
 		cursor.execute('insert into info(key, content) values (?, ?)', ('summary', summary))
 
+		# Hit info
 		cursor.execute('create table hits_info (hitid, label, url)')
 		for hit in hits:
 			cursor.execute('insert into hits_info(hitid, label, url) values (?, ?, ?)', hit)
 
+		# Page info
+		cursor.execute('create table pages_info (pageid, label)')
+		cursor.execute('create table page_hits (pageid, hitid)')
+		for page in pages:
+			cursor.execute('insert into pages_info(pageid, label) values (?, ?)', page[:2])
+			hitids = page[2]
+			for hitid in hitids:
+				cursor.execute('insert into page_hits(pageid, hitid) values (?, ?)', (page[0], hitid))
+
+		# Runtime data
 		cursor.execute('create table hits (hitid, start timestamp, end timestamp)')
 		cursor.execute('''create view hits_v as
 				select
@@ -56,6 +68,31 @@ class ReportBase:
 					min(time) as min,
 					count(time) as count
 				from one group by id''')
+
+		cursor.execute('''create view pages_v as
+				select
+					pages_info.pageid as pageid,
+					avg(hits_v.timestamp) as timestamp,
+					sum(hits_v.response_time) as response_time
+				from hits_v, pages_info, page_hits
+				where pages_info.pageid = page_hits.pageid and
+					page_hits.hitid = hits_v.hitid
+				group by pages_info.pageid''')
+		cursor.execute('''create view page_one as
+				select
+					pages_v.pageid as id,
+					pages_info.label as label,
+					pages_v.response_time as time
+				from pages_v, pages_info where pages_v.pageid = pages_info.pageid''')
+		cursor.execute('''create view page_summary as
+				select
+					id,
+					page_one.label as label,
+					avg(time) as avg,
+					max(time) as max,
+					min(time) as min,
+					count(time) as count
+				from page_one group by id''')
 
 		cursor.close()
 
@@ -99,12 +136,12 @@ class SimpleReport(ReportBase):
 	def __init__(self, path = ':memory:'):
 		ReportBase.__init__(self, path)
 
-	def start(self, hits = (), summary = ''):
+	def start(self, hits = (), pages = (), summary = ''):
 		self.finished = False
 		self.queue = Queue()
 		self.start_time = time.clock()
 
-		self.init_report(hits, summary)
+		self.init_report(hits, pages, summary)
 
 	def finish(self):
 		self.finished = True
@@ -119,7 +156,7 @@ class ThreadReport(ReportBase):
 	def __init__(self, path = ':memory:'):
 		ReportBase.__init__(self, path)
 
-	def start(self, hits = (), summary = ''):
+	def start(self, hits = (), pages = (), summary = ''):
 		self.finished = False
 		self.queue = Queue()
 		self.start_time = time.clock()
@@ -129,14 +166,14 @@ class ThreadReport(ReportBase):
 			def __init__(self, name='ReporterThread'):
 				threading.Thread.__init__(self, name=name)
 			def run(self):
-				reporter.run(hits, summary)
+				reporter.run(hits, pages, summary)
 		thread = ReporterThread() 
 		thread.start()
 
 		self.thread = thread
 
-	def run(self, hits, summary):
-		self.init_report(hits, summary)
+	def run(self, hits, pages, summary):
+		self.init_report(hits, pages, summary)
 		self.receive()
 		self.close_report()
 
