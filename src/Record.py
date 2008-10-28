@@ -2,6 +2,7 @@
 import datetime
 import re
 
+from Scope import Scope
 from Player import Player
 from Request import Request
 import Template
@@ -119,6 +120,14 @@ class Hit(Player, PropertyMixin):
 		if m:
 			self.label = m.group(1)
 
+	def play(self, basescope = None):
+		if basescope == None:
+			basescope = Scope()
+		self.before(basescope)
+		value = self.playmain(basescope)
+		self.after(basescope)
+		return value
+
 	def playmain(self, basescope=None):
 		if basescope == None:
 			request = Request(self.url, self.oreqstr)
@@ -149,6 +158,8 @@ class Hit(Player, PropertyMixin):
 			except Errors.ValidationError, e:
 				raise Errors.TerminateIteration('ValidationError: %s' % e)
 
+			return (start_time, end_time)
+
 
 class Page(Player):
 	def __init__(self, path):
@@ -171,6 +182,20 @@ class Page(Player):
 	def set_host(self, host):
 		for h in self.hits:
 			h.set_host(host)
+
+	def playmain(self, basescope):
+		times = []
+		for hit in self.hits:
+			value = hit.play(Scope(basescope))
+			if value:
+				times.append(value)
+		reporter = basescope.lookup('reporter')
+		if reporter and times:
+			starts, ends = zip(*times)
+			start_time = min(starts)
+			end_time = max(ends)
+			response_time = sum(map(lambda x:int((x[1]-x[0])*1000), times))
+			reporter.post_page(self.uuid, start_time, end_time, response_time)
 
 class Record(Player, PropertyMixin):
 	def __init__(self):

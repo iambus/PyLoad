@@ -58,7 +58,8 @@ class ReportBase:
 					hits_v.hitid as id,
 					hits_info.label as label,
 					hits_v.response_time as time
-				from hits_v, hits_info where hits_v.hitid = hits_info.hitid''')
+				from hits_v, hits_info
+				where hits_v.hitid = hits_info.hitid''')
 		cursor.execute('''create view summary as
 				select
 					id,
@@ -69,15 +70,14 @@ class ReportBase:
 					count(time) as count
 				from one group by id''')
 
+		cursor.execute('create table pages (pageid, start timestamp, end timestamp, response_time)')
 		cursor.execute('''create view pages_v as
 				select
-					pages_info.pageid as pageid,
-					avg(hits_v.timestamp) as timestamp,
-					sum(hits_v.response_time) as response_time
-				from hits_v, pages_info, page_hits
-				where pages_info.pageid = page_hits.pageid and
-					page_hits.hitid = hits_v.hitid
-				group by pages_info.pageid''')
+					pages.pageid as pageid,
+					(start + end)/2 as timestamp,
+					pages.response_time as response_time
+				from pages, pages_info
+				where pages.pageid = pages_info.pageid''')
 		cursor.execute('''create view page_one as
 				select
 					pages_v.pageid as id,
@@ -102,9 +102,14 @@ class ReportBase:
 
 	def receive(self):
 		while not self.finished or not self.queue.empty():
-			hits = self.queue.get()
-			if hits:
-				self.add_hits(hits)
+			data = self.queue.get()
+			if data:
+				if len(data[0]) == 3:
+					self.add_hits(data)
+				elif len(data[0]) == 4:
+					self.add_pages(data)
+				else:
+					assert False, 'The length of data must be 3 (for hit) or 4 (for page), but got: %s' % data[0]
 			self.queue.task_done()
 		assert self.queue.empty()
 
@@ -117,9 +122,23 @@ class ReportBase:
 			hits2.append((id, start, end))
 		self.connection.executemany('insert into hits(hitid, start, end) values (?, ?, ?)', hits2)
 
+	def add_pages(self, pages):
+		pages2 = []
+		for page in pages:
+			id = page[0]
+			start = int((page[1] - self.start_time)*1000)
+			end = int((page[2] - self.start_time)*1000)
+			time = page[3]
+			pages2.append((id, start, end, time))
+		self.connection.executemany('insert into pages(pageid, start, end, response_time) values (?, ?, ?, ?)', pages2)
+
 	def post_hits(self, hits):
 		if not self.finished:
 			self.queue.put(hits)
+
+	def post_pages(self, pages):
+		if not self.finished:
+			self.queue.put(pages)
 
 	def display(self):
 		if self.path != ':memory:':
@@ -195,12 +214,17 @@ class ReportPoster:
 	# not thread-safe
 	def __init__(self, report):
 		self.report = report
-		self.data = []
+		self.hits_data = []
+		self.pages_data = []
 	def post_hit(self, id, start, end):
-		self.data.append((id, start, end))
+		self.hits_data.append((id, start, end))
+	def post_page(self, id, start, end, time):
+		self.pages_data.append((id, start, end, time))
 	def commit(self):
-		self.report.post_hits(self.data)
-		self.data = []
+		self.report.post_hits(self.hits_data)
+		self.report.post_pages(self.pages_data)
+		self.hits_data = []
+		self.pages_data = []
 
 if __name__ == '__main__':
 	r = Report('last-report.db')

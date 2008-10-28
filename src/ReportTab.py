@@ -130,10 +130,11 @@ class ReportTab(wx.Panel):
 		self.LoadChart(uid)
 
 	def OnSwitch(self, event):
-		if self.data == self.page_data:
-			self.ShowHits()
-		else:
-			self.ShowPages()
+		if event.Column == -1:
+			if self.data == self.page_data:
+				self.ShowHits()
+			else:
+				self.ShowPages()
 
 if __name__ == '__main__':
 	import Test
