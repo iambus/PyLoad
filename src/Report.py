@@ -23,7 +23,12 @@ class ReportBase:
 		if self.path != ':memory:':
 			import os, os.path
 			if os.path.exists(self.path):
-				os.remove(self.path)
+				try:
+					os.remove(self.path)
+				except Exception, e:
+					print "Can't remove path: %s, Reasone: %s" % (self.path, e)
+					self.path += '-1'
+					print "Use path %s instead." % self.path
 		self.connection = sqlite3.connect(self.path)
 		cursor = self.connection.cursor()
 
