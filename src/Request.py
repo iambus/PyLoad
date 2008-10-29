@@ -160,6 +160,8 @@ class Request:
 			raise TerminateRequest(e)
 		end_time = time.clock() #XXX: is it a good place?
 		rawbody = resp.read()
+		# XXX: Is it necessary?
+		resp.close()
 
 		response = Response()
 		response.rawbody = rawbody
