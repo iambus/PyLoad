@@ -30,12 +30,16 @@ class LineChart(wx.Panel):
 		self.xformat = DefaultFormatter
 		self.yformat = DefaultFormatter
 
+		self.showAll = True
+
 		self.InitData()
 		self.InitBuffer()
 
 		self.Bind(wx.EVT_PAINT, self.OnPaint)
 		self.Bind(wx.EVT_SIZE, self.OnSize)
 		self.Bind(wx.EVT_IDLE, self.OnIdle)
+
+		self.Bind(wx.EVT_RIGHT_DCLICK, self.OnSwitchLines)
 
 	def InitData(self):
 		if self.times == None:
@@ -106,6 +110,10 @@ class LineChart(wx.Panel):
 	def OnPaint(self, event):
 		dc = wx.BufferedPaintDC(self, self.buffer)
 
+	def OnSwitchLines(self, event):
+		self.showAll = not self.showAll
+		self.reInitBuffer = True
+
 	# Drawing
 	def DrawAll(self, dc):
 		if self.times == None:
@@ -168,11 +176,12 @@ class LineChart(wx.Panel):
 
 
 	def DrawData(self, dc):
-		dc.SetPen(wx.Pen('#ff7272', 2))
-		self.DrawLine(dc, self.max)
+		if self.showAll:
+			dc.SetPen(wx.Pen('#ff7272', 2))
+			self.DrawLine(dc, self.max)
 
-		dc.SetPen(wx.Pen('#E0CD78', 2))
-		self.DrawLine(dc, self.min)
+			dc.SetPen(wx.Pen('#E0CD78', 2))
+			self.DrawLine(dc, self.min)
 
 		dc.SetPen(wx.Pen('#8ccbea', 2))
 		self.DrawLine(dc, self.avg)
