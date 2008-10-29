@@ -76,9 +76,15 @@ def get_browser(cookie = None):
 	proxy_handler = proxy.Settings.get_proxy_hander()
 	if cookie:
 		assert isinstance(cookie, cookielib.CookieJar)
-		return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), proxy_handler)
+		if proxy_handler:
+			return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), proxy_handler)
+		else:
+			return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 	else:
-		return urllib2.build_opener(proxy_handler)
+		if proxy_handler:
+			return urllib2.build_opener(proxy_handler)
+		else:
+			return urllib2.build_opener()
 
 class Request:
 	def __init__(self, url, reqstr = None):
