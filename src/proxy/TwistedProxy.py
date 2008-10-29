@@ -4,6 +4,8 @@ from twisted.internet import reactor
 from twisted.python import log
 from twisted.internet.error import CannotListenError
 
+import Settings
+
 import sys
 
 class ProxyFactory(http.HTTPFactory):
@@ -13,7 +15,6 @@ class ProxyFactory(http.HTTPFactory):
 
 def start_proxy():
 	#log.startLogging(sys.stdout)
-	import Settings
 	try:
 		reactor.listenTCP(Settings.AGENT_PORT, ProxyFactory())
 		reactor.run()
@@ -29,6 +30,8 @@ def stop():
 PROCESS = None
 
 def fork():
+	if not Settings.USE_AGENT:
+		return
 	global PROCESS
 	assert PROCESS == None
 	import subprocess
@@ -42,6 +45,8 @@ def fork_if():
 		fork()
 
 def kill():
+	if not Settings.USE_AGENT:
+		return
 	global PROCESS
 	assert PROCESS != None
 	import subprocess
