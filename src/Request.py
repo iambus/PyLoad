@@ -155,7 +155,9 @@ class Request:
 			resp = requester(req)
 		except urllib2.URLError, e:
 			log.error('Request error: %s\nURL: %s\nHeaders: %s\n%s' % (req, url, headers, e))
-			raise
+			from Errors import TerminateRequest
+			#TODO: add trace information
+			raise TerminateRequest(e)
 		end_time = time.clock() #XXX: is it a good place?
 		rawbody = resp.read()
 

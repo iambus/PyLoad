@@ -21,6 +21,10 @@ class ControlFlag(Base):
 	def __init__(self, message = None, traceback = None):
 		Base.__init__(self, message, traceback)
 
+class TerminateRequest(ControlFlag):
+	def __init__(self, message = None, traceback = None):
+		Base.__init__(self, message, traceback)
+
 class TerminateIteration(ControlFlag):
 	def __init__(self, message = None, traceback = None):
 		Base.__init__(self, message, traceback)

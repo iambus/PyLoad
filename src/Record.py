@@ -8,6 +8,8 @@ from Request import Request
 import Template
 import ContentTypeHandler
 
+import Errors
+
 import Logger
 log = Logger.getLogger()
 
@@ -123,10 +125,13 @@ class Hit(Player, PropertyMixin):
 	def play(self, basescope = None):
 		if basescope == None:
 			basescope = Scope()
-		self.before(basescope)
-		value = self.playmain(basescope)
-		self.after(basescope)
-		return value
+		try:
+			self.before(basescope)
+			value = self.playmain(basescope)
+			self.after(basescope)
+			return value
+		except Errors.TerminateRequest, e:
+			log.exeception('Request terminated because of %s' % e)
 
 	def playmain(self, basescope=None):
 		if basescope == None:
@@ -153,7 +158,6 @@ class Hit(Player, PropertyMixin):
 					self.resp_handler = ContentTypeHandler.get_handler(self.orespstr)
 				handler = self.resp_handler or self.req_handler
 			try:
-				import Errors
 				handler.validator.validate(response)
 			except Errors.ValidationError, e:
 				raise Errors.TerminateIteration('ValidationError: %s' % e)

@@ -18,7 +18,7 @@ class Iteration(Player):
 		try:
 			Player.play(self, scope)
 		except Errors.TerminateIteration, e:
-			log.exception(e)
+			log.exception('Iteration terminated because of %s' % e)
 		self.childern = []
 
 class User(Player):
