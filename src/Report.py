@@ -5,6 +5,11 @@ from Queue import Queue
 
 import time
 
+def remove_file(path):
+	import os, os.path
+	if os.path.exists(path):
+		os.remove(path)
+
 class ReportBase:
 	def __init__(self, path = ':memory:'):
 		''' The path is the location of SQLite3 database.
@@ -21,14 +26,14 @@ class ReportBase:
 
 	def init_report(self, hits, pages, summary):
 		if self.path != ':memory:':
-			import os, os.path
-			if os.path.exists(self.path):
-				try:
-					os.remove(self.path)
-				except Exception, e:
-					print "Can't remove path: %s, Reasone: %s" % (self.path, e)
-					self.path += '-1'
-					print "Use path %s instead." % self.path
+			try:
+				remove_file(self.path)
+			except Exception, e:
+				print "Can't remove path: %s, Reasone: %s" % (self.path, e)
+				self.path += '-1'
+				print "Use path %s instead." % self.path
+				remove_file(self.path)
+
 		self.connection = sqlite3.connect(self.path)
 		cursor = self.connection.cursor()
 
