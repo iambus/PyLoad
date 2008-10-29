@@ -55,12 +55,12 @@ class PolicyPanel(wx.Panel):
 
 		userLabel = wx.StaticText(self, -1, 'Users')
 		userField = wx.SpinCtrl(self, -1)
-		userField.SetRange(1,100)
+		userField.SetRange(1, 500)
 		userField.SetValue(1)
 
 		iterationLabel = wx.StaticText(self, -1, 'Iterations')
 		iterationField = wx.SpinCtrl(self, -1)
-		iterationField.SetRange(1,100)
+		iterationField.SetRange(1, 10000)
 		iterationField.SetValue(1)
 
 		specialLabel = wx.StaticText(self, -1, 'Special')
