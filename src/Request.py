@@ -160,7 +160,7 @@ class Request:
 		try:
 			resp = requester(req)
 		except urllib2.URLError, e:
-			log.error('Request error: %s\nURL: %s\nHeaders: %s\n%s' % (req, url, headers, e))
+			log.error('Request error: %s\nURL: %s\nHeaders: %s\n<%s> %s' % (req, url, headers, e.__class__.__name__, e))
 			from Errors import TerminateRequest
 			#TODO: add trace information
 			raise TerminateRequest(e)
