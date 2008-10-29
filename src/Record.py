@@ -131,7 +131,7 @@ class Hit(Player, PropertyMixin):
 			self.after(basescope)
 			return value
 		except Errors.TerminateRequest, e:
-			log.exeception('Request terminated because of %s' % e)
+			log.exception('Request terminated because of %s' % e)
 
 	def playmain(self, basescope=None):
 		if basescope == None:
