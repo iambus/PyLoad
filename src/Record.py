@@ -160,7 +160,7 @@ class Hit(Player, PropertyMixin):
 			try:
 				handler.validator.validate(response)
 			except Errors.ValidationError, e:
-				raise Errors.TerminateIteration('ValidationError: %s' % e)
+				raise Errors.TerminateRequest('ValidationError: %s' % e)
 
 			return (start_time, end_time)
 
