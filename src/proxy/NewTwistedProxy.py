@@ -1,11 +1,12 @@
+
 from twisted.web import proxy, http
 from twisted.python import log
+from twisted.internet import reactor
+from twisted.internet.error import CannotListenError
 
 #import sys
 #log.startLogging(sys.stdout)
 log.startLogging(open('twisted-proxy.log', 'w'))
-
-PROXY_PORT = 9107
 
 class NewProxyClient(proxy.ProxyClient):
 
@@ -50,9 +51,18 @@ class NewProxyFactory(http.HTTPFactory):
 		protocol = NewProxy()
 		return protocol
 
+
+def start_proxy(port = None):
+	#log.startLogging(sys.stdout)
+	if port == None:
+		import Settings
+		port = Settings.AGENT_PORT
+	try:
+		reactor.listenTCP(port, NewProxyFactory())
+		reactor.run()
+	except CannotListenError:
+		print 'Warning: the port %d is in use, maybe another agent' % port
+
 if __name__ == "__main__":
-	from twisted.internet import reactor
-	prox = NewProxyFactory()
-	reactor.listenTCP(PROXY_PORT, prox)
-	reactor.run( )
+	start_proxy()
 

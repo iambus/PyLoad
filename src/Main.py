@@ -354,7 +354,7 @@ class MainFrame(wx.Frame):
 			self.proxy.join()
 			self.proxy = None
 
-		import proxy.TwistedProxy as poster
+		import proxy.Agent as poster
 		poster.kill_if()
 		
 		self.Destroy()
@@ -432,7 +432,7 @@ class MainFrame(wx.Frame):
 		shutil.copyfile(self.report.path, filename)
 
 def Main():
-	import proxy.TwistedProxy as poster
+	import proxy.Agent as poster
 	poster.fork_if()
 		
 	import sys
