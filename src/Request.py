@@ -1,4 +1,5 @@
 
+import httplib
 import urllib2
 import cookielib
 
@@ -164,6 +165,11 @@ class Request:
 			from Errors import TerminateRequest
 			#TODO: add trace information
 			raise TerminateRequest(e)
+		except httplib.BadStatusLine, e:
+			log.error('Request error when requesting %s\nHeaders: %s\n%s:%s' % (url, headers, e, e.line))
+			from Errors import TerminateRequest
+			#TODO: add trace information
+			raise TerminateRequest('%s:%s' % (e.__class__.__name__, e))
 		end_time = time.clock() #XXX: is it a good place?
 		rawbody = resp.read()
 		# XXX: Is it necessary?
