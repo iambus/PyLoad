@@ -1,0 +1,8 @@
+
+* 10048 errors when there are many connections:
+
+Under HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters, add 
+DWORD value MaxUserPort = 0x00008000 (32768)
+DWORD value TcpTimedWaitDelay = 0x0000001e (30)
+
+
