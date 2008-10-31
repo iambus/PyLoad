@@ -10,8 +10,8 @@ class AMFEncoder:
 		if fp != None:
 			self.fp = fp
 		else:
-			import cStringIO
-			self.fp = cStringIO.StringIO()
+			from cStringIO import StringIO
+			self.fp = StringIO()
 
 		self.string_reference_table = []
 		self.trait_reference_table = []
@@ -374,11 +374,12 @@ class AMFEncoder:
 if __name__ == '__main__':
 	from AMFDecoder import AMFDecoder
 	from cStringIO import StringIO
-	fp = open('login.txt', 'rb')
-	fp = open('login-response.txt', 'rb')
-	fp = open('client-ping.txt', 'rb')
-	fp = open('client-ping-response.txt', 'rb')
-	fp = open('13.txt', 'rb')
+	fp = open('samples/login.txt', 'rb')
+	fp = open('samples/login-response.txt', 'rb')
+	fp = open('samples/client-ping.txt', 'rb')
+	fp = open('samples/client-ping-response.txt', 'rb')
+	fp = open('samples/13.txt', 'rb')
+	fp = open('samples/9.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	#print packet

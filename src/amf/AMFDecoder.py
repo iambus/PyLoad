@@ -7,8 +7,8 @@ from AMFTypes import *
 class AMFDecoder:
 	def __init__(self, fp):
 		if type(fp) == str or type(fp) == unicode:
-			import cStringIO
-			self.fp = cStringIO.StringIO(fp)
+			from cStringIO import StringIO
+			self.fp = StringIO(fp)
 		else:
 			self.fp = fp
 		self.trait_reference_table = []
@@ -382,18 +382,18 @@ class AMFDecoder:
 
 
 if __name__ == '__main__':
-	fp = open('login.txt', 'rb')
-	fp = open('login-response.txt', 'rb')
-	fp = open('client-ping.txt', 'rb')
-	fp = open('client-ping-response.txt', 'rb')
-	fp = open('5.txt', 'rb')
-	fp = open('6.txt', 'rb')
-	fp = open('7.txt', 'rb')
-	fp = open('9.txt', 'rb')
-	fp = open('12.txt', 'rb')
-	fp = open('13.txt', 'rb')
+	fp = open('samples/login.txt', 'rb')
+	fp = open('samples/login-response.txt', 'rb')
+	fp = open('samples/client-ping.txt', 'rb')
+	fp = open('samples/client-ping-response.txt', 'rb')
+	fp = open('samples/5.txt', 'rb')
+	fp = open('samples/6.txt', 'rb')
+	fp = open('samples/7.txt', 'rb')
+	fp = open('samples/9.txt', 'rb')
+	fp = open('samples/13.txt', 'rb')
+	fp = open('samples/12.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
-	#print packet
+	print packet
 
 # vim: foldmethod=marker:
