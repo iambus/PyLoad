@@ -180,7 +180,7 @@ class Request:
 		response.rawbody = rawbody
 		response.body = rawbody
 		response.url = resp.geturl()
-		response.code = resp.code()
+		response.code = resp.code
 		response.info = resp.info()
 		response.headers = resp.info().headers
 		return (response, start_time, end_time)
