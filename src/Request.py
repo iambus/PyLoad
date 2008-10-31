@@ -36,7 +36,6 @@ class Response:
 		return self.body
 
 	def rawfind(self, pattern, n = 0, flag = 0):
-		self.make_sure()
 		try:
 			m = re.search(pattern, self.rawbody, flag)
 			if m:
