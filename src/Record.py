@@ -143,7 +143,11 @@ class Hit(Player, PropertyMixin):
 			request = Request(self.url, self.encode(reqstr, self.req_handler.coder))
 
 			response, start_time, end_time = request.play(basescope.get_variables())
-			response.body = self.decode_body(response.rawbody, self.resp_handler.coder)
+
+			# Lazy decoding
+			#response.body = self.decode_body(response.rawbody, self.resp_handler.coder)
+			response.decoder = self.resp_handler.coder.decode
+
 			basescope.assign('response', response)
 			reporter = basescope.lookup('reporter')
 			if reporter:

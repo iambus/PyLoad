@@ -14,7 +14,7 @@ import Logger
 log = Logger.getLogger()
 
 class Response:
-	def __init__(self):
+	def __init__(self, decoder = None):
 		self.rawbody = None
 		self.body = None
 		self.headers = None
@@ -24,7 +24,28 @@ class Response:
 
 		#self.tree = None
 
+		self.decoder = decoder
+
+	# Lazy decoding
+	def make_sure(self):
+		if self.body == None and self.decoder != None:
+			self.body = self.decoder(self.rawbody)
+
+	def get_body(self):
+		self.make_sure()
+		return self.body
+
+	def rawfind(self, pattern):
+		self.make_sure()
+		try:
+			m = re.search(pattern, self.rawbody, flag)
+			if m:
+				return m.group(n)
+		except Exception, e:
+			log.exception(e)
+
 	def find(self, pattern, n = 0, flag = 0):
+		self.make_sure()
 		try:
 			m = re.search(pattern, self.body, flag)
 			if m:
@@ -33,6 +54,7 @@ class Response:
 			log.exception(e)
 
 	def findall(self, pattern, flag = 0):
+		self.make_sure()
 		try:
 			return re.findall(pattern, self.body, flag)
 		except Exception, e:
@@ -42,6 +64,7 @@ class Response:
 	find_all = findall
 
 	def xtree(self):
+		self.make_sure()
 		from xml.etree import ElementTree
 		try:
 			self.tree = ElementTree.fromstring(self.body)
@@ -67,6 +90,7 @@ class Response:
 			return tree.findtext(xpath)
 
 	def save_body(self, path):
+		self.make_sure()
 		fp = open(path, 'w')
 		try:
 			fp.write(self.body)
@@ -178,7 +202,7 @@ class Request:
 
 		response = Response()
 		response.rawbody = rawbody
-		response.body = rawbody
+		response.body = None
 		response.url = resp.geturl()
 		response.code = resp.code
 		response.info = resp.info()

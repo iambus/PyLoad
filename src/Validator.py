@@ -20,7 +20,7 @@ class AMFResponseValidator(ResponseValidator):
 	@classmethod
 	def validate(cls, response):
 		try:
-			if response.find('flex.messaging.messages.ErrorMessage'):
+			if response.rawfind('flex.messaging.messages.ErrorMessage'):
 				members = response.xfindall('.//members/member')
 				messages = {}
 				for m in members:
