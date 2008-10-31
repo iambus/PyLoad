@@ -345,7 +345,7 @@ class FromXML:
 			self.trait_table = {}
 
 	def get_childern(self, node):
-		return node.childNodes[1::2]
+		return filter(lambda n: isinstance(n, minidom.Element), node.childNodes)
 
 	def get_text(self, node):
 		if node.firstChild:
@@ -565,18 +565,18 @@ class FromXML:
 
 if __name__ == '__main__':
 	from AMFDecoder import AMFDecoder
-	fp = open('login.txt', 'rb')
-	fp = open('login-response.txt', 'rb')
-	fp = open('client-ping.txt', 'rb')
-	fp = open('client-ping-response.txt', 'rb')
-	fp = open('7.txt', 'rb')
-	fp = open('9.txt', 'rb')
+	fp = open('samples/login.txt', 'rb')
+	fp = open('samples/login-response.txt', 'rb')
+	fp = open('samples/client-ping.txt', 'rb')
+	fp = open('samples/client-ping-response.txt', 'rb')
+	fp = open('samples/7.txt', 'rb')
+	fp = open('samples/9.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	toxml = ToXML(packet)
 	xml = toxml.get_xml()
 	#print xml
-	#fromxml = FromXML(xml)
+	fromxml = FromXML(xml)
 	#print fromxml.get_packet()
 
 
