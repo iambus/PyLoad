@@ -18,6 +18,23 @@ def YMSFormatter(ms, max = None):
 def DefaultFormatter(x, max = None):
 	return str(x)
 
+
+wShift = 40 # left
+hShift = 30 # bottom
+tShift = 10 # top
+rShift = 10 # right
+
+def getDataAreaSize(dc):
+	w, h = dc.GetSize()
+	w, h = w - wShift - tShift, h - hShift - rShift
+	return w, h
+
+def getXYAreaSize(dc):
+	w, h = dc.GetSize()
+	w, h = w - wShift, h - hShift
+	return w, h
+
+
 class LineChart(wx.Panel): 
 	def __init__(self, parent, times = None):
 		wx.Panel.__init__(self, parent)
@@ -120,10 +137,10 @@ class LineChart(wx.Panel):
 			return
 
 		w, h = dc.GetSize()
-		dc.SetDeviceOrigin(30, h-30)
+		dc.SetDeviceOrigin(wShift, h-hShift)
 		dc.SetAxisOrientation(True, True)
 		dc.SetPen(wx.Pen('WHITE'))
-		dc.DrawRectangle(1, 1, w, h)
+		#dc.DrawRectangle(1, 1, w, h) #XXX? what
 
 		self.DrawGrid(dc)
 		self.DrawAxis(dc)
@@ -131,8 +148,8 @@ class LineChart(wx.Panel):
 		self.DrawData(dc)
 
 	def DrawAxis(self, dc):
-		w, h = dc.GetSize()
-		w, h = w - 40, h - 30
+		w, h = getDataAreaSize(dc)
+		ww, hh = getXYAreaSize(dc)
 		if w <= 0 or h <= 0:
 			return
 
@@ -140,8 +157,8 @@ class LineChart(wx.Panel):
 		font = dc.GetFont()
 		font.SetPointSize(8)
 		dc.SetFont(font)
-		dc.DrawLine(0, 0, w+40, 0)
-		dc.DrawLine(0, 0, 0, h+30)
+		dc.DrawLine(0, 0, ww, 0)
+		dc.DrawLine(0, 0, 0, hh)
 
 		for i in range(self.xi, self.xmax+1, self.xi):
 			x = w * i / self.xmax
@@ -154,21 +171,20 @@ class LineChart(wx.Panel):
 			dc.DrawText(self.yformat(i, self.ymax), -30, y)
 
 	def DrawGrid(self, dc):
-		w, h = dc.GetSize()
-		w, h = w - 40, h - 30
+		w, h = getDataAreaSize(dc)
+		ww, hh = getXYAreaSize(dc)
 		dc.SetPen(wx.Pen('#d5d5d5'))
 
 		for i in range(self.xi, self.xmax+1, self.xi):
 			x = w * i / self.xmax
-			dc.DrawLine(x, 0, x, h)
+			dc.DrawLine(x, 0, x, hh)
 
 		for i in range(self.yi, self.ymax+1, self.yi):
 			y = h * i / self.ymax
-			dc.DrawLine(0, y, w, y)
+			dc.DrawLine(0, y, ww, y)
 
 	def DrawTitle(self, dc):
-		w, h = dc.GetSize()
-		w, h = w - 40, h - 30
+		w, h = getDataAreaSize(dc)
 		font =  dc.GetFont()
 		font.SetWeight(wx.FONTWEIGHT_BOLD)
 		dc.SetFont(font)
@@ -188,8 +204,7 @@ class LineChart(wx.Panel):
 
 
 	def DrawLine(self, dc, lineData):
-		w, h = dc.GetSize()
-		w, h = w - 40, h - 30
+		w, h = getDataAreaSize(dc)
 
 		points = [(0,0)]
 		points.extend(lineData)
@@ -213,6 +228,7 @@ if __name__ == '__main__':
 	times = ((116, 173), 
 			(121, 216), 
 			(1401, 208), 
+			(1431, 400), 
 			(1508, 225), 
 			(1409, 214), 
 			(1700, 228), 
@@ -220,6 +236,7 @@ if __name__ == '__main__':
 			(1890, 274),
 			(1960, 272), 
 			(2600, 376), 
+			(3000, 200), 
 			)
 
 	import Test
