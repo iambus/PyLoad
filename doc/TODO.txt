@@ -7,7 +7,7 @@ Tree Editor
 Infotab (p2) (finised)
 extractor (p3)
 
-terminate playing
+terminate playing (finished)
 
 Performance (p2)
 UI Unit Tests (p4)

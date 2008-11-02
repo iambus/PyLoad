@@ -74,7 +74,7 @@ class MainFrame(wx.Frame):
 		self.UseToolBar()
 
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
-		self.Bind(EVT_PLAY_STOPPED, self.OnTerminate)
+		self.Bind(EVT_PLAY_STOPPED, self.OnPlayStopped)
 
 		#TODO: put in tabs' constructors
 		self.nb.recordTab.tree.project = self.project
@@ -269,15 +269,18 @@ class MainFrame(wx.Frame):
 			return
 
 		self.toolbar.EnableTool(self.toolPlay.GetId(), 0)
-		self.toolbar.EnableTool(self.toolTerminate.GetId(), 0) # TODO: enable it after function implemented
+		self.toolbar.EnableTool(self.toolTerminate.GetId(), 1)
 		menu = self.GetMenuBar().GetMenu(1)
 		menu.FindItemByPosition(3).Enable(False)
-		menu.FindItemByPosition(4).Enable(False) # TODO: enable it after function implemented
+		menu.FindItemByPosition(4).Enable(True)
 
 		self.Play()
 
 	def OnTerminate(self, event):
-		#raise NotImplementedError('Terminate is not implemented yet')
+		Record.CANCELLED = True
+
+	def OnPlayStopped(self, event):
+		Record.CANCELLED = False
 		self.toolbar.EnableTool(self.toolPlay.GetId(), 1)
 		self.toolbar.EnableTool(self.toolTerminate.GetId(), 0)
 		menu = self.GetMenuBar().GetMenu(1)

@@ -15,6 +15,8 @@ log = Logger.getLogger()
 
 from Repository import uuid, register
 
+CANCELLED = False
+
 #FIXME: bad name, and bad existence
 class PropertyMixin:
 	def __init__(self):
@@ -125,6 +127,8 @@ class Hit(Player, PropertyMixin):
 	def play(self, basescope = None):
 		if basescope == None:
 			basescope = Scope()
+		if CANCELLED:
+			raise Errors.TerminateUser('User cancelled')
 		try:
 			self.before(basescope)
 			value = self.playmain(basescope)

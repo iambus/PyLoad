@@ -37,18 +37,23 @@ class User(Player):
 			scope['reporter'] = reporter
 		else:
 			reporter = None
-		if self.iteration_factory:
-			self.before(scope)
-			for i in range(self.iteration_count):
-				iteration = self.iteration_factory.create()
-				iteration.player = self.player
-				Player.execute_here(self, iteration, scope)
-			self.after(scope)
-		else:
-			for i in range(self.iteration_count):
-				self.childern.append(self.player)
-			Player.play(self, scope)
-			self.childern = []
+		try:
+			if self.iteration_factory:
+				self.before(scope)
+				for i in range(self.iteration_count):
+					iteration = self.iteration_factory.create()
+					iteration.player = self.player
+					Player.execute_here(self, iteration, scope)
+				self.after(scope)
+			else:
+				try:
+					for i in range(self.iteration_count):
+						self.childern.append(self.player)
+					Player.play(self, scope)
+				finally:
+					self.childern = []
+		except Errors.TerminateUser, e:
+			log.exception('User terminated because of %s' % e)
 		if reporter:
 			reporter.commit()
 
