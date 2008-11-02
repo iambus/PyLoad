@@ -26,7 +26,7 @@ rShift = 10 # right
 
 def getDataAreaSize(dc):
 	w, h = dc.GetSize()
-	w, h = w - wShift - tShift, h - hShift - rShift
+	w, h = w - wShift - rShift, h - hShift - tShift
 	return w, h
 
 def getXYAreaSize(dc):
