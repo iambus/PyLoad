@@ -149,6 +149,18 @@ class ReportTab(wx.Panel):
 			else:
 				self.ShowPages()
 
+def Standalone(filename = None):
+	app = wx.PySimpleApp()
+	frame = wx.Frame(None, -1, "Report Reader", size = (800, 600))
+	p = ReportTab(frame)
+
+	if filename:
+		p.LoadReport(filename)
+
+	frame.Center()
+	frame.Show(True)
+	app.MainLoop()
+
 if __name__ == '__main__':
 	import Test
 	Test.TestPanel(ReportTab, lambda p:p.LoadReport('reports/last-report.db'))

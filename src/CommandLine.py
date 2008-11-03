@@ -87,8 +87,10 @@ def clean_project_in_path(path):
 
 ##################################################
 
+# TODO: read report and display results in console
 def read_report(path):
-	raise NotImplementedError()
+	from ReportTab import Standalone
+	Standalone(path)
 
 ##################################################
 
