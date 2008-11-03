@@ -2,6 +2,16 @@
 import wx
 import LineChartPanel
 
+class ReportDropTarget(wx.FileDropTarget):
+	def __init__(self, callback):
+		wx.FileDropTarget.__init__(self)
+		self.callback = callback
+
+	def OnDropFiles(self, x, y, filenames):
+		assert len(filenames) == 1, 'Please drop one and only one file'
+		self.callback(filenames[0])
+
+
 class ReportTab(wx.Panel):
 	def __init__(self, parent):
 		wx.Panel.__init__(self, parent, -1)
@@ -42,6 +52,9 @@ class ReportTab(wx.Panel):
 
 		import Layout
 		Layout.SingleLayout(self, self.splitter)
+
+		self.SetDropTarget(ReportDropTarget(self.LoadReport))
+
 
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self.list)
 
