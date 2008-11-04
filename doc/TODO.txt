@@ -10,6 +10,8 @@ extractor (p3)
 terminate playing (finished)
 
 Performance (p2)
+Memory Leak (p2)
+
 UI Unit Tests (p4)
 Packages (p4)
 Exception Handler (p4)
