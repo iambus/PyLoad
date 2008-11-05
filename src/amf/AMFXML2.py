@@ -2,7 +2,7 @@
 from xml.dom import minidom
 from AMFTypes import *
 
-from SimpleXML import LXML as XMLTree
+from LXMLTree import LXMLTree as XMLTree
 
 ##################################################
 # {{{ class ToXML
