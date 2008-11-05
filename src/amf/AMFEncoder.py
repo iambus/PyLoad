@@ -21,6 +21,27 @@ class AMFEncoder:
 		self.trait_rref_table = {}
 		self.complex_rref_table = {}
 
+		self.write_value0_mappings = {
+				str        : ('\x02', self.write_utf8),
+				unicode    : ('\x02', self.write_utf8),
+				StrictArray: ('\x0a', self.write_strict_array),
+				}
+		self.write_value3_mappings = {
+				NULL        : ('\x01', self.write_null),
+				FALSE       : ('\x02', self.write_false),
+				TRUE        : ('\x03', self.write_true),
+				int         : ('\x04', self.write_u29),
+				float       : ('\x05', self.write_double),
+				str         : ('\x06', self.write_utf8_vr),
+				unicode     : ('\x06', self.write_utf8_vr),
+				#XMLDocRef   : ('\x07', self.write_xml_doc),
+				DateRef     : ('\x08', self.write_date),
+				ArrayRef    : ('\x09', self.write_array),
+				ObjectRef   : ('\x0a', self.write_object),
+				XMLRef      : ('\x0b', self.write_xml),
+				ByteArrayRef: ('\x0c', self.write_byte_array),
+				}
+
 	########################################
 	# {{{ encode: encode AMFPacket into stream
 	def encode(self):
@@ -327,11 +348,7 @@ class AMFEncoder:
 			assert value.__class__ in [StrictArray, str, unicode], 'AMF0 type is not supported except strict-array and str. %s is not supported' % value.__class__
 
 		t = value.__class__
-		funs = {
-				str        : ('\x02', self.write_utf8),
-				unicode    : ('\x02', self.write_utf8),
-				StrictArray: ('\x0a', self.write_strict_array),
-				}
+		funs = self.write_value0_mappings
 		assert funs.has_key(t), '%s is not supported in AMF0' % t
 
 		b, func = funs[t]
@@ -340,21 +357,7 @@ class AMFEncoder:
 
 	def write_value3(self, value):
 		t = value.__class__
-		funs = {
-				NULL        : ('\x01', self.write_null),
-				FALSE       : ('\x02', self.write_false),
-				TRUE        : ('\x03', self.write_true),
-				int         : ('\x04', self.write_u29),
-				float       : ('\x05', self.write_double),
-				str         : ('\x06', self.write_utf8_vr),
-				unicode     : ('\x06', self.write_utf8_vr),
-				#XMLDocRef   : ('\x07', self.write_xml_doc),
-				DateRef     : ('\x08', self.write_date),
-				ArrayRef    : ('\x09', self.write_array),
-				ObjectRef   : ('\x0a', self.write_object),
-				XMLRef      : ('\x0b', self.write_xml),
-				ByteArrayRef: ('\x0c', self.write_byte_array),
-				}
+		funs = self.write_value3_mappings
 		assert funs.has_key(t), '%s is not supported in AMF3' % t
 		b, func = funs[t]
 		self.fp.write(b)

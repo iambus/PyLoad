@@ -16,6 +16,22 @@ class ToXML:
 		self.complex_object_set = set()
 		self.trait_set = set()
 
+		self.create_value_node_mappings = {
+				str          : self.create_str_node,
+				unicode      : self.create_str_node,
+				int          : self.create_int_node,
+				float        : self.create_float_node,
+				NULL         : self.create_null_node,
+				FALSE        : self.create_false_node,
+				TRUE         : self.create_true_node,
+				StrictArray  : self.create_strict_array_node,
+				DateRef      : self.create_date_node,
+				ObjectRef    : self.create_object_node,
+				ArrayRef     : self.create_array_node,
+				XMLRef       : self.create_xml_node,
+				ByteArrayRef : self.create_byte_array_node,
+				}
+
 		self.to_xml()
 
 	##################################################
@@ -68,21 +84,7 @@ class ToXML:
 	##################################################
 	def create_value_node(self, parent, value, tag = None):
 		t = value.__class__
-		funcs = {
-				str          : self.create_str_node,
-				unicode      : self.create_str_node,
-				int          : self.create_int_node,
-				float        : self.create_float_node,
-				NULL         : self.create_null_node,
-				FALSE        : self.create_false_node,
-				TRUE         : self.create_true_node,
-				StrictArray  : self.create_strict_array_node,
-				DateRef      : self.create_date_node,
-				ObjectRef    : self.create_object_node,
-				ArrayRef     : self.create_array_node,
-				XMLRef       : self.create_xml_node,
-				ByteArrayRef : self.create_byte_array_node,
-				}
+		funcs = self.create_value_node_mappings
 		assert funcs.has_key(t), 'Type %s is not supported' % t
 		func = funcs[t]
 		return func(parent, value, tag)
@@ -291,6 +293,23 @@ class FromXML:
 		self.complex_object_table = {}
 		self.trait_table = {}
 
+		self.get_value_mappings = {
+				'str'           : self.get_str,
+				'int'           : self.get_int,
+				'float'         : self.get_float,
+				'null'          : self.get_null,
+				'false'         : self.get_false,
+				'true'          : self.get_true,
+				'StrictArray'   : self.get_strict_array,
+				'Date'          : self.get_date,
+				'StaticObject'  : self.get_static_object,
+				'DynamicObject' : self.get_dynamic_object,
+				'ExtObject'     : self.get_ext_object,
+				'Array'         : self.get_array,
+				'ByteArray'     : self.get_byte_array,
+				'XML'           : self.get_xml,
+				}
+
 		self.from_xml()
 
 	def from_xml(self):
@@ -342,22 +361,7 @@ class FromXML:
 	##################################################
 	def get_value(self, node):
 		class_type = self.get_attribute(node, 'class')
-		funcs = {
-				'str'           : self.get_str,
-				'int'           : self.get_int,
-				'float'         : self.get_float,
-				'null'          : self.get_null,
-				'false'         : self.get_false,
-				'true'          : self.get_true,
-				'StrictArray'   : self.get_strict_array,
-				'Date'          : self.get_date,
-				'StaticObject'  : self.get_static_object,
-				'DynamicObject' : self.get_dynamic_object,
-				'ExtObject'     : self.get_ext_object,
-				'Array'         : self.get_array,
-				'ByteArray'     : self.get_byte_array,
-				'XML'           : self.get_xml,
-				}
+		funcs = self.get_value_mappings
 		assert funcs.has_key(class_type), 'unkown class %s' % class_type
 		func = funcs[class_type]
 		return func(node)
@@ -546,13 +550,13 @@ if __name__ == '__main__':
 	fp = open('samples/login-response.txt', 'rb')
 	fp = open('samples/client-ping.txt', 'rb')
 	fp = open('samples/client-ping-response.txt', 'rb')
-	fp = open('samples/7.txt', 'rb')
 	fp = open('samples/9.txt', 'rb')
+	fp = open('samples/7.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	toxml = ToXML(packet)
 	xml = toxml.get_xml()
-	#print xml
+	print xml
 	fromxml = FromXML(xml)
 	#print fromxml.get_packet()
 

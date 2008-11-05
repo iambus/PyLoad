@@ -15,6 +15,26 @@ class AMFDecoder:
 		self.string_reference_table = []
 		self.complex_object_reference_table = []
 
+		self.read_value0_mappings = {
+				0x02: self.read_utf8,
+				0x0a: self.read_strict_array,
+				#0x10: self.read_typed_object,
+			   }
+		self.read_value3_mappings = {
+				0x01: self.read_null,
+				0x02: self.read_false,
+				0x03: self.read_true,
+				0x04: self.read_u29,
+				0x05: self.read_double,
+				0x06: self.read_utf8_vr,
+				#0x07: self.read_xml_doc,
+				0x08: self.read_date,
+				0x09: self.read_array,
+				0x0a: self.read_object,
+				0x0b: self.read_xml,
+				0x0c: self.read_byte_array,
+			   }
+
 	########################################
 	# {{{ decode: return a AMFPacket object
 	def decode(self):
@@ -344,29 +364,12 @@ class AMFDecoder:
 		if x == 0x11:
 			self.switch_to_amf3()
 			return self.read_value3()
-		funs = {
-				0x02: self.read_utf8,
-				0x0a: self.read_strict_array,
-				#0x10: self.read_typed_object,
-			   }
+		funs = self.read_value0_mappings
 		return funs[x]()
 
 	def read_value3(self):
 		x = self.read_byte()
-		funs = {
-				0x01: self.read_null,
-				0x02: self.read_false,
-				0x03: self.read_true,
-				0x04: self.read_u29,
-				0x05: self.read_double,
-				0x06: self.read_utf8_vr,
-				#0x07: self.read_xml_doc,
-				0x08: self.read_date,
-				0x09: self.read_array,
-				0x0a: self.read_object,
-				0x0b: self.read_xml,
-				0x0c: self.read_byte_array,
-			   }
+		funs = self.read_value3_mappings
 		return funs[x]()
 
 	def switch_to_amf0(self):
