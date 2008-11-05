@@ -51,7 +51,7 @@ class LXMLTree(IXMLTree):
 		return node.tag
 
 	def tostring(self):
-		pretty = etree.tostring(self.root, pretty_print=True)
+		pretty = etree.tostring(self.root, pretty_print=True, encoding='utf-8')
 		return pretty
 
 	@classmethod
