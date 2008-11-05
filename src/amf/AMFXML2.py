@@ -136,8 +136,6 @@ class ToXML:
 				for name, value in members:
 					member_node = self.create_value_node(members_node, value, 'member')
 					self.set_attribute(member_node, 'name', name)
-			elif isinstance(trait, TraitExt):
-				self.create_value_node(node, obj.members[0])
 			elif isinstance(trait, DynamicTrait):
 				members_node = self.create_child(node, 'members')
 				members = zip(trait.member_names, obj.members)
@@ -148,6 +146,8 @@ class ToXML:
 				for name, value in obj.dynamic_members:
 					member_node = self.create_value_node(dynamic_members_node, value, 'member')
 					self.set_attribute(member_node, 'name', name)
+			elif isinstance(trait, TraitExt):
+				self.create_value_node(node, obj.members[0])
 			else:
 				raise TypeError('Unkown trait type: %s' % trait.__class__)
 
