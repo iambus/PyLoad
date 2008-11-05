@@ -52,11 +52,7 @@ class LXMLTree(IXMLTree):
 
 	def tostring(self):
 		pretty = etree.tostring(self.root, pretty_print=True)
-
-		#TODO: clean the object
-
-		import re
-		return re.sub(r'(<[^/][^<>]*[^/]>)\s*([^<>]{,40}?)\s*(</[^<>]*>)', r'\1\2\3', pretty)
+		return pretty
 
 	@classmethod
 	def fromstring(cls, text):
