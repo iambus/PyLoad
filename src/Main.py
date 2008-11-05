@@ -352,8 +352,8 @@ class MainFrame(wx.Frame):
 		self.Close()
 
 	def OnClose(self, event):
-		# Stopping playing
-		Record.CANCELLED = True
+		# TODO: Stopping playing before exiting
+		Record.CANCELLED = True # not enough
 
 		if self.proxy:
 			Proxy.stop()
