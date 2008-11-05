@@ -352,6 +352,9 @@ class MainFrame(wx.Frame):
 		self.Close()
 
 	def OnClose(self, event):
+		# Stopping playing
+		Record.CANCELLED = True
+
 		if self.proxy:
 			Proxy.stop()
 			self.proxy.join()
