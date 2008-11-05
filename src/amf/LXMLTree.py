@@ -1,12 +1,13 @@
 
 from SimpleXMLTree import IXMLTree
 
+from lxml import etree
+
 class LXMLTree(IXMLTree):
 	def __init__(self, tag = None):
 		IXMLTree.__init__(self, tag)
 
 	def init_root(self, tag):
-		from lxml import etree
 		self.root = etree.Element(tag)
 		return self.root
 
@@ -14,7 +15,6 @@ class LXMLTree(IXMLTree):
 		return self.root
 
 	def create_child(self, parent, tag):
-		from lxml import etree
 		return etree.SubElement(parent, tag)
 
 	def get_childern(self, node):
@@ -31,7 +31,6 @@ class LXMLTree(IXMLTree):
 				raise
 		if len(value) > 40 and ('<' in value) and (']]>' not in value):
 			# FIXME: how to reserve \r?
-			from lxml import etree
 			node.text = etree.CDATA(value)
 		else:
 			node.text = value
@@ -52,7 +51,6 @@ class LXMLTree(IXMLTree):
 		return node.tag
 
 	def tostring(self):
-		from lxml import etree
 		pretty = etree.tostring(self.root, pretty_print=True)
 
 		#TODO: clean the object
@@ -64,7 +62,6 @@ class LXMLTree(IXMLTree):
 	def fromstring(cls, text):
 		tree = cls()
 
-		from lxml import etree
 		# XXX: encoding?
 		tree.root = etree.fromstring(text)
 

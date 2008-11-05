@@ -1,12 +1,13 @@
 
 from SimpleXMLTree import IXMLTree
 
+from xml.dom import minidom
+
 class DomTree(IXMLTree):
 	def __init__(self, tag = None):
 		IXMLTree.__init__(self, tag)
 
 	def init_root(self, tag):
-		from xml.dom import minidom
 		self.doc = minidom.Document()
 		self.root = self.doc.createElement(tag)
 		self.doc.appendChild(self.root)
@@ -21,7 +22,6 @@ class DomTree(IXMLTree):
 		return node
 
 	def get_childern(self, node):
-		from xml.dom import minidom
 		return filter(lambda n: isinstance(n, minidom.Element), node.childNodes)
 
 	def set_text(self, node, value):
@@ -48,7 +48,6 @@ class DomTree(IXMLTree):
 			if text == '':
 				# FIXME: Not a good logical
 				# FIXME: how to reserve \r?
-				from xml.dom import minidom
 				if isinstance(node.nextSibling, minidom.CDATASection):
 					node = node.nextSibling
 					text = node.data
@@ -76,7 +75,6 @@ class DomTree(IXMLTree):
 
 	@classmethod
 	def fromstring(cls, text):
-		from xml.dom import minidom
 		tree = cls()
 		tree.doc = minidom.parseString(text.encode('utf-8'))
 		tree.root = tree.doc.childNodes[0]
