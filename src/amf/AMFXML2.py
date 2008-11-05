@@ -130,14 +130,14 @@ class ToXML:
 			trait = traitref.trait
 			self.create_trait_node(node, traitref)
 
-			if isinstance(trait, TraitExt):
-				self.create_value_node(node, obj.members[0])
-			elif isinstance(trait, StaticTrait):
+			if isinstance(trait, StaticTrait):
 				members_node = self.create_child(node, 'members')
 				members = zip(trait.member_names, obj.members)
 				for name, value in members:
 					member_node = self.create_value_node(members_node, value, 'member')
 					self.set_attribute(member_node, 'name', name)
+			elif isinstance(trait, TraitExt):
+				self.create_value_node(node, obj.members[0])
 			elif isinstance(trait, DynamicTrait):
 				members_node = self.create_child(node, 'members')
 				members = zip(trait.member_names, obj.members)
@@ -556,7 +556,7 @@ if __name__ == '__main__':
 	packet = decoder.decode()
 	toxml = ToXML(packet)
 	xml = toxml.get_xml()
-	print xml
+	#print xml
 	fromxml = FromXML(xml)
 	#print fromxml.get_packet()
 
