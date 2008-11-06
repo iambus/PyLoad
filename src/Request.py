@@ -69,7 +69,7 @@ class Response:
 		try:
 			from lxml import etree
 		except ImportError:
-			log.warn('Module lxml.etree is not found, try to use xml.etree.ElementTree now. Note that the some xpath feature may not be supported by xml.etree.ElementTree.')
+			log.warn('Module lxml.etree is not found, try to use xml.etree.ElementTree now. Note that the some xpath feature is not supported by older version of xml.etree.ElementTree.')
 			from xml.etree import ElementTree as etree
 		try:
 			self.tree = etree.fromstring(self.body)
