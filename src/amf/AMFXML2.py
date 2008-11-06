@@ -30,7 +30,7 @@ class ToXML:
 				ArrayRef     : self.create_array_node,
 				XMLRef       : self.create_xml_node,
 				ByteArrayRef : self.create_byte_array_node,
-				}
+			}
 
 		self.to_xml()
 
@@ -38,6 +38,7 @@ class ToXML:
 
 	def to_xml(self):
 		self.root = XMLTree('packet')
+		self.set_attribute = self.root.set_attribute # not necessary, but for performance reasone
 		root_node = self.root.get_root_node()
 
 		packet = self.packet
@@ -308,7 +309,7 @@ class FromXML:
 				'Array'         : self.get_array,
 				'ByteArray'     : self.get_byte_array,
 				'XML'           : self.get_xml,
-				}
+			}
 
 		self.from_xml()
 
