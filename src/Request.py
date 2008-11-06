@@ -22,7 +22,7 @@ class Response:
 		self.url = None
 		self.code = None
 
-		#self.tree = None
+		self.tree = None
 
 		self.decoder = decoder
 
@@ -63,29 +63,34 @@ class Response:
 	find_all = findall
 
 	def xtree(self):
+		if self.tree != None:
+			return self.tree
 		self.make_sure()
-		from xml.etree import ElementTree
 		try:
-			self.tree = ElementTree.fromstring(self.body)
+			from lxml import etree
+		except ImportError:
+			log.warn('Module lxml.etree is not found, try to use xml.etree.ElementTree now. Note that the some xpath feature may not be supported by xml.etree.ElementTree.')
+			from xml.etree import ElementTree as etree
+		try:
+			self.tree = etree.fromstring(self.body)
 			return self.tree
 		except Exception, e:
-			self.tree = None
 			log.error("Can't parse response body as XML tree.\nBody: [see debug log]\nReasone: %s" % e)
 			log.debug("Can't parse response body as XML tree.\nBody: %s\nReasone: %s" % (self.body, e))
 
 	def xfind(self, xpath):
 		tree = self.xtree()
-		if tree:
+		if tree != None:
 			return tree.find(xpath)
 
 	def xfindall(self, xpath):
 		tree = self.xtree()
-		if tree:
+		if tree != None:
 			return tree.findall(xpath)
 
 	def xfindtext(self, xpath):
 		tree = self.xtree()
-		if tree:
+		if tree != None:
 			return tree.findtext(xpath)
 
 	def save_body(self, path):
