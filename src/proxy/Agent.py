@@ -22,7 +22,7 @@ def kill_command(pid):
 	import sys
 	return ({
 		'linux2': 'kill %s',
-		'win': 'taskkill /F /PID %i',
+		'win32': 'taskkill /F /PID %i',
 	}[sys.platform] % pid).split()
 
 def kill():
