@@ -56,7 +56,8 @@ class ControllersPanel(wx.Panel):
 			dropSource.SetData(data)
 			result = dropSource.DoDragDrop(wx.Drag_AllowMove)
 
-		wx.CallAfter(DoDragDrop) # can't call dropSource.DoDragDrop here..
+		#wx.CallAfter(DoDragDrop) # XXX: not working on Linux
+		DoDragDrop()
 
 
 	def BindGetUserData(self):
