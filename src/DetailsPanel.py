@@ -107,6 +107,11 @@ class DetailsPanel(wx.Panel):
 			return n
 
 	def Load(self, data):
+		if data == None:
+			# possible on Linux
+			# TODO: auto-select next node on Linux when a node is deleted (of course not here)
+			self.Unload()
+			return
 		'Avoid re-creating the same tabs'
 		c = data.__class__
 		tabNames = ClassToTabs[c]
