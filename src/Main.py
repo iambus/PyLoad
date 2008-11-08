@@ -1,4 +1,5 @@
 
+import sys
 import wx
 import IconImages
 
@@ -25,12 +26,13 @@ class NoteBook(wx.Toolbook):
 	def __init__(self, parent, id, project = None, reporter = None):
 		wx.Toolbook.__init__(self, parent, id, style=wx.BK_TOP)
 
-
 		images = wx.ImageList(32, 32)
-		images.Add(IconImages.getRecordTabBitmap())
-		images.Add(IconImages.getEditTabBitmap())
-		images.Add(IconImages.getPlayTabBitmap())
-		images.Add(IconImages.getReportTabBitmap())
+		if sys.platform == 'linux2':
+			# Must set icons for Linux
+			images.Add(IconImages.getRecordTabBitmap())
+			images.Add(IconImages.getEditTabBitmap())
+			images.Add(IconImages.getPlayTabBitmap())
+			images.Add(IconImages.getReportTabBitmap())
 		self.AssignImageList(images)
 
 		self.recordTab = RecordTab(self)
@@ -92,14 +94,18 @@ class MainFrame(wx.Frame):
 			os.mkdir('reports')
 
 	def InitIcons(self):
-		self.newIcon = wx.ArtProvider_GetBitmap(wx.ART_NEW, wx.ART_OTHER, (24, 24))
-		self.newIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (24, 24)) #TODO: add correct icon
-		self.openIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, (24, 24))
-		self.openIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (24, 24)) #TODO: add correct icon
-		self.saveIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_SAVE, wx.ART_OTHER, (24, 24))
-		self.saveIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (24, 24)) #TODO: add correct icon
-		self.saveAsIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_OTHER, (24, 24))
-		self.saveAsIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (24, 24)) #TODO: add correct icon
+		if sys.platform == 'linux2':
+			iconSize = (24, 24)
+		else:
+			iconSize = (16, 16)
+		self.newIcon = wx.ArtProvider_GetBitmap(wx.ART_NEW, wx.ART_OTHER, iconSize)
+		self.newIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, iconSize) #TODO: add correct icon
+		self.openIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, iconSize)
+		self.openIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, iconSize) #TODO: add correct icon
+		self.saveIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_SAVE, wx.ART_OTHER, iconSize)
+		self.saveIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, iconSize) #TODO: add correct icon
+		self.saveAsIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_OTHER, iconSize)
+		self.saveAsIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, iconSize) #TODO: add correct icon
 
 		self.startIcon = IconImages.getStartBitmap()
 		self.startIconOff = IconImages.getStartOffBitmap()
@@ -446,7 +452,6 @@ def Main():
 	import proxy.Agent as poster
 	poster.fork_if()
 		
-	import sys
 	sys.path.append('runtime')
 	sys.path.append('plugin')
 	app = wx.PySimpleApp()
