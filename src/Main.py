@@ -26,27 +26,32 @@ class NoteBook(wx.Toolbook):
 		wx.Toolbook.__init__(self, parent, id, style=wx.BK_TOP)
 
 
-		self.AssignImageList(wx.ImageList(0,0))
+		images = wx.ImageList(32, 32)
+		images.Add(IconImages.getRecordTabBitmap())
+		images.Add(IconImages.getEditTabBitmap())
+		images.Add(IconImages.getPlayTabBitmap())
+		images.Add(IconImages.getReportTabBitmap())
+		self.AssignImageList(images)
 
 		self.recordTab = RecordTab(self)
-		self.AddPage(self.recordTab, 'Record', imageId=-1)
+		self.AddPage(self.recordTab, 'Record', imageId=0)
 		self.recordTab.ResetSize()
 
 		self.editTab = EditTab(self)
-		self.AddPage(self.editTab, 'Edit', imageId=-1)
+		self.AddPage(self.editTab, 'Edit', imageId=1)
 		self.editTab.ResetSize()
 
 		self.editTab.recordPanel.SetMirrorOf(self.recordTab.tree)
 		self.recordTab.tree.AddObserver(self.editTab.specialsPanel.UpdateAll)
 
 		self.playTab = PlayTab(self, project, reporter)
-		self.AddPage(self.playTab, 'Play', imageId=-1)
+		self.AddPage(self.playTab, 'Play', imageId=2)
 		self.playTab.ResetSize()
 
 		self.editTab.specialsPanel.onNewSpecialCallback = self.playTab.policyPanel.UpdateSpecials
 
 		self.reportTab = ReportTab(self)
-		self.AddPage(self.reportTab, 'Report', imageId=-1)
+		self.AddPage(self.reportTab, 'Report', imageId=3)
 		self.reportTab.ResetSize()
 
 
@@ -87,14 +92,14 @@ class MainFrame(wx.Frame):
 			os.mkdir('reports')
 
 	def InitIcons(self):
-		self.newIcon = wx.ArtProvider_GetBitmap(wx.ART_NEW, wx.ART_OTHER, (16, 16))
-		self.newIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (16, 16)) #TODO: add correct icon
-		self.openIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, (16, 16))
-		self.openIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (16, 16)) #TODO: add correct icon
-		self.saveIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_SAVE, wx.ART_OTHER, (16, 16))
-		self.saveIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (16, 16)) #TODO: add correct icon
-		self.saveAsIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_OTHER, (16, 16))
-		self.saveAsIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (16, 16)) #TODO: add correct icon
+		self.newIcon = wx.ArtProvider_GetBitmap(wx.ART_NEW, wx.ART_OTHER, (24, 24))
+		self.newIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (24, 24)) #TODO: add correct icon
+		self.openIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, (24, 24))
+		self.openIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (24, 24)) #TODO: add correct icon
+		self.saveIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_SAVE, wx.ART_OTHER, (24, 24))
+		self.saveIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (24, 24)) #TODO: add correct icon
+		self.saveAsIcon = wx.ArtProvider_GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_OTHER, (24, 24))
+		self.saveAsIconOff = wx.ArtProvider_GetBitmap(wx.ART_ERROR, wx.ART_OTHER, (24, 24)) #TODO: add correct icon
 
 		self.startIcon = IconImages.getStartBitmap()
 		self.startIconOff = IconImages.getStartOffBitmap()
