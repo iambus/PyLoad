@@ -1,6 +1,8 @@
 
 from proxy import Proxy
 
+from Record import HitData
+
 def callback(hit):
 	if len(hit.oreqstr) > 100 * 1000:
 		print '--------------------------------------------------'
@@ -24,7 +26,8 @@ def start():
 	Proxy.begin_catch(
 			#callback = record.add_hit,
 			callback = callback,
-			filter = lambda x: True
+			filter = lambda x: True,
+			hittype = HitData,
 			)
 	proxy = Proxy.thread_start()
 

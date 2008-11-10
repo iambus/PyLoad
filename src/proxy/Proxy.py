@@ -11,6 +11,7 @@ import Logger
 log = Logger.getLogger()
 
 import Record
+HitType = Record.Hit
 
 respfilter = lambda x: False
 respcallback = lambda x: False
@@ -31,12 +32,11 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
 
     rbufsize = 0                        # self.rfile Be unbuffered
 
-
     def init(self):
         log.debug('init:%s' % self)
         if self.path == STOPPING_URL:
             raise StoppingFlag()
-        self.hit = Record.Hit(self.path)
+        self.hit = HitType(self.path)
         #TODO: thread-safe
 
         self.reqstr = cStringIO.StringIO()
@@ -254,12 +254,14 @@ def stop():
     except:
         pass
 
-def begin_catch(callback = None, filter = None):
-    global respcallback, respfilter
+def begin_catch(callback = None, filter = None, hittype = None):
+    global respcallback, respfilter, HitType
     if callback:
         respcallback = callback
     if filter:
         respfilter = filter
+    if hittype:
+        HitType = hittype
 
 def end_catch():
     global respcallback, respfilter

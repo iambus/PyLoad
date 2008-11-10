@@ -24,6 +24,15 @@ class PropertyMixin:
 		self.timestr = self.time.strftime('%Y-%m-%d %H:%M:%S')
 		self.label = self.timestr
 
+class HitData:
+	def __init__(self, url):
+		self.url = url
+		self.reqstr = None
+		self.respstr = None
+
+	def finish(self):
+		self.oreqstr = self.reqstr
+		self.orespstr = self.respstr
 
 class Hit(Player, PropertyMixin):
 	def __init__(self, url):
