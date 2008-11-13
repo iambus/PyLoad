@@ -10,6 +10,8 @@ extractor (p3)
 terminate playing (finished)
 
 Performance (p2)
+    Buffer request
+    Don't use proxy to send request
 Memory Leak (p2)
 
 UI Unit Tests (p4)
