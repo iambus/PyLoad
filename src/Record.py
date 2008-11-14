@@ -4,7 +4,7 @@ import re
 
 from Scope import Scope
 from Player import Player
-from Request import Request
+from Requester import Requester
 import Template
 import ContentTypeHandler
 
@@ -148,12 +148,12 @@ class Hit(Player, PropertyMixin):
 
 	def playmain(self, basescope=None):
 		if basescope == None:
-			request = Request(self.url, self.oreqstr)
+			request = Requester(self.url, self.oreqstr)
 			request.play()
 		else:
 			variables = basescope.get_variables()
 			reqstr = Template.subst(self.reqstr, variables)
-			request = Request(self.url, self.encode(reqstr, self.req_handler.coder))
+			request = Requester(self.url, self.encode(reqstr, self.req_handler.coder))
 
 			response, start_time, end_time = request.play(basescope.get_variables())
 

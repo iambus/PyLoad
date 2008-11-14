@@ -1,7 +1,5 @@
 
-import httplib
-import urllib2
-import cookielib
+from URL import CookieJar, get_browser, URL_ERROR, STATUS_LINE_ERROR, Request
 
 from cStringIO import StringIO
 import re
@@ -101,22 +99,7 @@ class Response:
 		finally:
 			fp.close()
 
-def get_browser(cookie = None):
-	import proxy.Settings
-	proxy_handler = proxy.Settings.get_proxy_hander()
-	if cookie:
-		assert isinstance(cookie, cookielib.CookieJar)
-		if proxy_handler:
-			return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), proxy_handler)
-		else:
-			return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-	else:
-		if proxy_handler:
-			return urllib2.build_opener(proxy_handler)
-		else:
-			return urllib2.build_opener()
-
-class Request:
+class Requester:
 	def __init__(self, url, reqstr = None):
 		self.url = url
 		self.reqstr = reqstr
@@ -182,19 +165,19 @@ class Request:
 			requester = get_browser().open
 
 		if data:
-			req = urllib2.Request(url=url, data=data, headers=headers)
+			req = Request(url=url, data=data, headers=headers)
 		else:
-			req = urllib2.Request(url=url, headers=headers)
+			req = Request(url=url, headers=headers)
 
 		start_time = time.clock() #XXX: is it a good place?
 		try:
 			resp = requester(req)
-		except urllib2.URLError, e:
+		except URL_ERROR, e:
 			log.error('Request error: %s\nURL: %s\nHeaders: %s\n<%s> %s' % (req, url, headers, e.__class__.__name__, e))
 			from Errors import TerminateRequest
 			#TODO: add trace information
 			raise TerminateRequest(e)
-		except httplib.BadStatusLine, e:
+		except STATUS_LINE_ERROR, e:
 			log.error('Request error when requesting %s\nHeaders: %s\n%s:%s' % (url, headers, e, e.line))
 			from Errors import TerminateRequest
 			#TODO: add trace information
@@ -234,7 +217,7 @@ class Request:
 
 
 if __name__ == '__main__':
-	r = Request('x')
+	r = Requester('x')
 	r.parse('''GET / HTTP/1.0\r
 host: localhost:8000\r
 connection: close\r
