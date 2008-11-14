@@ -147,6 +147,10 @@ class MainFrame(wx.Frame):
 					("Play\tCtrl+3", "Play", self.OnPlayViewSelected),
 					("Report\tCtrl+4", "Report", self.OnReportViewSelected),
 					)),
+#				("&Util", 
+#					(
+#					("Reload Module\tCtrl+l", "Reload Module", self.OnReloadModule),
+#					)),
 				("&Help", (
 					("&About", "", self.OnAll),
 					)),
@@ -313,6 +317,19 @@ class MainFrame(wx.Frame):
 
 	def OnReportViewSelected(self, event):
 		self.nb.SetSelection(3)
+
+	def OnReloadModule(self, event):
+		dialog = wx.TextEntryDialog(
+				self, 'Please enter the module name to reload',
+				'Reload Module')
+		moduleName = dialog.GetValue() if dialog.ShowModal() == wx.ID_OK else None
+		dialog.Destroy()
+
+		if moduleName == None or moduleName == '':
+			return
+
+		m = __import__(moduleName)
+		reload(m)
 
 	def OnAll(self, event):
 		print event
