@@ -1,5 +1,5 @@
 
-from URL import CookieJar, get_browser, URL_ERROR, STATUS_LINE_ERROR, Request
+from URL import *
 
 from cStringIO import StringIO
 import re
@@ -160,9 +160,9 @@ class Requester:
 		elif cookie and isinstance(cookie, cookielib.CookieJar):
 			if headers.has_key('Cookie'):
 				del headers['Cookie']
-			requester = get_browser(cookie).open
+			requester = get_requester(cookie)
 		else:
-			requester = get_browser().open
+			requester = get_requester()
 
 		if data:
 			req = Request(url=url, data=data, headers=headers)

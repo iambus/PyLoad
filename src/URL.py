@@ -22,6 +22,22 @@ def get_browser(cookie = None):
 		else:
 			return urllib2.build_opener()
 
+def get_requester(cookie = None):
+	import proxy.Settings
+	proxy_handler = proxy.Settings.get_proxy_hander()
+	if cookie:
+		assert isinstance(cookie, CookieJar)
+		if proxy_handler:
+			return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), proxy_handler).open
+		else:
+			return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj)).open
+	else:
+		if proxy_handler:
+			return urllib2.build_opener(proxy_handler).open
+		else:
+			return urllib2.urlopen
+
+
 class Request:
 	def __init__(self, url, data = None, headers = None):
 		pass
