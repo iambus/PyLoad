@@ -223,6 +223,8 @@ class LineChart(wx.Panel):
 		self.InitData()
 		self.reInitBuffer = True
 
+	def Clear(self):
+		self.SetData(None)
 
 if __name__ == '__main__':
 	times = ((116, 173), 

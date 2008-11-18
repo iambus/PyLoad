@@ -96,6 +96,8 @@ class ReportTab(wx.Panel):
 		h.SetText('PageID')
 		self.list.SetColumn(0, h)
 
+		self.chartPanel.Clear()
+
 	def ShowHits(self):
 		self.summary = self.hit_summary
 		self.data = self.hit_data
@@ -104,6 +106,8 @@ class ReportTab(wx.Panel):
 		h = wx.ListItem()
 		h.SetText('ID')
 		self.list.SetColumn(0, h)
+
+		self.chartPanel.Clear()
 
 	def LoadSummary(self, rows):
 		self.list.DeleteAllItems()
