@@ -8,6 +8,8 @@ from twisted.internet.error import CannotListenError
 #log.startLogging(sys.stdout)
 log.startLogging(open('twisted-proxy.log', 'w'))
 
+import time
+
 class NewProxyClient(proxy.ProxyClient):
 
 	def handleHeader(self, key, value):
@@ -18,16 +20,29 @@ class NewProxyClient(proxy.ProxyClient):
 
 	def handleResponseEnd(self):
 		proxy.ProxyClient.handleResponseEnd(self)
+		self.end_time = time.clock()
+		print 'time: %s' % (self.start_time - self.end_time)
 
 	def connectionMade(self):
 		print 'connected'
 		proxy.ProxyClient.connectionMade(self)
+		self.start_time = time.clock()
 
 class NewProxyClientFactory(proxy.ProxyClientFactory):
 	def buildProtocol(self, addr):
 		client = proxy.ProxyClientFactory.buildProtocol(self, addr)
 		client.__class__ = NewProxyClient
 		return client
+
+	def clientConnectionFailed(self, connector, reason):
+		print "Can't connect, reasone: %s" % reason
+		proxy.ProxyClientFactory.clientConnectionFailed(self, connector, reason)
+		#self.father.transport.write("HTTP/1.0 501 Gateway error\r\n")
+		#self.father.transport.write("Content-Type: text/html\r\n")
+		#self.father.transport.write("\r\n")
+		#self.father.transport.write('''<H1>Could not connect</H1>''')
+		#self.father.transport.loseConnection()
+
 
 class NewProxyRequest(proxy.ProxyRequest):
 	protocols = {'http': NewProxyClientFactory}
