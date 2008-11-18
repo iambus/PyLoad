@@ -191,9 +191,10 @@ class Requester:
 		response.rawbody = rawbody
 		response.body = None
 		response.url = resp.geturl()
-		response.code = resp.code
-		response.info = resp.info()
-		response.headers = resp.info().headers
+		#TODO: recover these attributes here after URL2 supports
+		#response.code = resp.code
+		#response.info = resp.info()
+		#response.headers = resp.info().headers
 		return (response, start_time, end_time)
 
 	def parse_r_n(self, reqstr):
