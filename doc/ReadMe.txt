@@ -17,5 +17,8 @@ lxml (optional)
 	easy_install lxml
 	(easy_install is under Scripts directory of Python install directory.)
 
+pycurl
+	http://pycurl.sourceforge.net/download/pycurl-ssl-7.18.2.win32-py2.5.exe
+
 
 
