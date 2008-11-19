@@ -26,8 +26,11 @@ class AMFResponseValidator(ResponseValidator):
 				for m in members:
 					if m.attrib['class'] == 'str':
 						name = m.attrib['name']
-						if name not in ['clientId', 'messageId', 'correlationId']:
+						if name in ['faultCode', 'destination', 'faultString']:
 							messages[name] = m.text.strip()
+						# ignore others
+						#elif name not in ['clientId', 'messageId', 'correlationId']:
+						#	messages[name] = m.text.strip()
 				raise ValidationError(messages)
 			else:
 				# no error
