@@ -60,6 +60,8 @@ class ReportTab(wx.Panel):
 
 		self.Bind(wx.EVT_LIST_COL_RIGHT_CLICK, self.OnSwitch, self.list)
 
+		self.chartPanel.Bind(wx.EVT_MIDDLE_UP, self.OnSwitchTime, self.chartPanel)
+
 	def LoadReport(self, path):
 		import sqlite3
 
@@ -73,15 +75,45 @@ class ReportTab(wx.Panel):
 		self.hit_data = [row for row in cursor]
 
 		try:
+			cursor.execute('select hitid, timestamp, response_time from hits_v_start order by hitid, timestamp')
+			self.hit_data_by_start_time = [row for row in cursor]
+			cursor.execute('select hitid, timestamp, response_time from hits_v_end order by hitid, timestamp')
+			self.hit_data_by_end_time = [row for row in cursor]
+		except:
+			print '[Warning] No start/end time information, always use middle time'
+			self.hit_data_by_start_time = self.hit_data
+			self.hit_data_by_end_time = self.hit_data
+
+		self.hit_datas = [self.hit_data_by_start_time, self.hit_data, self.hit_data_by_end_time]
+
+		try:
 			cursor.execute('select id, label, avg, max, min, count from page_summary')
 			self.page_summary = [row for row in cursor]
 
 			cursor.execute('select pageid, timestamp, response_time from pages_v order by pageid, timestamp')
 			self.page_data = [(row[0], int(row[1]), row[2]) for row in cursor]
+
+			try:
+				cursor.execute('select pageid, timestamp, response_time from pages_v_start order by pageid, timestamp')
+				self.page_data_by_start_time = [(row[0], int(row[1]), row[2]) for row in cursor]
+				cursor.execute('select pageid, timestamp, response_time from pages_v_end order by pageid, timestamp')
+				self.page_data_by_end_time = [(row[0], int(row[1]), row[2]) for row in cursor]
+			except:
+				print '[Warning] No page start/end time information, always use middle time'
+				self.page_data_by_start_time = self.page_data
+				self.page_data_by_end_time = self.page_data
+
 		except:
 			print '[Warning] No page information, always use hits'
 			self.page_summary = self.hit_summary
 			self.page_data = self.hit_data
+
+		self.page_datas = [self.page_data_by_start_time, self.page_data, self.page_data_by_end_time]
+
+		self.data_index = 1
+
+		self.datas = [self.hit_datas, self.page_datas]
+		self.type_index = 0
 
 		cursor.close()
 
@@ -89,7 +121,7 @@ class ReportTab(wx.Panel):
 
 	def ShowPages(self):
 		self.summary = self.page_summary
-		self.data = self.page_data
+		self.data = self.page_datas[self.data_index]
 		self.LoadSummary(self.page_summary)
 
 		h = wx.ListItem()
@@ -100,7 +132,7 @@ class ReportTab(wx.Panel):
 
 	def ShowHits(self):
 		self.summary = self.hit_summary
-		self.data = self.hit_data
+		self.data = self.hit_datas[self.data_index]
 		self.LoadSummary(self.hit_summary)
 
 		h = wx.ListItem()
@@ -135,7 +167,7 @@ class ReportTab(wx.Panel):
 				self.list.SetColumnWidth(1, 60)
 
 	def LoadChart(self, uid):
-		data = [hit[1:3] for hit in self.data if hit[0] == uid]
+		data = [d[1:3] for d in self.data if d[0] == uid]
 		self.chartPanel.SetData(data)
 
 	# XXX: why I need this?
@@ -148,10 +180,28 @@ class ReportTab(wx.Panel):
 
 	def OnSwitch(self, event):
 		if event.Column == -1:
-			if self.data == self.page_data:
+			self.type_index = (self.type_index + 1) % 2
+			if self.type_index == 0 or self.hit_data == self.page_data:
 				self.ShowHits()
 			else:
 				self.ShowPages()
+
+	def OnSwitchTime(self, event):
+		self.data_index = (self.data_index + 1) % 3
+		if self.type_index == 0 or self.hit_data == self.page_data:
+			self.data = self.hit_datas[self.data_index]
+		else:
+			self.data = self.page_datas[self.data_index]
+
+		uid = self.GetSelectedItem()
+		if uid:
+			self.LoadChart(uid)
+
+	def GetSelectedItem(self):
+		index = self.list.GetNextItem(-1,
+								wx.LIST_NEXT_ALL,
+								wx.LIST_STATE_SELECTED)
+		return self.list.GetItemText(index) if index != -1 else None
 
 def Standalone(filename = None):
 	app = wx.PySimpleApp()

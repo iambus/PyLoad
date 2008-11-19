@@ -63,6 +63,18 @@ class ReportBase:
 					(start + end)/2 as timestamp,
 					(end - start) as response_time
 				from hits''')
+		cursor.execute('''create view hits_v_start as
+				select
+					hits.hitid as hitid,
+					start as timestamp,
+					(end - start) as response_time
+				from hits''')
+		cursor.execute('''create view hits_v_end as
+				select
+					hits.hitid as hitid,
+					end as timestamp,
+					(end - start) as response_time
+				from hits''')
 		cursor.execute('''create view one as
 				select
 					hits_v.hitid as id,
@@ -85,6 +97,20 @@ class ReportBase:
 				select
 					pages.pageid as pageid,
 					(start + end)/2 as timestamp,
+					pages.response_time as response_time
+				from pages, pages_info
+				where pages.pageid = pages_info.pageid''')
+		cursor.execute('''create view pages_v_start as
+				select
+					pages.pageid as pageid,
+					start as timestamp,
+					pages.response_time as response_time
+				from pages, pages_info
+				where pages.pageid = pages_info.pageid''')
+		cursor.execute('''create view pages_v_end as
+				select
+					pages.pageid as pageid,
+					end as timestamp,
 					pages.response_time as response_time
 				from pages, pages_info
 				where pages.pageid = pages_info.pageid''')
