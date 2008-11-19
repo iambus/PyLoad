@@ -221,7 +221,7 @@ def usage():
   -c, --clean        remove unused object in project file
   -u, --user         specify the user numbers to play
   -i, --iteration    specify the iteration numbers to play
-	  --host         specify the server host:port. E.g. localhost:8000
+      --host         specify the server host:port. E.g. localhost:8000
   -o, --operation    should be 'play' (default value), 'clean', or 'report'.
       --show-classes show classes of objects used in project
 
