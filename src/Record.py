@@ -177,6 +177,8 @@ class Hit(Player, PropertyMixin):
 			try:
 				handler.validator.validate(response)
 			except Errors.ValidationError, e:
+				if reporter:
+					reporter.post_error(self.uuid, start_time) # using start time
 				raise Errors.TerminateRequest('ValidationError: %s' % e)
 
 			return (start_time, end_time)
@@ -208,6 +210,7 @@ class Page(Player):
 		times = []
 		for hit in self.hits:
 			value = hit.play(Scope(basescope))
+			# TODO: record page errors
 			if value:
 				times.append(value)
 		reporter = basescope.lookup('reporter')

@@ -35,6 +35,7 @@ class ReportTab(wx.Panel):
 		self.list.InsertColumn(3, "Max")
 		self.list.InsertColumn(4, "Min")
 		self.list.InsertColumn(5, "Count")
+		self.list.InsertColumn(6, "Error")
 
 		self.list.SetColumnWidth(0, 60)
 		self.list.SetColumnWidth(1, 60)
@@ -42,6 +43,7 @@ class ReportTab(wx.Panel):
 		self.list.SetColumnWidth(3, 60)
 		self.list.SetColumnWidth(4, 60)
 		self.list.SetColumnWidth(5, 60)
+		self.list.SetColumnWidth(6, 60)
 
 
 		self.chartPanel = LineChartPanel.LineChart(self.splitter)
@@ -115,6 +117,13 @@ class ReportTab(wx.Panel):
 		self.datas = [self.hit_datas, self.page_datas]
 		self.type_index = 0
 
+		try:
+			cursor.execute('select id, count from error_summary')
+			self.errors = dict([row for row in cursor])
+		except:
+			print '[Warning] No errors information'
+			self.errors = {}
+
 		cursor.close()
 
 		self.ShowHits()
@@ -160,6 +169,7 @@ class ReportTab(wx.Panel):
 			self.list.SetStringItem(index, 3, row[3])
 			self.list.SetStringItem(index, 4, row[4])
 			self.list.SetStringItem(index, 5, row[5])
+			self.list.SetStringItem(index, 6, str(self.errors.get(row[0], '-')))
 
 		if len(rows):
 			self.list.SetColumnWidth(1, wx.LIST_AUTOSIZE)

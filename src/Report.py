@@ -130,6 +130,13 @@ class ReportBase:
 					count(time) as count
 				from page_one group by id''')
 
+		cursor.execute('create table errors (id, time)')
+		cursor.execute('''create view error_summary as
+				select
+					id,
+					count(time) as count
+				from errors group by id''')
+
 		cursor.close()
 
 	def close_report(self):
@@ -144,8 +151,10 @@ class ReportBase:
 					self.add_hits(data)
 				elif len(data[0]) == 4:
 					self.add_pages(data)
+				elif len(data[0]) == 2:
+					self.add_errors(data)
 				else:
-					assert False, 'The length of data must be 3 (for hit) or 4 (for page), but got: %s' % data[0]
+					assert False, 'The length of data must be 2 (for error) 3 (for hit) or 4 (for page), but got: %s' % str(data[0])
 			self.queue.task_done()
 		assert self.queue.empty()
 
@@ -168,6 +177,14 @@ class ReportBase:
 			pages2.append((id, start, end, time))
 		self.connection.executemany('insert into pages(pageid, start, end, response_time) values (?, ?, ?, ?)', pages2)
 
+	def add_errors(self, errors):
+		errors2 = []
+		for error in errors:
+			id = error[0]
+			time = int(error[1]*1000)
+			errors2.append((id, time))
+		self.connection.executemany('insert into errors(id, time) values (?, ?)', errors2)
+
 	def post_hits(self, hits):
 		if not self.finished:
 			self.queue.put(hits)
@@ -175,6 +192,10 @@ class ReportBase:
 	def post_pages(self, pages):
 		if not self.finished:
 			self.queue.put(pages)
+
+	def post_errors(self, errors):
+		if not self.finished:
+			self.queue.put(errors)
 
 	def display(self):
 		if self.path != ':memory:':
@@ -252,15 +273,20 @@ class ReportPoster:
 		self.report = report
 		self.hits_data = []
 		self.pages_data = []
+		self.errors_data = []
 	def post_hit(self, id, start, end):
 		self.hits_data.append((id, start, end))
 	def post_page(self, id, start, end, time):
 		self.pages_data.append((id, start, end, time))
+	def post_error(self, id, time):
+		self.errors_data.append((id, time))
 	def commit(self):
 		self.report.post_hits(self.hits_data)
 		self.report.post_pages(self.pages_data)
+		self.report.post_errors(self.errors_data)
 		self.hits_data = []
 		self.pages_data = []
+		self.errors_data = []
 
 if __name__ == '__main__':
 	r = Report('last-report.db')
