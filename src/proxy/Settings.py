@@ -1,6 +1,11 @@
 
-# TODO: automatically set USE_AGENT to False if twisted doesn't existed
 USE_AGENT = True
+if USE_AGENT:
+	try:
+		import twisted
+	except ImportError:
+		print "[Warning] Can't find twisted library. Agent is disabled."
+		USE_AGENT = False
 
 AGENT_HOST = 'localhost'
 AGENT_PORT = 9107
