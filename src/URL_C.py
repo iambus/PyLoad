@@ -1,10 +1,16 @@
 
+# URL implemented using pycurl
+
 import pycurl
 from cStringIO import StringIO
 
 URL_ERROR = (pycurl.error)
 STATUS_LINE_ERROR = (None)
 
+from proxy.Settings import get_proxy
+http_proxy = get_proxy()
+
+# TODO: is there memory cookie?
 class CookieJar:
 	def __init__(self):
 		# XXX: a better way to generate a temp file name?
@@ -30,10 +36,7 @@ class Response:
 		self.code = None # TODO: set code
 
 		self.stream = StringIO()
-
 		self.body_callback = self.stream.write
-#	def body_callback(self):
-#		self.stream.write()
 
 	def read(self):
 		content = self.stream.getvalue()
@@ -65,9 +68,11 @@ def urlopen(req):
 		c.setopt(pycurl.HTTPHEADER, req.headers)
 
 	if req.cookie:
-		# XXX: how to set cookie?
 		c.setopt(pycurl.COOKIEFILE, req.cookie.path)
-		#c.setopt(pycurl.COOKIEJAR, req.cookie.path)
+		c.setopt(pycurl.COOKIEJAR, req.cookie.path)
+
+	if http_proxy:
+		c.setopt(pycurl.PROXY, http_proxy)
 
 	c.perform()
 	c.close()
@@ -86,7 +91,6 @@ class ProxyHandler:
 		self.http = http
 		self.https = https
 
-# TODO: check agent setting
 def get_browser(cookie = None):
 	return Browser(cookie)
 

@@ -10,8 +10,7 @@ import cStringIO
 import Logger
 log = Logger.getLogger()
 
-import Record
-HitType = Record.Hit
+HitType = None
 
 respfilter = lambda x: False
 respcallback = lambda x: False
@@ -262,6 +261,9 @@ def begin_catch(callback = None, filter = None, hittype = None):
         respfilter = filter
     if hittype:
         HitType = hittype
+    if not HitType:
+        import Record
+        HitType = Record.Hit
 
 def end_catch():
     global respcallback, respfilter

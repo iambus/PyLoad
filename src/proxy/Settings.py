@@ -10,14 +10,22 @@ if USE_AGENT:
 AGENT_HOST = 'localhost'
 AGENT_PORT = 9107
 
+PROXY_SELF = False # for debug usage
+
 def get_proxy():
-	http_proxy = 'http://%s:%s/' % (AGENT_HOST, AGENT_PORT)
-	return {'http': http_proxy}
+	if PROXY_SELF:
+		from Proxy import use_port as port
+		return 'http://localhost:%s/' % port
+	elif USE_AGENT:
+		return 'http://%s:%s/' % (AGENT_HOST, AGENT_PORT)
+	else:
+		return None
 
 def get_proxy_hander():
-	if USE_AGENT:
-		import urllib2
-		return urllib2.ProxyHandler(get_proxy())
+	http = get_proxy()
+	if http:
+		from URL import ProxyHandler
+		return ProxyHandler(http)
 	else:
 		return None
 

@@ -153,11 +153,11 @@ class Requester:
 				del headers['Cookie'] # if this line raises Exception, then it may be a muti-threads bug...
 			requester = browser.open
 		#XXX: maybe not a good idea
-		elif browser and hasattr(browser, 'urlopen'):
+		elif browser != None and hasattr(browser, 'urlopen'):
 			if headers.has_key('Cookie'):
 				del headers['Cookie']
 			requester = browser.open
-		elif cookie and isinstance(cookie, cookielib.CookieJar):
+		elif cookie != None and isinstance(cookie, CookieJar):
 			if headers.has_key('Cookie'):
 				del headers['Cookie']
 			requester = get_requester(cookie)

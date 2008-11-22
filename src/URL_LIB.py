@@ -1,4 +1,6 @@
 
+# URL implemented using urllib2
+
 from cookielib import CookieJar
 
 import urllib2
@@ -13,15 +15,22 @@ def ProxyHandler(http, https = None):
 	else:
 		return urllib2.ProxyHandler({'http':http})
 
+from proxy.Settings import get_proxy
+http_proxy = get_proxy()
+# XXX: can a ProxyHandler be shared among threads?
+proxy_handler = ProxyHandler(http_proxy) if http_proxy else None
+
+def Browser(cookie = None):
+	cj = cookie if cookie != None else CookieJar()
+	if proxy_handler:
+		return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), proxy_handler)
+	else:
+		return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+
 def get_browser(cookie = None):
-	import proxy.Settings
-	proxy_handler = proxy.Settings.get_proxy_hander()
-	if cookie:
+	if cookie != None:
 		assert isinstance(cookie, CookieJar)
-		if proxy_handler:
-			return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), proxy_handler)
-		else:
-			return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+		return Browser(cookie)
 	else:
 		if proxy_handler:
 			return urllib2.build_opener(proxy_handler)
@@ -29,14 +38,9 @@ def get_browser(cookie = None):
 			return urllib2.build_opener()
 
 def get_requester(cookie = None):
-	import proxy.Settings
-	proxy_handler = proxy.Settings.get_proxy_hander()
-	if cookie:
+	if cookie != None:
 		assert isinstance(cookie, CookieJar)
-		if proxy_handler:
-			return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), proxy_handler).open
-		else:
-			return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj)).open
+		return Browser(cookie).open
 	else:
 		if proxy_handler:
 			return urllib2.build_opener(proxy_handler).open

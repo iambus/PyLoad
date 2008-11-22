@@ -4,17 +4,12 @@ import cookielib, urllib2
 __all__ = ['Cookie', 'Browser', 'sleep', 'randsleep']
 
 def Cookie():
-	return cookielib.CookieJar()
+	import URL
+	return URL.CookieJar()
 
 def Browser():
-	import proxy.Settings
-	proxy_handler = proxy.Settings.get_proxy_hander()
-
-	cj = cookielib.CookieJar()
-	if proxy_handler:
-		return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), proxy_handler)
-	else:
-		return urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+	import URL
+	return URL.Browser()
 
 from time import sleep
 
