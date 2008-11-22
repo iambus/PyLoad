@@ -13,6 +13,7 @@ class ProxyFactory(http.HTTPFactory):
 def start_proxy(port = None):
 	import sys
 	#log.startLogging(sys.stdout)
+	#log.startLogging(open('twisted-proxy.log', 'w'))
 	if port == None:
 		import Settings
 		port = Settings.AGENT_PORT
