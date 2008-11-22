@@ -1,5 +1,5 @@
 
-USE_AGENT = True
+USE_AGENT = False
 if USE_AGENT:
 	try:
 		import twisted
