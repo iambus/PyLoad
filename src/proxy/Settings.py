@@ -10,7 +10,7 @@ if USE_AGENT:
 AGENT_HOST = 'localhost'
 AGENT_PORT = 9107
 
-PROXY_SELF = False # for debug usage
+PROXY_SELF = True # for debug usage
 
 def get_proxy():
 	if PROXY_SELF:

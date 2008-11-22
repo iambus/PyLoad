@@ -44,7 +44,7 @@ class Choice(wx.Choice):
 				break
 		else:
 			self.selected = None
-			self.Clear()
+			self.SetSelection(wx.NOT_FOUND) # set selection to none if item not found
 
 class PolicyPanel(wx.Panel):
 	def __init__(self, parent):
