@@ -5,6 +5,16 @@ from cStringIO import StringIO
 URL_ERROR = (pycurl.error)
 STATUS_LINE_ERROR = (None)
 
+class CookieJar:
+	def __init__(self):
+		# XXX: a better way to generate a temp file name?
+		import tempfile
+		import os
+		fd, path = tempfile.mkstemp(suffix = '.txt', prefix = 'pyload-cookie-')
+		fp = os.fdopen(fd, 'wb')
+		fp.close()
+		self.path = path
+
 class Request:
 	def __init__(self, url, data = None, headers = None):
 		self.url = url
@@ -12,6 +22,7 @@ class Request:
 		self.headers = headers
 		if self.headers:
 			self.headers = ["%s: %s" % (k, v) for k, v in self.headers.items()]
+		self.cookie = None
 
 class Response:
 	def __init__(self, url):
@@ -53,18 +64,37 @@ def urlopen(req):
 	if req.headers:
 		c.setopt(pycurl.HTTPHEADER, req.headers)
 
+	if req.cookie:
+		# XXX: how to set cookie?
+		c.setopt(pycurl.COOKIEFILE, req.cookie.path)
+		#c.setopt(pycurl.COOKIEJAR, req.cookie.path)
+
 	c.perform()
 	c.close()
 
 	return resp
 
+class Browser:
+	def __init__(self, cookie = None):
+		self.cookie = cookie or CookieJar()
+	def open(self, req):
+		req.cookie = self.cookie
+		return urlopen(req)
 
+class ProxyHandler:
+	def __init__(http, https = None):
+		self.http = http
+		self.https = https
+
+# TODO: check agent setting
 def get_browser(cookie = None):
-	raise NotImplementedError('session not implemented')
+	return Browser(cookie)
 
 def get_requester(cookie = None):
-	assert cookie == None, 'Cookie is not supported'
-	return urlopen
+	if cookie:
+		return Browser(cookie).open
+	else:
+		return urlopen
 
 if __name__ == '__main__':
 	req = Request('http://www.google.com')
