@@ -1,5 +1,4 @@
 
-from xml.dom import minidom
 from AMFTypes import *
 
 try:
