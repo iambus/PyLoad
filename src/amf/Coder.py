@@ -1,7 +1,7 @@
 
 from AMFDecoder import AMFDecoder
 from AMFEncoder import AMFEncoder
-from AMFXML import ToXML, FromXML
+from AMFXML2 import ToXML, FromXML
 
 class SimpleAMFCoder:
 	@classmethod
