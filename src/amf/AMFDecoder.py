@@ -76,7 +76,10 @@ class AMFDecoder:
 			packet.messages.append(message)
 			self.switch_to_amf0()
 
-		assert self.fp.read() == '', 'Decode error: something left in stream...'
+		rest = self.fp.read()
+		if rest != '':
+			if rest != '\r\n':
+				raise RuntimeError('Decode error: something left in stream...')
 
 		return packet
 	# }}}
