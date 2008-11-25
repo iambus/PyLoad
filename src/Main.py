@@ -127,7 +127,7 @@ class MainFrame(wx.Frame):
 					("&New\tCtrl+N", "New Project", self.OnNew),
 					("&Open\tCtrl+O", "Open Project", self.OnOpen),
 					("&Report\tCtrl+R", "Open Report", self.OnOpenReport),
-					("&Save\tCtrl+S", "Save Project", self.OnSave),
+					("&Save", "Save Project", self.OnSave),
 					("Save &As", "Save Project As...", self.OnSaveAs),
 					("", "", ""),
 					("E&xit", "Exit", self.OnExit),
