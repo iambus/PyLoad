@@ -3,7 +3,8 @@ from AMFTypes import *
 
 try:
 	from LXMLTree import LXMLTree as XMLTree
-except ImportError:
+except ImportError, e:
+	print "[Warning] Can't use LXMLTree because of ", e
 	from DomTree import DomTree as XMLTree
 
 ##################################################
