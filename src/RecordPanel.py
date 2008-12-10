@@ -276,7 +276,7 @@ class RecordPanel(wx.Panel):
 			return
 
 		import re
-		if not re.match(r'^[\w\d.-@%~]+(:\d+)?$', host):
+		if not re.match(r'^[-\w\d.@%~]+(:\d+)?$', host):
 			dialog = wx.MessageDialog(self, 'The host/port is not valid. Operation will be ignored.',
 								   'Bad host/port',
 								   wx.OK | wx.ICON_WARNING
