@@ -75,10 +75,10 @@ class Hit(Player, PropertyMixin):
 		if self.respstr:
 			self.resp_handler = ContentTypeHandler.get_handler(self.respstr)
 
-		self.reqstr = self.decode(self.reqstr, self.req_handler.coder)
+		self.reqstr = self.decode_whole(self.reqstr, self.req_handler.coder)
 		self.reqstr = Template.escape(self.reqstr)
 		if self.respstr:
-			self.respstr = self.decode(self.respstr, self.resp_handler.coder)
+			self.respstr = self.decode_whole(self.respstr, self.resp_handler.coder)
 
 
 		self.set_label()
@@ -96,12 +96,16 @@ class Hit(Player, PropertyMixin):
 		self.url = urlparse.urlunsplit(parts)
 
 	# {{{ encode / decode
-	def decode(self, raw, coder):
+	def get_encoded_request(self, basescope):
+		variables = basescope.get_variables()
+		reqstr = Template.subst(self.reqstr, variables)
+		return self.encode_whole(reqstr, self.req_handler.coder)
+	def decode_whole(self, raw, coder):
 		header, body = self.split_header_and_body(raw)
 		return header + coder.decode(body)
 	def decode_body(self, body, coder):
 		return coder.decode(body)
-	def encode(self, exp, coder):
+	def encode_whole(self, exp, coder):
 		header, body = self.split_header_and_body(exp)
 		rawbody = coder.encode(body)
 		if type(rawbody) == unicode:
@@ -146,42 +150,42 @@ class Hit(Player, PropertyMixin):
 		except Errors.TerminateRequest, e:
 			log.exception('Request terminated because of %s' % e)
 
-	def playmain(self, basescope=None):
-		if basescope == None:
-			request = Requester(self.url, self.oreqstr)
-			request.play()
-		else:
-			variables = basescope.get_variables()
-			reqstr = Template.subst(self.reqstr, variables)
-			request = Requester(self.url, self.encode(reqstr, self.req_handler.coder))
+	def playmain(self, basescope):
+		assert basescope != None
 
-			response, start_time, end_time = request.play(basescope.get_variables())
+		request = Requester(self.url, self.get_encoded_request(basescope))
 
-			# Lazy decoding
-			#response.body = self.decode_body(response.rawbody, self.resp_handler.coder)
-			response.decoder = self.resp_handler.coder.decode
+		response, start_time, end_time = request.play(basescope.get_variables())
 
-			basescope.assign('response', response)
-			reporter = basescope.lookup('reporter')
+		# Lazy decoding
+		#response.body = self.decode_body(response.rawbody, self.resp_handler.coder)
+		response.decoder = self.resp_handler.coder.decode
+
+		basescope.assign('response', response)
+		reporter = basescope.lookup('reporter')
+		if reporter:
+			reporter.post_hit(self.uuid, start_time, end_time)
+
+		try:
+			self.validate_response(response)
+		except Errors.ValidationError, e:
 			if reporter:
-				reporter.post_hit(self.uuid, start_time, end_time)
+				reporter.post_error(self.uuid, start_time) # using start time
+			raise Errors.TerminateRequest('ValidationError: %s' % e)
 
+		return (start_time, end_time)
+
+	def validate_response(self, response):
+		handler = self.resp_handler or self.req_handler
+		if len(handler) == 2:
+			# older version of ContentTypeHandler doesn't have validators
+			# for back compatibility, we re-set handlers
+			self.req_handler = ContentTypeHandler.get_handler(self.oreqstr)
+			if self.orespstr:
+				self.resp_handler = ContentTypeHandler.get_handler(self.orespstr)
 			handler = self.resp_handler or self.req_handler
-			if len(handler) == 2:
-				# older version of ContentTypeHandler doesn't have validators
-				# for back compatibility, we re-set handlers
-				self.req_handler = ContentTypeHandler.get_handler(self.oreqstr)
-				if self.orespstr:
-					self.resp_handler = ContentTypeHandler.get_handler(self.orespstr)
-				handler = self.resp_handler or self.req_handler
-			try:
-				handler.validator.validate(response)
-			except Errors.ValidationError, e:
-				if reporter:
-					reporter.post_error(self.uuid, start_time) # using start time
-				raise Errors.TerminateRequest('ValidationError: %s' % e)
 
-			return (start_time, end_time)
+		handler.validator.validate(response)
 
 
 class Page(Player):
