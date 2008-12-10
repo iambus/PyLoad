@@ -96,10 +96,34 @@ class Hit(Player, PropertyMixin):
 		self.url = urlparse.urlunsplit(parts)
 
 	# {{{ encode / decode
+	def get_original_request(self, basescope):
+		return self.oreqstr
+
+	def get_cached_request(self, basescope):
+		cache = basescope.lookup('cache')
+		if cache != None:
+			if cache == 0:
+				self.cached_request = self.get_encoded_request(basescope)
+				basescope.assign('cache', 1)
+			return self.cached_request
+		else:
+			return self.get_encoded_request(basescope)
+
 	def get_encoded_request(self, basescope):
 		variables = basescope.get_variables()
 		reqstr = Template.subst(self.reqstr, variables)
 		return self.encode_whole(reqstr, self.req_handler.coder)
+
+	# by default, always encode request
+	get_raw_request = get_encoded_request
+
+	# change to get_original_request if the recorded request is OK for you
+	#get_raw_request = get_original_request
+
+	# change to get_cached_request if the recorded request is not OK for you,
+	# but all requests sent during one test are exactly the same
+	#get_raw_request = get_cached_request
+
 	def decode_whole(self, raw, coder):
 		header, body = self.split_header_and_body(raw)
 		return header + coder.decode(body)
@@ -153,7 +177,7 @@ class Hit(Player, PropertyMixin):
 	def playmain(self, basescope):
 		assert basescope != None
 
-		request = Requester(self.url, self.get_encoded_request(basescope))
+		request = Requester(self.url, self.get_raw_request(basescope))
 
 		response, start_time, end_time = request.play(basescope.get_variables())
 
