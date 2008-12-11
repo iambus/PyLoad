@@ -99,6 +99,13 @@ class Response:
 		finally:
 			fp.close()
 
+
+
+RN_P = re.compile(r'\A(.*)\r\n((?:.+\r\n)+)\r\n((?:.|\r|\n)*)\Z')
+RN_HEADER = re.compile(r'([^:\r\n]+):\s?([^\r\n]*)')
+N_P = re.compile(r'\A(.*)\n((?:.+\n)+)\n((?:.|\r|\n)*)\Z')
+N_HEADER = re.compile(r'([^:\n]+):\s?([^\n]*)')
+
 class Requester:
 	def __init__(self, url, reqstr = None):
 		self.url = url
@@ -198,21 +205,21 @@ class Requester:
 		return (response, start_time, end_time)
 
 	def parse_r_n(self, reqstr):
-		m = re.match(r'\A(.*)\r\n((?:.+\r\n)+)\r\n((?:.|\r|\n)*)\Z', reqstr)
+		m = RN_P.match(reqstr)
 		if m == None:
 			return
 		request_line = m.group(1)
-		headers = re.findall(r'([^:\r\n]+):\s?([^\r\n]*)', m.group(2))
+		headers = RN_HEADER.findall(m.group(2))
 		body = m.group(3)
 		return (request_line, headers, body)
 
 	def parse_n(self, reqstr):
-		m = re.match(r'\A(.*)\n((?:.+\n)+)\n((?:.|\r|\n)*)\Z', reqstr)
+		m = N_P.match(reqstr)
 		if m == None:
 			log.error("Can't parse request:[[[%s]]]" % repr(reqstr))
 			return
 		request_line = m.group(1)
-		headers = re.findall(r'([^:\n]+):\s?([^\n]*)', m.group(2))
+		headers = N_HEADER.findall(m.group(2))
 		body = m.group(3)
 		return (request_line, headers, body)
 
