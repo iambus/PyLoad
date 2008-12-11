@@ -140,39 +140,24 @@ class Hit(Player, PropertyMixin):
 
 		return (start_time, end_time)
 
-	def get_original_request_data(self, basescope):
-		return self.oreqstr
-
 	def get_original_request(self, basescope):
 		return Requester(self.url, self.oreqstr)
 
-	def get_cached_request_data(self, basescope):
+	def get_cached_request(self, basescope):
 		cache = basescope.lookup('cache')
 		if cache != None:
 			if cache == 0:
-				self.cached_request = self.get_encoded_request_data(basescope)
-				basescope.assign('cache', 1)
-			return self.cached_request
-		else:
-			return self.get_encoded_request_data(basescope)
-
-	def get_cached_request(self, basescope):
-		cache = basescope.lookup('more_cache')
-		if cache != None:
-			if cache == 0:
 				self.cached_request = self.get_encoded_request(basescope)
-				basescope.assign('more_cache', 1)
+				basescope.assign('cache', 1)
 			return self.cached_request
 		else:
 			return self.get_encoded_request(basescope)
 
-	def get_encoded_request_data(self, basescope):
+	def get_encoded_request(self, basescope):
 		variables = basescope.get_variables()
 		reqstr = Template.subst(self.reqstr, variables)
-		return self.encode_whole(reqstr, self.req_handler.coder)
-
-	def get_encoded_request(self, basescope):
-		return Requester(self.url, self.get_encoded_request_data(basescope))
+		raw_request = self.encode_whole(reqstr, self.req_handler.coder)
+		return Requester(self.url, raw_request)
 
 	# by default, always encode request
 	get_request = get_encoded_request
