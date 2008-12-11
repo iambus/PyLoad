@@ -133,9 +133,10 @@ class Requester:
 
 		headers = {}
 		for k, v in headers_list:
-			if k.lower() in ('content-length', 'host'):
+			lk = k.lower()
+			if lk in ('content-length', 'host'):
 				continue
-			elif k.lower() == 'cookie':
+			elif lk == 'cookie':
 				headers['Cookie'] = v
 			else:
 				headers[k] = v
