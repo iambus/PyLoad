@@ -57,7 +57,7 @@ def urlopen(req):
 	resp = Response(req.url)
 
 	c = pycurl.Curl()
-	c.setopt(c.URL, req.url)
+	c.setopt(c.URL, req.url.encode())
 	c.setopt(c.WRITEFUNCTION, resp.body_callback)
 
 	if req.data:
