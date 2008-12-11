@@ -72,6 +72,8 @@ class MainFrame(wx.Frame):
 		self.project = Project()
 		self.reportPath = 'reports/last-report.db'
 		self.report = Report(self.reportPath)
+		# set self.report to None if you don't want to generate report
+		#self.report = None
 		self.path = None
 
 		self.nb = NoteBook(self, -1, self.project, self.report)
@@ -302,9 +304,10 @@ class MainFrame(wx.Frame):
 		menu.FindItemByPosition(3).Enable(True)
 		menu.FindItemByPosition(4).Enable(False)
 
-		self.SaveReport()
-		self.nb.reportTab.LoadReport(self.reportPath)
-		self.nb.SetSelection(3) # You may not like it.
+		if self.report:
+			self.SaveReport()
+			self.nb.reportTab.LoadReport(self.reportPath)
+			self.nb.SetSelection(3) # You may not like it.
 
 	def OnRecordViewSelected(self, event):
 		self.nb.SetSelection(0)
@@ -442,7 +445,8 @@ class MainFrame(wx.Frame):
 		special = policyPanel.specialField.GetData()
 		specialLabel = special.label if special else '<empty>'
 		summary = 'Start Time: %s\nUser Count: %s\nIteration Count: %s\nSpecial: %s' % (startTime, userCount, iterationCount, specialLabel)
-		ReportManager.start_report(self.report, self.project, summary=summary)
+		if self.report:
+			ReportManager.start_report(self.report, self.project, summary=summary)
 
 		func = self.PlayInCurrentThread
 		import threading
