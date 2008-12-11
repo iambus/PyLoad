@@ -131,6 +131,7 @@ class Requester:
 		if self.method == 'GET':
 			assert self.body == ''
 
+		# TODO: bad performance
 		headers = {}
 		for k, v in headers_list:
 			lk = k.lower()
@@ -227,7 +228,7 @@ class Requester:
 
 if __name__ == '__main__':
 	r = Requester('x')
-	r.parse('''GET / HTTP/1.0\r
+	r.parse('''POST / HTTP/1.0\r
 host: localhost:8000\r
 connection: close\r
 user-agent: Python-urllib/1.17\r
