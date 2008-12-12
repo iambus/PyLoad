@@ -99,6 +99,12 @@ class Response:
 		finally:
 			fp.close()
 
+	def save_raw_body(self, path):
+		fp = open(path, 'w')
+		try:
+			fp.write(self.rawbody)
+		finally:
+			fp.close()
 
 
 RN_P = re.compile(r'\A(.*)\r\n((?:.+\r\n)+)\r\n((?:.|\r|\n)*)\Z')
