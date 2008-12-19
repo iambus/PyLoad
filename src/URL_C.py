@@ -71,6 +71,10 @@ def urlopen(req):
 		c.setopt(pycurl.COOKIEFILE, req.cookie.path)
 		c.setopt(pycurl.COOKIEJAR, req.cookie.path)
 
+	if req.url.startswith('https'):
+		# don't verify the authenticity of the peer's certificate
+		c.setopt(pycurl.SSL_VERIFYPEER, 0)
+
 	if http_proxy:
 		c.setopt(pycurl.PROXY, http_proxy)
 
