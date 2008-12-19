@@ -90,8 +90,16 @@ class Hit(Player, PropertyMixin):
 		self.reqstr = reqstr
 
 	def set_host(self, host):
+		protocol = None
+		m = re.match(r'((\w+)://)?(.*)', host)
+		if m:
+			protocol = m.group(2)
+			host = m.group(3)
+
 		import urlparse
 		parts = list(urlparse.urlsplit(self.url))
+		if protocol:
+			parts[0] = protocol
 		parts[1] = host
 		self.url = urlparse.urlunsplit(parts)
 
@@ -194,7 +202,7 @@ class Hit(Player, PropertyMixin):
 			if index != -1:
 				index += 2
 		if index == -1:
-			raise RuntimeError("Bad reqest/response format:[%s]" % whole)
+			raise RuntimeError("Bad reqest/response format:[%s]" % repr(whole))
 		header = whole[0:index]
 		body = whole[index:]
 		return header, body
