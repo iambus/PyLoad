@@ -23,6 +23,7 @@ class CookieJar:
 
 class Request:
 	def __init__(self, url, data = None, headers = None):
+		#assert headers == None or type(headers) == dict
 		self.url = url
 		self.data = data
 		self.headers = headers
@@ -52,11 +53,10 @@ class Response:
 	def info(self):
 		raise NotImplementedError()
 
-def urlopen(req):
+def open_with_curl(c, req):
 
 	resp = Response(req.url)
 
-	c = pycurl.Curl()
 	c.setopt(c.URL, req.url.encode())
 	c.setopt(c.WRITEFUNCTION, resp.body_callback)
 
@@ -79,16 +79,22 @@ def urlopen(req):
 		c.setopt(pycurl.PROXY, http_proxy)
 
 	c.perform()
-	c.close()
 
+	return resp
+
+def urlopen(req):
+	c = pycurl.Curl()
+	resp = open_with_curl(c, req)
+	c.close()
 	return resp
 
 class Browser:
 	def __init__(self, cookie = None):
 		self.cookie = cookie or CookieJar()
+		self.curl_obj = pycurl.Curl()
 	def open(self, req):
 		req.cookie = self.cookie
-		return urlopen(req)
+		return open_with_curl(self.curl_obj, req)
 
 class ProxyHandler:
 	def __init__(http, https = None):
