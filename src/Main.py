@@ -431,6 +431,30 @@ class MainFrame(wx.Frame):
 			dialog.Destroy()
 			if not path:
 				return
+
+			# Give a warning if file exists
+			import os.path
+			if os.path.exists(path):
+				dialog = wx.MessageDialog(self, '%s exists. Do you want to overwrite it?' % path,
+						'Save Confirmation',
+						wx.YES_NO | wx.ICON_WARNING
+						)
+				selection = dialog.ShowModal()
+				dialog.Destroy()
+				if selection != wx.ID_YES:
+					return
+
+		else:
+			# Give a warning if overwriting project
+			dialog = wx.MessageDialog(self, 'Are you sure you want to save?',
+					'Save Confirmation',
+					wx.YES_NO | wx.ICON_WARNING
+					)
+			selection = dialog.ShowModal()
+			dialog.Destroy()
+			if selection != wx.ID_YES:
+				return
+
 		self.path = path
 		self.project.save(path)
 

@@ -57,6 +57,5 @@ redirect stdout/stderr to log file (p3)
 
 Add more information (e.g. start time, end time, user count) to summary table in report db.
 
-add confirmation dialog when deleting node
 
 
