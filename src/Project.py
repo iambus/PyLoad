@@ -69,7 +69,7 @@ class Project:
 		new_project = clone_project(self)
 		new_project.raw_save(path)
 
-	save = raw_save
+	save = clean_save
 	
 	def load(self, path):
 		input = open(path, 'rb')
