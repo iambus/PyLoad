@@ -33,7 +33,7 @@ class Project:
 	def remove_special(self, special):
 		self.specials.remove(special)
 
-	def save(self, path):
+	def raw_save(self, path):
 		output = open(path, 'wb')
 		try:
 			pickle.dump(self, output)
@@ -64,6 +64,12 @@ class Project:
 			raise
 		finally:
 			output.close()
+
+	def clean_save(self, path):
+		new_project = clone_project(self)
+		new_project.raw_save(path)
+
+	save = raw_save
 	
 	def load(self, path):
 		input = open(path, 'rb')
@@ -78,7 +84,6 @@ class Project:
 			self.iteration_count = p.iteration_count
 			self.current_special = p.current_special
 			self.repository_internal = p.repository_internal
-
 		finally:
 			input.close()
 
@@ -112,7 +117,7 @@ def load_project(path):
 	return project
 
 def save_project(project, path):
-	project.save(path)
+	project.raw_save(path)
 
 #FIXME: dirty and duplicated code
 def play_project(project, reporter = None, project_path = 'unkown'):
@@ -173,7 +178,7 @@ def play_project(project, reporter = None, project_path = 'unkown'):
 
 def clone_project(project):
 	data = project.repository_internal
-	project.repository_internal = None
+	project.repository_internal = None #FIXME: should not modify source project
 
 	import Repository
 	new_data = Repository.RepositoryInternal()
