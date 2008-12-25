@@ -13,7 +13,7 @@ def save_project(project, path):
 	project.save(path)
 
 #FIXME: dirty and duplicated code
-def play_project(project, reporter = None):
+def play_project(project, reporter = None, project_path = 'unkown'):
 	assert isinstance(project, Project)
 
 	if project.current_special == None:
@@ -34,10 +34,16 @@ def play_project(project, reporter = None):
 
 		import datetime
 		start_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-		summary = 'Start Time: %s\nUser Count: %s\nIteration Count: %s\nSpecial: %s' % (start_time, user_count, iteration_count, special.label)
+		info = {
+				'Start Time': start_time,
+				'User Count': user_count,
+				'Iteration Count': iteration_count,
+				'Special': special.label,
+				'Project Path': project_path,
+			}
 
 		import ReportManager
-		ReportManager.start_report(reporter = reporter, project = project, summary = summary)
+		ReportManager.start_report(reporter = reporter, project = project, info = info)
 
 	import PlayPolicy
 	policy = PlayPolicy.IterationBasedPlayPolicy(
@@ -211,7 +217,7 @@ def run_command(argv):
 		for record in project.records:
 			record.set_host(host)
 
-	play_project(project, report_path)
+	play_project(project, report_path, project_path)
 
 
 def usage():

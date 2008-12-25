@@ -55,7 +55,5 @@ redirect stdout/stderr to log file (p3)
 
 100 users, why 200 threads? (p3)
 
-Add more information (e.g. start time, end time, user count) to summary table in report db.
-
 
 

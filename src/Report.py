@@ -24,7 +24,18 @@ class ReportBase:
 		self.queue = None
 
 
-	def init_report(self, hits, pages, summary):
+	def init_report(self, hits, pages, info):
+		if type(info) == dict:
+			info = info.items()
+		elif type(info) == tuple or type(info) == list:
+			pass
+		elif type(info) == str or type(info) == unicode:
+			# TODO: remove this clause later
+			print '[Warning] info is a string, so use info as summary. Please use update your code to supply a dict/tuple/list next time.'
+			info = (('summary', info),)
+		else:
+			raise TypeError(type(info))
+
 		if self.path != ':memory:':
 			try:
 				remove_file(self.path)
@@ -39,7 +50,7 @@ class ReportBase:
 
 		# Info
 		cursor.execute('create table info (key, content)')
-		cursor.execute('insert into info(key, content) values (?, ?)', ('summary', summary))
+		cursor.executemany('insert into info(key, content) values (?, ?)', info)
 
 		# Hit info
 		cursor.execute('create table hits_info (hitid, label, url)')
@@ -212,12 +223,12 @@ class SimpleReport(ReportBase):
 	def __init__(self, path = ':memory:'):
 		ReportBase.__init__(self, path)
 
-	def start(self, hits = (), pages = (), summary = ''):
+	def start(self, hits = (), pages = (), info = ()):
 		self.finished = False
 		self.queue = Queue()
 		self.start_time = time.clock()
 
-		self.init_report(hits, pages, summary)
+		self.init_report(hits, pages, info)
 
 	def finish(self):
 		self.finished = True
@@ -232,7 +243,7 @@ class ThreadReport(ReportBase):
 	def __init__(self, path = ':memory:'):
 		ReportBase.__init__(self, path)
 
-	def start(self, hits = (), pages = (), summary = ''):
+	def start(self, hits = (), pages = (), info = ()):
 		self.finished = False
 		self.queue = Queue()
 		self.start_time = time.clock()
@@ -242,14 +253,14 @@ class ThreadReport(ReportBase):
 			def __init__(self, name='ReporterThread'):
 				threading.Thread.__init__(self, name=name)
 			def run(self):
-				reporter.run(hits, pages, summary)
+				reporter.run(hits, pages, info)
 		thread = ReporterThread() 
 		thread.start()
 
 		self.thread = thread
 
-	def run(self, hits, pages, summary):
-		self.init_report(hits, pages, summary)
+	def run(self, hits, pages, info):
+		self.init_report(hits, pages, info)
 		self.receive()
 		self.close_report()
 

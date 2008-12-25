@@ -3,7 +3,7 @@ import Report
 import Project
 import Record
 
-def start_report(reporter, project, summary = ''):
+def start_report(reporter, project, info = ()):
 	hits = {}
 	pages = {}
 	def loop_all(node):
@@ -17,5 +17,5 @@ def start_report(reporter, project, summary = ''):
 	for s in project.specials:
 		loop_all(s)
 
-	reporter.start(hits = hits.values(), pages = pages.values(), summary = summary)
+	reporter.start(hits = hits.values(), pages = pages.values(), info = info)
 

@@ -468,9 +468,15 @@ class MainFrame(wx.Frame):
 		iterationCount = policyPanel.iterationField.GetValue()
 		special = policyPanel.specialField.GetData()
 		specialLabel = special.label if special else '<empty>'
-		summary = 'Start Time: %s\nUser Count: %s\nIteration Count: %s\nSpecial: %s' % (startTime, userCount, iterationCount, specialLabel)
+		info = {
+				'Start Time': startTime,
+				'User Count': userCount,
+				'Iteration Count': iterationCount,
+				'Special': specialLabel,
+				'Project Path': self.path,
+			}
 		if self.report:
-			ReportManager.start_report(self.report, self.project, summary=summary)
+			ReportManager.start_report(self.report, self.project, info=info)
 
 		func = self.PlayInCurrentThread
 		import threading
