@@ -386,17 +386,28 @@ class MainFrame(wx.Frame):
 		# TODO: Stopping playing before exiting
 		Record.CANCELLED = True # not enough
 
-		if self.proxy:
-			Proxy.stop()
-			self.proxy.join()
-			self.proxy = None
+		try:
+			if self.proxy:
+				Proxy.stop()
+				self.proxy.join()
+				self.proxy = None
 
-		import proxy.Agent as poster
-		poster.kill_if()
+			import proxy.Agent as poster
+			poster.kill_if()
+
+			#self.TryAutoSave()
+
+		except Exception, e:
+			import Logger
+			log = Logger.getLogger()
+			log.exception('Ignornig Exception when closing application:\n%s', e)
+
 		
 		self.Destroy()
 	
 	# }}}
+
+	# Load & Save
 
 	def UnloadAll(self):
 		self.nb.recordTab.Unload()
@@ -459,6 +470,34 @@ class MainFrame(wx.Frame):
 		self.project.save(path)
 
 		self.SetTitle(path + ' - PyLoad')
+
+	# Auto save
+
+	def SyncProject(self):
+		# Nothing to sync by now
+		# XXX: anything to do?
+		pass
+
+	def AutoSave(self):
+		import datetime
+		path = 'projects/autosaved/%s.pkl' % datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+		self.project.save(path)
+
+	def ShouldDoAutoSave(self):
+		def is_empty_factory(f):
+			return not(f and (f.beforescript.script or f.afterscript.script))
+		return self.project.records or\
+		       self.project.specials or\
+		       (not is_empty_factory(self.project.global_factory)) or\
+		       (not is_empty_factory(self.project.user_factory)) or\
+		       (not is_empty_factory(self.project.iteration_factory))
+
+	def TryAutoSave(self):
+		self.SyncProject()
+		if self.ShouldDoAutoSave():
+			self.AutoSave()
+
+	# Play
 
 	def Play(self):
 		import datetime
