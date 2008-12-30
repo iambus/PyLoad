@@ -460,7 +460,7 @@ class MainFrame(wx.Frame):
 
 		else:
 			# Give a warning if overwriting project
-			dialog = wx.MessageDialog(self, 'Are you sure you want to save?',
+			dialog = wx.MessageDialog(self, 'Do you want to overwrite %s?' % path,
 					'Save Confirmation',
 					wx.YES_NO | wx.ICON_WARNING
 					)
