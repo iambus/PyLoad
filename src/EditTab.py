@@ -13,7 +13,6 @@ class ColoredPanel(wx.Window):
 		self.SetBackgroundColour(color)
 
 
-
 class EditTab(wx.Panel):
 	def __init__(self, parent):
 		wx.Panel.__init__(self, parent, -1)

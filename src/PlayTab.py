@@ -2,6 +2,7 @@
 import wx
 from DetailsPanel import DetailsPanel
 import PlayPolicy
+from Changes import make_change, remove_change
 
 class Choice(wx.Choice):
 	def __init__(self, parent):
@@ -33,6 +34,7 @@ class Choice(wx.Choice):
 	def GetData(self):
 		return self.selected
 
+	@make_change
 	def OnSelected(self, event):
 		self.selected = self.values[event.Selection]
 

@@ -15,6 +15,8 @@ import ReportManager
 
 from proxy import Proxy
 
+from Changes import make_change, remove_change
+
 # For unimplemented panel...
 class ColoredPanel(wx.Window):
 	def __init__(self, parent, color):
@@ -419,6 +421,7 @@ class MainFrame(wx.Frame):
 		self.nb.editTab.Reload()
 		self.nb.playTab.Reload()
 
+	@remove_change
 	def LoadProjectFrom(self, path):
 		assert path
 		self.path = path
@@ -467,9 +470,13 @@ class MainFrame(wx.Frame):
 				return
 
 		self.path = path
-		self.project.save(path)
+		self.DoSave(path)
 
 		self.SetTitle(path + ' - PyLoad')
+
+	@remove_change
+	def DoSave(self, path):
+		self.project.save(path)
 
 	# Auto save
 
@@ -484,7 +491,7 @@ class MainFrame(wx.Frame):
 		folder = os.path.join('projects', 'autosaved')
 		filename = '%s.pkl' % datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 		path = os.path.join(folder, filename)
-		self.project.save(path)
+		self.DoSave(path)
 		self.UniqSave(folder, filename)
 
 
@@ -526,6 +533,10 @@ class MainFrame(wx.Frame):
 
 	# TODO: check changes since last save/load
 	def ShouldDoAutoSave(self):
+		import Changes
+		if not Changes.is_changed():
+			return
+
 		def is_empty_factory(f):
 			return not(f and (f.beforescript.script or f.afterscript.script))
 		return self.project.records or\

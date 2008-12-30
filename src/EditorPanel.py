@@ -4,6 +4,8 @@ import wx
 from editor.CodeCtrl import CodeCtrl
 from editor.SearchBar import SearchBar
 
+from Changes import make_change, remove_change
+
 from Binding import *
 
 import Logger
@@ -106,6 +108,7 @@ class EditorPanel(wx.Panel):
 
 		self.process.Destroy()
 
+	@make_change
 	def OnSave(self, event):
 		self.Save()
 		self.saveButton.Disable()

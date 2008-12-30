@@ -2,6 +2,7 @@
 import wx
 import wx.lib.newevent
 import Record
+from Changes import make_change, remove_change
 
 # {{{ SimpleTree
 class SimpleTree(wx.TreeCtrl):
@@ -152,6 +153,7 @@ class RecordPanel(wx.Panel):
 		if self.isMirror:
 			event.Veto()
 
+	# TODO: make_change
 	def OnEndEdit(self, event):
 		if event.EditCancelled:
 			return
@@ -200,6 +202,7 @@ class RecordPanel(wx.Panel):
 		#wx.CallAfter(DoDragDrop) # XXX: not working on Linux
 		DoDragDrop()
 
+	@make_change
 	def OnNewPage(self, event):
 		assert not self.isMirror
 
@@ -221,10 +224,12 @@ class RecordPanel(wx.Panel):
 
 		self.NotifyObservers()
 
+	@make_change
 	def OnDeleteItem(self, event):
 		item = self.tree.GetSelection()
 		self.DeleteItem(item)
 
+	@make_change
 	def OnDuplicateItem(self, event):
 		oldItem = self.tree.GetSelection()
 		oldData = self.tree.GetPyData(oldItem)
@@ -329,6 +334,7 @@ class RecordPanel(wx.Panel):
 
 	########################################
 
+	@make_change
 	def AppendNewRecord(self, record):
 		assert not self.isMirror
 		self.project.add_record(record)
@@ -340,6 +346,7 @@ class RecordPanel(wx.Panel):
 
 		self.NotifyObservers()
 
+	@make_change
 	def AppendHit(self, hit, updated = False):
 		assert False, "Don't call it now"
 		assert not self.isMirror
@@ -349,6 +356,7 @@ class RecordPanel(wx.Panel):
 			self.AppendNewHit(hit)
 		self.NotifyObservers()
 
+	@make_change
 	def AppendNewHit(self, hit):
 		assert not self.isMirror
 		recordItem = self.LastRecord()
@@ -434,6 +442,7 @@ class RecordPanel(wx.Panel):
 		mappings[sourceData.__class__](parentItem, targetItem, sourceData)
 
 	#FIXME: name confliction?
+	@make_change
 	def DeleteItem(self, item):
 		data = self.tree.GetPyData(item)
 		parentItem = self.tree.GetItemParent(item)

@@ -4,6 +4,7 @@ from Special import Special
 import Controller
 import Player
 import Record
+from Changes import make_change, remove_change
 
 import Logger
 log = Logger.getLogger()
@@ -135,6 +136,7 @@ class SpecialsPanel(wx.Panel):
 				):
 			event.Veto()
 
+	# TODO: make_change
 	def OnEndEdit(self, event):
 		if event.EditCancelled:
 			return
@@ -216,6 +218,7 @@ class SpecialsPanel(wx.Panel):
 	# }}}
 
 	# {{{ Add new nodes
+	@make_change
 	def AppendNewSpecial(self):
 		special = Special()
 		self.project.add_special(special)
@@ -358,6 +361,7 @@ class SpecialsPanel(wx.Panel):
 
 	# {{{ Deleting nodes
 	#FIXME: name confliction?
+	@make_change
 	def DeleteItem(self, item):
 		data = self.tree.GetPyData(item)
 		parentItem = self.tree.GetItemParent(item)
@@ -377,6 +381,7 @@ class SpecialsPanel(wx.Panel):
 	# }}}
 
 	# {{{ Duplicating nodes
+	@make_change
 	def DuplicateItem(self, oldItem):
 		oldData = self.tree.GetPyData(oldItem)
 		parentItem = self.tree.GetItemParent(oldItem)
@@ -400,6 +405,7 @@ class SpecialsPanel(wx.Panel):
 	# }}}
 
 	# {{{ Load kinds of Data (the data to be loaded should have been added as parent node's child)
+	@make_change
 	def LoadData(self, item, data):
 		mappings = {
 				Record.Record : self.LoadRecord,
@@ -492,6 +498,7 @@ class SpecialsPanel(wx.Panel):
 	# {{{ Insert kinds of Data AFTER a node (the data to be loaded should have been added as parent node's child)
 	#FIXME: duplicated code
 	#FIXME: bad names -- why "insert" suppose "the data to be loaded should have been added as parent node's child"?
+	@make_change
 	def InsertData(self, item, prev, data):
 		mappings = {
 				Record.Record : self.InsertRecord,
