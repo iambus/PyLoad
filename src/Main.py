@@ -480,9 +480,51 @@ class MainFrame(wx.Frame):
 
 	def AutoSave(self):
 		import datetime
-		path = 'projects/autosaved/%s.pkl' % datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+		import os.path
+		folder = os.path.join('projects', 'autosaved')
+		filename = '%s.pkl' % datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+		path = os.path.join(folder, filename)
 		self.project.save(path)
+		self.UniqSave(folder, filename)
 
+
+	def UniqSave(self, folder, filename):
+		from glob import glob
+		import os.path
+		import re
+
+		def abs_file_content(p):
+			fp = open(p, 'rb')
+			try:
+				return fp.read()
+			finally:
+				fp.close()
+		def file_content(filename):
+			p = os.path.join(folder, filename)
+			return abs_file_content(p)
+
+		c = file_content(filename)
+		existed_contents = set()
+
+		if self.path:
+			existed_contents.add(abs_file_content(self.path))
+
+		all_saved = glob(os.path.join(folder, '*.pkl'))
+		all_saved = sorted(map(os.path.basename, all_saved))
+		all_saved = filter(lambda p:re.match(r'\d+-\d+-\d+-\d+-\d+-\d+\.pkl$', p), all_saved)
+		if all_saved:
+			if all_saved[-1] == filename:
+				if len(all_saved) >= 2:
+					existed_contents.add(file_content(all_saved[-2]))
+			else:
+				existed_contents.add(file_content(all_saved[-1]))
+
+		if c in existed_contents:
+			import os
+			os.remove(os.path.join(folder, filename))
+
+
+	# TODO: check changes since last save/load
 	def ShouldDoAutoSave(self):
 		def is_empty_factory(f):
 			return not(f and (f.beforescript.script or f.afterscript.script))
