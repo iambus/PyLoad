@@ -114,8 +114,12 @@ def format_seconds(ts):
 def percentage_bits(u):
     n = int(u+0.5)
     f = 100
-    n, f = n/2, f/2
-    return '[' + '=' * n + '.' * (f - n) + ']'
+    m = f - n
+    b = 0
+    assert type(n) == int
+    n, m, b = n/2, m/2, n%2
+    assert (n + m + b) == f/2, '%s + %s + %s != %s / 2' % (n, m, b, f)
+    return '[' + '=' * n + '>' * b + '.' * m + ']'
 
 def analysis_text(text):
     values = extract_from_text(text)
