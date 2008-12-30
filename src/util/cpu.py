@@ -127,7 +127,7 @@ def analysis_text(text):
         s1 = format_seconds(t1)
         s2 = format_seconds(t2)
         us = percentage_bits(u)
-        print '%s ~ %s %2d%% %s' % (s1, s2, u, us)
+        print '%s ~ %s %3d%% %s' % (s1, s2, u, us)
 
 def analysis_file(path):
     analysis_text(file_text(path))
