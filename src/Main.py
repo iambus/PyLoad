@@ -397,7 +397,7 @@ class MainFrame(wx.Frame):
 			import proxy.Agent as poster
 			poster.kill_if()
 
-			#self.TryAutoSave()
+			self.TryAutoSave()
 
 		except Exception, e:
 			import Logger
