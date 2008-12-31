@@ -32,6 +32,7 @@ def record_loop(logname):
 
 def record(logname):
     try:
+        print 'Recording... [Press Ctrl+C to terminate]'
         record_loop(logname)
     except KeyboardInterrupt:
         see_log_message = ' Log is saved in %s' % logname if logname else ''
