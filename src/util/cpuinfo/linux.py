@@ -3,7 +3,7 @@
 import platform
 assert platform.uname()[0] == 'Linux', 'This module must be used under Linux'
 
-__ALL__ = ['get_core_number', 'read_current_cpu_point', 'cpu_percentage_between_points']
+__all__ = ['get_core_number', 'read_current_cpu_point', 'cpu_percentage_between_points']
 
 def get_core_number():
     fp = open('/proc/cpuinfo')
