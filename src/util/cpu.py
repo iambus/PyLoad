@@ -67,7 +67,8 @@ def record(logname):
     try:
         record_loop(logname)
     except KeyboardInterrupt:
-        print 'finished'
+        see_log_message = ' Log is saved in %s' % logname if logname else ''
+        print 'Finished.%s' % see_log_message
 
 ##################################################
 ################  Read Log File  #################
@@ -139,7 +140,7 @@ def analysis_file(path):
 def usage():
     print '''Usage: python cpu.py [option] [logpath]
 
-When no option specified, start to record CPU usage.
+When no option specified, start to record CPU usage. (Press Ctrl+C to stop.)
 Default log file path is cpu-usage.log.
 
 Options:
