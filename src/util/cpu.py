@@ -1,14 +1,8 @@
 
 import time
 import sys
-import platform
 
-if platform.uname()[0] == 'Linux':
-    from cpuinfo.linux import read_current_cpu_point, cpu_percentage_between_points
-elif platform.uname()[0] == 'Windows':
-    from cpuinfo.win import read_current_cpu_point, cpu_percentage_between_points
-else:
-    raise OSError('Supported platform %s' % platform.uname()[0])
+from cpuinfo import read_current_cpu_point, cpu_percentage_between_points
 
 ##################################################
 ###################  Recording  ##################
