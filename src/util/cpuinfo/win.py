@@ -1,4 +1,9 @@
 
+import platform
+assert platform.uname()[0] == 'Windows', 'This module must be used under Windows'
+
+__all__ = ['get_core_number', 'CORE_NUMBER', 'read_current_cpu_point', 'cpu_percentage_between_points']
+
 from ctypes import *
 from ctypes.wintypes import *
 

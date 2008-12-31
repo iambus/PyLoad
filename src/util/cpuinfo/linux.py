@@ -1,10 +1,20 @@
 
 
 import platform
-assert platform.uname()[0] == 'Linux', 'This script must be run under Linux'
+assert platform.uname()[0] == 'Linux', 'This module must be used under Linux'
+
+__ALL__ = ['get_core_number', 'read_current_cpu_point', 'cpu_percentage_between_points']
 
 def get_core_number():
-    raise NotImplementedError()
+    fp = open('/proc/cpuinfo')
+    lines = fp.readlines()
+    fp.close()
+    for line in lines:
+        if line.startswith('cpu core'):
+            return int(line[line.index(':')+1:])
+    else:
+        raise RuntimeError("Can't find cpu core information from /proc/cpuinfo")
+
 
 def read_current_cpu_point():
     fp = open('/proc/stat')
