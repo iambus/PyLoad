@@ -2,16 +2,15 @@
 from ctypes import *
 from ctypes.wintypes import *
 
-# undocumented API!
-NtQuerySystemInformation = windll.ntdll.NtQuerySystemInformation
 
 SystemBasicInformation       = 0
 SystemPerformanceInformation = 2
 SystemTimeInformation        = 3
 
-Li2Double = lambda x: float(x >> 32) * 4.294967296E9 + float(x & 0xffffffff)
-
 PVOID = c_void_p
+#NULL = c_void_p()
+NULL = 0
+NO_ERROR = 0
 
 class SYSTEM_BASIC_INFORMATION(Structure):
 	_fields_ = (('dwUnknown1', DWORD),
@@ -41,6 +40,38 @@ class SYSTEM_TIME_INFORMATION(Structure):
 
 ##################################################
 
+# undocumented API!
+# NtQuerySystemInformation(
+#    IN UINT SystemInformationClass,    // information type
+#    OUT PVOID SystemInformation,       // pointer to buffer
+#    IN ULONG SystemInformationLength,  // buffer size in bytes
+#    OUT PULONG ReturnLength OPTIONAL   // pointer to a 32-bit
+#                                       // variable that receives
+#                                       // the number of bytes
+#                                       // written to the buffer 
+# );
+def NtQuerySystemInformation(SystemInformationClass,
+                             SystemInformation,
+                             SystemInformationLength,
+                             OPTIONAL = NULL):
+	status = windll.ntdll.NtQuerySystemInformation(SystemInformationClass,
+	                                               SystemInformation,
+	                                               SystemInformationLength,
+	                                               OPTIONAL)
+	if status != NO_ERROR:
+		raise RuntimeError("WinAPI Error: NtQuerySystemInformation returned %s; GetLastError: %s" % (status, GetLastError()))
+
+##################################################
+
+def read_current_cpu_point():
+	raise NotImplementedError()
+	return user, system, idle
+
+
+def cpu_percentage_between_points(p1, p2):
+	raise NotImplementedError()
+
+##################################################
 
 def main():
 	SysPerfInfo = SYSTEM_PERFORMANCE_INFORMATION()
@@ -53,25 +84,18 @@ def main():
 	liOldIdleTime = 0L
 	liOldSystemTime = LARGE_INTEGER(0)
 
-	NULL = c_void_p()
-	#NULL = 0
-	NO_ERROR = 0
 	# get number of processors in the system
-	status = NtQuerySystemInformation(SystemBasicInformation, pointer(SysBaseInfo), sizeof(SysBaseInfo), NULL)
-	if status != NO_ERROR:
-		return
+	NtQuerySystemInformation(SystemBasicInformation, pointer(SysBaseInfo), sizeof(SysBaseInfo))
+
+	Li2Double = lambda x: float(x >> 32) * 4.294967296E9 + float(x & 0xffffffff)
 
 	#while not _kbhit():
 	while True:
 		# get new system time
-		status = NtQuerySystemInformation(SystemTimeInformation, pointer(SysTimeInfo), sizeof(SysTimeInfo), 0)
-		if status!=NO_ERROR:
-			raise RuntimeError( "WinAPI Error: %s" % GetLastError() )
+		NtQuerySystemInformation(SystemTimeInformation, pointer(SysTimeInfo), sizeof(SysTimeInfo))
 
 		# get new CPU's idle time
-		status = NtQuerySystemInformation(SystemPerformanceInformation, pointer(SysPerfInfo), sizeof(SysPerfInfo), NULL)
-		if status != NO_ERROR:
-			raise RuntimeError( "WinAPI Error: %s" % GetLastError() )
+		NtQuerySystemInformation(SystemPerformanceInformation, pointer(SysPerfInfo), sizeof(SysPerfInfo))
 
 		# if it's a first call - skip it
 		if liOldIdleTime != 0:
