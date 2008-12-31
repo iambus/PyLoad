@@ -33,6 +33,7 @@ def read_current_cpu_point():
     iowait  = int(values[4])
     irq     = int(values[5])
     softirq = int(values[6])
+    #???     = int(values[7]) # XXX: what does last item mean?
 
     return user, system, idle
 

@@ -59,6 +59,7 @@ def NtQuerySystemInformation(SystemInformationClass,
                              SystemInformation,
                              SystemInformationLength,
                              OPTIONAL = NULL):
+	'''A simple wrapper for [windll.ntdll.NtQuerySystemInformation]. Throw RuntimeException if error occures. Return None.'''
 	status = windll.ntdll.NtQuerySystemInformation(SystemInformationClass,
 	                                               SystemInformation,
 	                                               SystemInformationLength,
@@ -67,6 +68,7 @@ def NtQuerySystemInformation(SystemInformationClass,
 		raise RuntimeError("WinAPI Error: NtQuerySystemInformation returned %s; GetLastError: %s" % (status, GetLastError()))
 
 def SimpleNtQuerySystemInformation(SystemInformationClass, SystemInformation):
+	'''A simpler wrapper for [windll.ntdll.NtQuerySystemInformation]. The second argument is a plain Python reference for ctype instead of a C pointer to ctype.'''
 	NtQuerySystemInformation(SystemInformationClass,
                              pointer(SystemInformation),
                              sizeof(SystemInformation),
