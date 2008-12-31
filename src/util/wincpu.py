@@ -2,13 +2,13 @@
 from ctypes import *
 from ctypes.wintypes import *
 
+##################################################
 
 SystemBasicInformation       = 0
 SystemPerformanceInformation = 2
 SystemTimeInformation        = 3
 
 PVOID = c_void_p
-#NULL = c_void_p()
 NULL = 0
 NO_ERROR = 0
 
@@ -74,11 +74,11 @@ def get_core_number():
 	SimpleNtQuerySystemInformation(SystemBasicInformation, SysBaseInfo)
 	return SysBaseInfo.bKeNumberProcessors
 
-##################################################
-
-Li2Double = lambda x: float(x >> 32) * 4.294967296E9 + float(x & 0xffffffff)
-
 CORE_NUMBER = get_core_number()
+
+def Li2Double(x):
+	return (x >> 32) * 4.294967296E9 + (x & 0xffffffff)
+
 def read_current_cpu_point():
 	SysTimeInfo = SYSTEM_TIME_INFORMATION()
 	SysPerfInfo = SYSTEM_PERFORMANCE_INFORMATION()
@@ -101,7 +101,7 @@ def cpu_percentage_between_points(p1, p2):
 	dbIdleTime = dbIdleTime / dbSystemTime
 
 	# CurrentCpuUsage% = 100 - (CurrentCpuIdle * 100) / NumberOfProcessors
-	dbIdleTime = 100.0 - dbIdleTime * 100.0 / float(CORE_NUMBER) + 0.5
+	dbIdleTime = 100.0 - dbIdleTime * 100.0 / float(CORE_NUMBER) + 0.5 # XXX: why +0.5?
 
 	return dbIdleTime
 
@@ -109,27 +109,22 @@ def cpu_percentage_between_points(p1, p2):
 
 def main():
 	from time import sleep
-	SysPerfInfo = SYSTEM_PERFORMANCE_INFORMATION()
-	SysTimeInfo = SYSTEM_TIME_INFORMATION()
-	liOldIdleTime = 0L
 
-	Li2Double = lambda x: float(x >> 32) * 4.294967296E9 + float(x & 0xffffffff)
-
-	liOldSystemTime, liOldIdleTime = read_current_cpu_point()
+	old_cpu_point = read_current_cpu_point()
 	sleep(1)
 
 	while True:
-		liNewSystemTime, liNewIdleTime = read_current_cpu_point()
+		new_cpu_point = read_current_cpu_point()
+		usage_percentage = cpu_percentage_between_points(old_cpu_point,
+		                                                 new_cpu_point)
+		old_cpu_point = new_cpu_point
 
-		dbIdleTime = cpu_percentage_between_points((liOldSystemTime, liOldIdleTime),
-		                                           (liNewSystemTime, liNewIdleTime))
-
-		print "%3d%%" % dbIdleTime
-
-		liOldSystemTime, liOldIdleTime = liNewSystemTime, liNewIdleTime
+		print "%3d%%" % usage_percentage
 
 		# wait one second
 		sleep(1)
+
+##################################################
 
 if __name__ == '__main__':
 	main()
