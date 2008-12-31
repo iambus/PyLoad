@@ -61,64 +61,75 @@ def NtQuerySystemInformation(SystemInformationClass,
 	if status != NO_ERROR:
 		raise RuntimeError("WinAPI Error: NtQuerySystemInformation returned %s; GetLastError: %s" % (status, GetLastError()))
 
+def SimpleNtQuerySystemInformation(SystemInformationClass, SystemInformation):
+	NtQuerySystemInformation(SystemInformationClass,
+                             pointer(SystemInformation),
+                             sizeof(SystemInformation),
+                             NULL)
+
 ##################################################
 
+def get_core_number():
+	SysBaseInfo = SYSTEM_BASIC_INFORMATION()
+	SimpleNtQuerySystemInformation(SystemBasicInformation, SysBaseInfo)
+	return SysBaseInfo.bKeNumberProcessors
+
+##################################################
+
+Li2Double = lambda x: float(x >> 32) * 4.294967296E9 + float(x & 0xffffffff)
+
+CORE_NUMBER = get_core_number()
 def read_current_cpu_point():
-	raise NotImplementedError()
-	return user, system, idle
+	SysTimeInfo = SYSTEM_TIME_INFORMATION()
+	SysPerfInfo = SYSTEM_PERFORMANCE_INFORMATION()
+	SimpleNtQuerySystemInformation(SystemTimeInformation, SysTimeInfo)
+	SimpleNtQuerySystemInformation(SystemPerformanceInformation, SysPerfInfo)
+	liOldSystemTime = SysTimeInfo.liKeSystemTime
+	liOldIdleTime = SysPerfInfo.liIdleTime
+	return Li2Double(liOldSystemTime), Li2Double(liOldIdleTime)
 
 
 def cpu_percentage_between_points(p1, p2):
-	raise NotImplementedError()
+	liOldSystemTime, liOldIdleTime = p1
+	liNewSystemTime, liNewIdleTime = p2
+
+	# CurrentValue = NewValue - OldValue
+	dbIdleTime = liNewIdleTime - liOldIdleTime
+	dbSystemTime = liNewSystemTime - liOldSystemTime
+
+	# CurrentCpuIdle = IdleTime / SystemTime
+	dbIdleTime = dbIdleTime / dbSystemTime
+
+	# CurrentCpuUsage% = 100 - (CurrentCpuIdle * 100) / NumberOfProcessors
+	dbIdleTime = 100.0 - dbIdleTime * 100.0 / float(CORE_NUMBER) + 0.5
+
+	return dbIdleTime
 
 ##################################################
 
 def main():
+	from time import sleep
 	SysPerfInfo = SYSTEM_PERFORMANCE_INFORMATION()
 	SysTimeInfo = SYSTEM_TIME_INFORMATION()
-	SysBaseInfo = SYSTEM_BASIC_INFORMATION()
-	dbIdleTime = DOUBLE()
-	dbSystemTime = DOUBLE()
-	status = LONG()
-	#liOldIdleTime = LARGE_INTEGER(0)
 	liOldIdleTime = 0L
-	liOldSystemTime = LARGE_INTEGER(0)
-
-	# get number of processors in the system
-	NtQuerySystemInformation(SystemBasicInformation, pointer(SysBaseInfo), sizeof(SysBaseInfo))
 
 	Li2Double = lambda x: float(x >> 32) * 4.294967296E9 + float(x & 0xffffffff)
 
-	#while not _kbhit():
+	liOldSystemTime, liOldIdleTime = read_current_cpu_point()
+	sleep(1)
+
 	while True:
-		# get new system time
-		NtQuerySystemInformation(SystemTimeInformation, pointer(SysTimeInfo), sizeof(SysTimeInfo))
+		liNewSystemTime, liNewIdleTime = read_current_cpu_point()
 
-		# get new CPU's idle time
-		NtQuerySystemInformation(SystemPerformanceInformation, pointer(SysPerfInfo), sizeof(SysPerfInfo))
+		dbIdleTime = cpu_percentage_between_points((liOldSystemTime, liOldIdleTime),
+		                                           (liNewSystemTime, liNewIdleTime))
 
-		# if it's a first call - skip it
-		if liOldIdleTime != 0:
-			# CurrentValue = NewValue - OldValue
-			dbIdleTime = Li2Double(SysPerfInfo.liIdleTime) - Li2Double(liOldIdleTime)
-			dbSystemTime = Li2Double(SysTimeInfo.liKeSystemTime) - Li2Double(liOldSystemTime)
+		print "%3d%%" % dbIdleTime
 
-			# CurrentCpuIdle = IdleTime / SystemTime
-			dbIdleTime = dbIdleTime / dbSystemTime
-
-			# CurrentCpuUsage% = 100 - (CurrentCpuIdle * 100) / NumberOfProcessors
-			dbIdleTime = 100.0 - dbIdleTime * 100.0 / float(SysBaseInfo.bKeNumberProcessors) + 0.5
-
-			print "%3d%%" % dbIdleTime
-
-		# store new CPU's idle and system time
-		liOldIdleTime = SysPerfInfo.liIdleTime
-		liOldSystemTime = SysTimeInfo.liKeSystemTime
+		liOldSystemTime, liOldIdleTime = liNewSystemTime, liNewIdleTime
 
 		# wait one second
-		from time import sleep
 		sleep(1)
-	print
 
 if __name__ == '__main__':
 	main()

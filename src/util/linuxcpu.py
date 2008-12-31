@@ -3,6 +3,9 @@
 import platform
 assert platform.uname()[0] == 'Linux', 'This script must be run under Linux'
 
+def get_core_number():
+    raise NotImplementedError()
+
 def read_current_cpu_point():
     fp = open('/proc/stat')
     lines = fp.readlines()
