@@ -174,7 +174,7 @@ def run_command(argv):
     if nolog and read_mode:
         sys.exit("Bad args: log path must be given in read mode")
 
-    if nolog and not logpath:
+    if nolog and logpath:
         sys.exit("Bad args: don't give log path if nolog specified")
 
     assert nolog or logpath
