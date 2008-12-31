@@ -17,11 +17,11 @@ else:
 def read_current_time_and_cpu():
     return time.time(), read_current_cpu_point()
 
-def record_loop(logname):
+def record_loop(logname, interval):
     fp = open(logname, 'w') if logname else None
     last_time, last_cpu = read_current_time_and_cpu()
     while True:
-        time.sleep(3)
+        time.sleep(interval)
         current_time, current_cpu = read_current_time_and_cpu()
         current_cpu_usage = cpu_percentage_between_points(last_cpu, current_cpu)
         if fp:
@@ -30,10 +30,10 @@ def record_loop(logname):
 
         last_time, last_cpu = current_time, current_cpu
 
-def record(logname):
+def record(logname, interval):
     try:
         print 'Recording... [Press Ctrl+C to terminate]'
-        record_loop(logname)
+        record_loop(logname, interval)
     except KeyboardInterrupt:
         see_log_message = ' Log is saved in %s' % logname if logname else ''
         print 'Finished.%s' % see_log_message
@@ -116,12 +116,14 @@ Options:
   -r, --read      Compute the average CPU usage in log file.
   -a, --analysis  Display CPU information in log file.
   -n, --no-log    When recording CPU information, don't write date to log file (simply print to stdout).
+  -i, --interval  Delay interval. Default to 3 seconds.
 
 Examples:
   python cpu.py [logpath]
   python cpu.py -r [logpath]
   python cpu.py -a [logpath]
   python cpu.py -n
+  python cpu.py -i 1
   python cpu.py -h
 '''
 
@@ -131,15 +133,20 @@ def main():
 
 def run_command(argv):
     import getopt
-    optlist, args = getopt.getopt(argv, 'harn', [
+    optlist, args = getopt.getopt(argv, 'harni:', [
             'help',
             'analysis',
             'read',
             'no-log',
+            'interval',
         ])
 
     default_log_path = 'cpu-usage.log'
     logpath = None
+
+    default_interval = 3
+    interval = default_interval
+
     read_mode = None
     nolog = None
 
@@ -153,6 +160,8 @@ def run_command(argv):
             read_mode = 'a'
         elif o in ('-n', 'no-log'):
             nolog = True
+        elif o in ('-i', 'interval'):
+            interval = float(a)
         else:
             sys.exit('Unknown option %s' % o)
 
@@ -176,7 +185,7 @@ def run_command(argv):
     elif read_mode == 'a':
         analysis_file(logpath)
     else:
-        record(logpath)
+        record(logpath, interval)
 
 
 if __name__ == '__main__':
