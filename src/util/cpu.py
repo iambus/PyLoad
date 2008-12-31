@@ -4,9 +4,9 @@ import sys
 import platform
 
 if platform.uname()[0] == 'Linux':
-    from cpuinfo.linuxcpu import read_current_cpu_point, cpu_percentage_between_points
+    from cpuinfo.linux import read_current_cpu_point, cpu_percentage_between_points
 elif platform.uname()[0] == 'Windows':
-    from cpuinfo.wincpu import read_current_cpu_point, cpu_percentage_between_points
+    from cpuinfo.win import read_current_cpu_point, cpu_percentage_between_points
 else:
     raise OSError('Supported platform %s' % platform.uname()[0])
 
