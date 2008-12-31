@@ -26,7 +26,7 @@ def read_current_cpu_point():
     line = lines[0]
     values = line.split()[1:]
 
-    assert len(values) == 7 or (len(values) == 8 and values[-1] == '0')
+    assert len(values) == 7 or len(values) == 8
 
     user    = int(values[0])
     nice    = int(values[1])
