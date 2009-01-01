@@ -39,7 +39,11 @@ def record(logname, interval):
 
 def extract_from_text(text):
     import re
-    lines = filter(lambda x:x, text.split('\n'))
+    lines = text.split('\n')
+    lines = map(lambda x:re.sub('#.*', '', x), lines) # remove comments
+    lines = map(lambda x:x.strip(), lines) # remove blanks
+    lines = map(lambda x:x.rstrip('%'), lines) # remove tailing %
+    lines = filter(lambda x:x, lines) # remove blank lines
     return [map(float, re.split(r'\s*:\s*', line)) for line in lines]
 
 def compute_all_cpu(values):
