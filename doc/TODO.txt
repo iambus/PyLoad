@@ -57,4 +57,7 @@ redirect stdout/stderr to log file (p3)
 
 auto-save
 
+Add Change URL
+
+bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224: illegal multibyte sequence
 
