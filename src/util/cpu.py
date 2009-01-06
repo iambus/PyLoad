@@ -194,7 +194,7 @@ def run_command(argv):
     elif read_mode == 'a':
         analysis_file(logpath)
     else:
-        record(logpath, interval)
+        record(logpath, interval, pid)
 
 
 if __name__ == '__main__':
