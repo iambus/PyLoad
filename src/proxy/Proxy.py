@@ -144,6 +144,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
                     self.request_version))
                 self.headers['Connection'] = 'close'
                 del self.headers['Proxy-Connection']
+                del self.headers['Accept-Encoding'] # Disable Gzip. TODO: support gzip
                 for key_val in self.headers.items():
                     self.req("%s: %s\r\n" % key_val)
                 self.req("\r\n")
