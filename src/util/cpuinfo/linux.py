@@ -3,7 +3,7 @@
 import platform
 assert platform.uname()[0] == 'Linux', 'This module must be used under Linux'
 
-__all__ = ['get_core_number', 'read_current_cpu_point', 'cpu_percentage_between_points']
+__all__ = ['get_core_number', 'read_current_point', 'cpu_percentage_between_points']
 
 def get_core_number():
     fp = open('/proc/cpuinfo')
@@ -26,9 +26,9 @@ def read_current_process_point(pid):
 
     assert int(values[0]) == int(pid)
 
-    print len(values)
-    print line
-    print values
+    user    = int(values[13])
+    system  = int(values[14])
+    return user, system
 
 def read_current_cpu_point():
     fp = open('/proc/stat')
@@ -51,16 +51,37 @@ def read_current_cpu_point():
 
     return user, system, idle
 
+def read_current_cpu_and_process_point(pid):
+    return read_current_cpu_point() + read_current_process_point(pid)
+
+def read_current_point(pid = None):
+    if pid:
+        return read_current_cpu_and_process_point(pid)
+    else:
+        return read_current_cpu_point()
 
 def cpu_percentage_between_points(p1, p2):
-    user1, system1, idle1 = p1
-    user2, system2, idle2 = p2
-    u = user2 - user1
-    s = system2 - system1
-    i = idle2 - idle1
-    return (u + s) * 100.0 / (u + s + i)
+    assert len(p1) == len(p2)
+    if len(p1) == 3:
+        user1, system1, idle1 = p1
+        user2, system2, idle2 = p2
+        u = user2 - user1
+        s = system2 - system1
+        i = idle2 - idle1
+        return (u + s) * 100.0 / (u + s + i)
+    else:
+        assert len(p1) == 5
+        user1, system1, idle1, puser1, psystem1 = p1
+        user2, system2, idle2, puser2, psystem2 = p2
+        u = user2 - user1
+        s = system2 - system1
+        i = idle2 - idle1
+        pu = puser2 - puser1
+        ps = psystem2 - psystem1
+        return (pu + ps) * 100.0 / (u + s + i)
 
 if __name__ == '__main__':
+    print read_current_cpu_point()
     print read_current_process_point(3864)
 
 # vim: expandtab:shiftwidth=4

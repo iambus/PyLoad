@@ -2,21 +2,21 @@
 import time
 import sys
 
-from cpuinfo import read_current_cpu_point, cpu_percentage_between_points
+from cpuinfo import read_current_point, cpu_percentage_between_points
 
 ##################################################
 ###################  Recording  ##################
 ##################################################
 
-def read_current_time_and_cpu():
-    return time.time(), read_current_cpu_point()
+def read_current_time_and_cpu(pid = None):
+    return time.time(), read_current_point(pid)
 
-def record_loop(logname, interval):
+def record_loop(logname, interval, pid = None):
     fp = open(logname, 'w') if logname else None
     last_time, last_cpu = read_current_time_and_cpu()
     while True:
         time.sleep(interval)
-        current_time, current_cpu = read_current_time_and_cpu()
+        current_time, current_cpu = read_current_time_and_cpu(pid)
         current_cpu_usage = cpu_percentage_between_points(last_cpu, current_cpu)
         if fp:
             fp.write( '%s:%16s:%8.2f\n' % (last_time, current_time, current_cpu_usage) )
@@ -24,10 +24,10 @@ def record_loop(logname, interval):
 
         last_time, last_cpu = current_time, current_cpu
 
-def record(logname, interval):
+def record(logname, interval, pid = None):
     try:
         print 'Recording... [Press Ctrl+C to terminate]'
-        record_loop(logname, interval)
+        record_loop(logname, interval, pid)
     except KeyboardInterrupt:
         see_log_message = ' Log is saved in %s' % logname if logname else ''
         print 'Finished.%s' % see_log_message
@@ -112,6 +112,7 @@ Default log file path is cpu-usage.log.
 
 Options:
   -h, --help      Show this help.
+  -p, --pid       If pid is specified, it will record CPU usage for single process
   -r, --read      Compute the average CPU usage in log file.
   -a, --analysis  Display CPU information in log file.
   -n, --no-log    When recording CPU information, don't write date to log file (simply print to stdout).
@@ -119,6 +120,7 @@ Options:
 
 Examples:
   python cpu.py [logpath]
+  python cpu.py -p 5678 [logpath]
   python cpu.py -r [logpath]
   python cpu.py -a [logpath]
   python cpu.py -n
@@ -132,13 +134,16 @@ def main():
 
 def run_command(argv):
     import getopt
-    optlist, args = getopt.getopt(argv, 'harni:', [
+    optlist, args = getopt.getopt(argv, 'hp:arni:', [
             'help',
+            'pid',
             'analysis',
             'read',
             'no-log',
             'interval',
         ])
+
+    pid = None
 
     default_log_path = 'cpu-usage.log'
     logpath = None
@@ -153,6 +158,8 @@ def run_command(argv):
         if o in ('-h', '--help'):
             usage()
             sys.exit(2)
+        elif o in ('-p', 'pid'):
+            pid = int(a)
         elif o in ('-r', 'read'):
             read_mode = 'r'
         elif o in ('-a', 'Analysis'):
@@ -178,6 +185,9 @@ def run_command(argv):
 
     assert nolog or logpath
     assert not read_mode or logpath
+
+    if read_mode and pid:
+        sys.exit("-p (--pid) is only for recording.")
 
     if read_mode == 'r':
         compute_file(logpath)
