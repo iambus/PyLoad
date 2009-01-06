@@ -15,7 +15,7 @@ import ReportManager
 
 from proxy import Proxy
 
-from Changes import make_change, remove_change
+from Changes import make_change, remove_change, register_changed_callback
 
 # For unimplemented panel...
 class ColoredPanel(wx.Window):
@@ -86,6 +86,8 @@ class MainFrame(wx.Frame):
 
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 		self.Bind(EVT_PLAY_STOPPED, self.OnPlayStopped)
+
+		register_changed_callback(self.SetChanged)
 
 		#TODO: put in tabs' constructors
 		self.nb.recordTab.tree.project = self.project
@@ -549,6 +551,13 @@ class MainFrame(wx.Frame):
 		self.SyncProject()
 		if self.ShouldDoAutoSave():
 			self.AutoSave()
+
+
+	def SetChanged(self, b):
+		title = self.GetTitle().rstrip(' *')
+		if b:
+			title += ' *'
+		self.SetTitle(title)
 
 	# Play
 

@@ -4,13 +4,19 @@ changed = False
 def is_changed():
 	return changed
 
-def change():
+def set_changed(b = True):
 	global changed
-	changed = True
+	changed = b
+
+	global callbacks
+	for callback in callbacks:
+		callback(changed)
+
+def change():
+	set_changed(True)
 
 def unchange():
-	global changed
-	changed = False
+	set_changed(False)
 
 def reset():
 	unchange()
@@ -33,6 +39,13 @@ def remove_change(func):
 		finally:
 			unchange()
 	return decorator
+
+
+# change notification
+callbacks = []
+def register_changed_callback(callback):
+	global callbacks
+	callbacks.append(callback)
 
 if __name__ == '__main__':
 	pass
