@@ -13,7 +13,7 @@ def read_current_time_and_cpu(pid = None):
 
 def record_loop(logname, interval, pid = None):
     fp = open(logname, 'w') if logname else None
-    last_time, last_cpu = read_current_time_and_cpu()
+    last_time, last_cpu = read_current_time_and_cpu(pid)
     while True:
         time.sleep(interval)
         current_time, current_cpu = read_current_time_and_cpu(pid)
