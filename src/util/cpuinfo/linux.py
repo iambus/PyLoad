@@ -17,7 +17,11 @@ def get_core_number():
 
 
 def read_current_process_point(pid):
-    fp = open('/proc/%d/stat' % pid)
+    try:
+        statpath = '/proc/%d/stat' % pid
+        fp = open(statpath)
+    except IOError, e:
+        raise RuntimeError('Open %s error because of %s.\nDoes process %d exist?' % (statpath, e, pid))
     lines = fp.readlines()
     fp.close()
 
