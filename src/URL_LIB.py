@@ -40,6 +40,7 @@ def get_browser(cookie = None):
 def get_requester(cookie = None):
 	if cookie != None:
 		assert isinstance(cookie, CookieJar)
+		print '[Warning] Using CookieJar directly is not suggested. Browser object is suggested.'
 		return Browser(cookie).open
 	else:
 		if proxy_handler:

@@ -10,8 +10,8 @@ STATUS_LINE_ERROR = (None)
 from proxy.Settings import get_proxy
 http_proxy = get_proxy()
 
-# TODO: is there memory cookie?
-class CookieJar:
+
+class FileCookieJar:
 	def __init__(self):
 		# XXX: a better way to generate a temp file name?
 		import tempfile
@@ -20,6 +20,20 @@ class CookieJar:
 		fp = os.fdopen(fd, 'wb')
 		fp.close()
 		self.path = path
+
+	def apply_to(self, c):
+		c.setopt(pycurl.COOKIEFILE, self.path)
+		c.setopt(pycurl.COOKIEJAR, self.path)
+
+# XXX: How about the performance of pycurl.CurlShare?
+class MemoryCookieJar:
+	def __init__(self):
+		self.shared = pycurl.CurlShare()
+		self.shared.setopt(pycurl.SH_SHARE, pycurl.LOCK_DATA_COOKIE)
+	def apply_to(self, c):
+		c.setopt(pycurl.SHARE, self.shared)
+
+CookieJar = MemoryCookieJar
 
 class Request:
 	def __init__(self, url, data = None, headers = None):
@@ -53,10 +67,6 @@ class Response:
 	def info(self):
 		raise NotImplementedError()
 
-def apply_cookie_jar(c, cookie):
-	c.setopt(pycurl.COOKIEFILE, cookie.path)
-	c.setopt(pycurl.COOKIEJAR, cookie.path)
-
 def open_with_curl(c, req):
 
 	resp = Response(req.url)
@@ -72,7 +82,7 @@ def open_with_curl(c, req):
 		c.setopt(pycurl.HTTPHEADER, req.headers)
 
 	if req.cookie:
-		apply_cookie_jar(c, req.cookie)
+		req.cookie.apply_to(c)
 
 	if req.url.startswith('https'):
 		# don't verify the authenticity of the peer's certificate
@@ -97,8 +107,8 @@ class Browser:
 	def __init__(self, cookie = None):
 		self.cookie = cookie or CookieJar()
 		self.curl_obj = pycurl.Curl()
+		self.cookie.apply_to(self.curl_obj)
 	def open(self, req):
-		req.cookie = self.cookie
 		return open_with_curl(self.curl_obj, req)
 
 class ProxyHandler:
@@ -111,6 +121,7 @@ def get_browser(cookie = None):
 
 def get_requester(cookie = None):
 	if cookie:
+		print '[Warning] Using CookieJar directly is not suggested. Browser object is suggested.'
 		return Browser(cookie).open
 	else:
 		return urlopen
