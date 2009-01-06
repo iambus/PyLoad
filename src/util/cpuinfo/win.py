@@ -2,7 +2,7 @@
 import platform
 assert platform.uname()[0] == 'Windows', 'This module must be used under Windows'
 
-__all__ = ['get_core_number', 'CORE_NUMBER', 'read_current_cpu_point', 'cpu_percentage_between_points']
+__all__ = ['get_core_number', 'CORE_NUMBER', 'read_current_point', 'cpu_percentage_between_points']
 
 from ctypes import *
 from ctypes.wintypes import *
@@ -95,6 +95,11 @@ def read_current_cpu_point():
 	liOldIdleTime = SysPerfInfo.liIdleTime
 	return Li2Double(liOldSystemTime), Li2Double(liOldIdleTime)
 
+def read_current_point(pid = None):
+	if pid:
+		raise NotImplementedError('process CPU monitor is not supported')
+	else:
+		return  read_current_cpu_point()
 
 def cpu_percentage_between_points(p1, p2):
 	liOldSystemTime, liOldIdleTime = p1
