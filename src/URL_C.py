@@ -53,6 +53,10 @@ class Response:
 	def info(self):
 		raise NotImplementedError()
 
+def apply_cookie_jar(c, cookie):
+	c.setopt(pycurl.COOKIEFILE, cookie.path)
+	c.setopt(pycurl.COOKIEJAR, cookie.path)
+
 def open_with_curl(c, req):
 
 	resp = Response(req.url)
@@ -68,12 +72,13 @@ def open_with_curl(c, req):
 		c.setopt(pycurl.HTTPHEADER, req.headers)
 
 	if req.cookie:
-		c.setopt(pycurl.COOKIEFILE, req.cookie.path)
-		c.setopt(pycurl.COOKIEJAR, req.cookie.path)
+		apply_cookie_jar(c, req.cookie)
 
 	if req.url.startswith('https'):
 		# don't verify the authenticity of the peer's certificate
 		c.setopt(pycurl.SSL_VERIFYPEER, 0)
+		# cache SSL session
+		#c.setopt(pycurl.SSL_SESSIONID_CACHE, 0)
 
 	if http_proxy:
 		c.setopt(pycurl.PROXY, http_proxy)
