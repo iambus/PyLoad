@@ -16,6 +16,20 @@ def get_core_number():
         raise RuntimeError("Can't find cpu core information from /proc/cpuinfo")
 
 
+def read_current_process_point(pid):
+    fp = open('/proc/%d/stat' % pid)
+    lines = fp.readlines()
+    fp.close()
+
+    line = lines[0]
+    values = line.split()
+
+    assert int(values[0]) == int(pid)
+
+    print len(values)
+    print line
+    print values
+
 def read_current_cpu_point():
     fp = open('/proc/stat')
     lines = fp.readlines()
@@ -46,5 +60,7 @@ def cpu_percentage_between_points(p1, p2):
     i = idle2 - idle1
     return (u + s) * 100.0 / (u + s + i)
 
+if __name__ == '__main__':
+    print read_current_process_point(3864)
 
 # vim: expandtab:shiftwidth=4
