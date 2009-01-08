@@ -67,6 +67,15 @@ class ReportTab(wx.Panel):
 	def LoadReport(self, path):
 		import sqlite3
 
+		if type(path) == str:
+			try:
+				path = path.decode()
+			except UnicodeDecodeError:
+				import sys
+				path = path.decode(sys.getfilesystemencoding())
+		assert type(path) == unicode
+		path = path.encode('utf-8')
+
 		connection = sqlite3.connect(path)
 		cursor = connection.cursor()
 
