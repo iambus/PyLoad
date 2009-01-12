@@ -2,6 +2,11 @@
 from struct import *
 from AMFTypes import *
 
+##################################################
+def encode(packet):
+	return AMFEncoder(packet).encode()
+
+##################################################
 
 class AMFEncoder:
 	def __init__(self, packet, fp = None):

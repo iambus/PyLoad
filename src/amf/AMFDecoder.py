@@ -3,6 +3,10 @@ from struct import *
 from AMFTypes import *
 
 ##################################################
+def decode(source):
+	return AMFDecoder(source).decode()
+
+##################################################
 
 class AMFDecoder:
 	def __init__(self, fp):
