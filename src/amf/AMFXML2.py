@@ -8,6 +8,19 @@ except ImportError, e:
 	from DomTree import DomTree as XMLTree
 
 ##################################################
+def decode(packet):
+	# raw => packet => xml
+	#               ^^
+	toxml = ToXML(packet)
+	return toxml.get_xml()
+
+def encode(xml)
+	# xml => packet => raw
+	#     ^^
+	fromxml = FromXML(xml)
+	return fromxml.get_packet()
+
+##################################################
 # {{{ class ToXML
 class ToXML:
 	def __init__(self, packet):
