@@ -14,7 +14,7 @@ def decode(packet):
 	toxml = ToXML(packet)
 	return toxml.get_xml()
 
-def encode(xml)
+def encode(xml):
 	# xml => packet => raw
 	#     ^^
 	fromxml = FromXML(xml)
