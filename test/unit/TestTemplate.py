@@ -20,6 +20,8 @@ class TestTemplate(unittest.TestCase):
 		self.assertSubst('$$', '$')
 		self.assertSubst('$x', '1')
 		self.assertSubst('${x}', '1')
+		self.assertSubst('$$$x', '$1')
+		self.assertSubst('$$$$x', '$$x')
 		self.assertSubst('a$xb', 'a$xb')
 		self.assertSubst('a${x}b', 'a1b')
 		self.assertSubst('${x+y}', '${x+y}')
