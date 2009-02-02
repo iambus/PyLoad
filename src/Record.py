@@ -66,6 +66,9 @@ class Hit(Player, PropertyMixin):
 
 		self.oreqstr = self.reqstr
 		self.orespstr = self.respstr
+
+		self.original_request = self.create_original_request()
+
 		# TODO: don't decode big response
 		if self.respstr and len(self.respstr) > 1*1000*1000:
 			log.warning('The response content is too large! Length: %d' % len(self.respstr))
@@ -148,8 +151,14 @@ class Hit(Player, PropertyMixin):
 
 		return (start_time, end_time)
 
-	def get_original_request(self, basescope):
+	def create_original_request(self):
 		return Requester(self.url, self.oreqstr)
+
+	def get_original_request(self, basescope):
+		if not hasattr(self, 'original_request'):
+			# TODO: this check is for backward compatibility, remove it in future
+			self.original_request = self.create_original_request()
+		return self.original_request
 
 	def get_cached_request(self, basescope):
 		cache = basescope.lookup('cache')
