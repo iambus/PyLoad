@@ -604,8 +604,9 @@ def Main():
 	import proxy.Agent as poster
 	poster.fork_if()
 		
-	sys.path.append('runtime')
-	sys.path.append('plugin')
+	import os.path
+	sys.path.append(os.path.join(sys.path[0], 'runtime'))
+	sys.path.append(os.path.join(sys.path[0], 'plugin'))
 	app = wx.PySimpleApp()
 	frame = MainFrame()
 	frame.Center()

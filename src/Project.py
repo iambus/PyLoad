@@ -164,8 +164,8 @@ def play_project(project, reporter = None, project_path = 'unkown'):
 			)
 
 	import sys
-	sys.path.append('runtime')
-	sys.path.append('plugin')
+	sys.path.append(os.path.join(sys.path[0], 'runtime'))
+	sys.path.append(os.path.join(sys.path[0], 'plugin'))
 
 	policy.play()
 
