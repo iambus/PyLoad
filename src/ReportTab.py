@@ -65,6 +65,10 @@ class ReportTab(wx.Panel):
 		self.chartPanel.Bind(wx.EVT_MIDDLE_UP, self.OnSwitchTime, self.chartPanel)
 
 	def LoadReport(self, path):
+		import os.path
+		if not os.path.isfile(path):
+			raise RuntimeError("%s doesn't exist" % path)
+
 		import sqlite3
 
 		if type(path) == str:
