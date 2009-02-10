@@ -1,6 +1,7 @@
 
 from struct import *
 from AMFTypes import *
+from AMFExtAlias import *
 
 ##################################################
 def encode(packet):
@@ -233,13 +234,16 @@ class AMFEncoder:
 				# trait-ref
 				u = (index << 2) | 1
 				self.write_u29(u)
-				for member in obj.members:
-					self.write_value(member)
-				if trait.is_dynamic():
-					for k, v in obj.dynamic_members:
-						self.write_utf8_vr(k)
-						self.write_value(v)
-					self.write_utf8_vr('')
+				if trait.is_external():
+					obj.encode(self)
+				else:
+					for member in obj.members:
+						self.write_value(member)
+					if trait.is_dynamic():
+						for k, v in obj.dynamic_members:
+							self.write_utf8_vr(k)
+							self.write_value(v)
+						self.write_utf8_vr('')
 			else:
 				if isinstance(trait, TraitExt):
 					assert isinstance(obj, ExtObject)
@@ -247,7 +251,9 @@ class AMFEncoder:
 					u = (0 << 3) | 7
 					self.write_u29(u)
 					self.write_utf8_vr(trait.classname)
-					self.write_value(obj.members[0])
+
+					obj.encode(self)
+
 				elif isinstance(trait, StaticTrait):
 					assert isinstance(obj, StaticObject)
 					u = (len(trait.member_names) << 4) | 3
@@ -382,12 +388,15 @@ class AMFEncoder:
 if __name__ == '__main__':
 	from AMFDecoder import AMFDecoder
 	from cStringIO import StringIO
-	fp = open('samples/login.txt', 'rb')
-	fp = open('samples/login-response.txt', 'rb')
-	fp = open('samples/client-ping.txt', 'rb')
-	fp = open('samples/client-ping-response.txt', 'rb')
-	fp = open('samples/13.txt', 'rb')
-	fp = open('samples/9.txt', 'rb')
+
+	sample_path = 'samples/login.txt'
+	sample_path = 'samples/login-response.txt'
+	sample_path = 'samples/client-ping.txt'
+	sample_path = 'samples/client-ping-response.txt'
+	sample_path = 'samples/13.txt'
+	sample_path = 'samples/9.txt'
+
+	fp = open(sample_path, 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	#print packet

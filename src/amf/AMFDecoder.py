@@ -1,6 +1,7 @@
 
 from struct import *
 from AMFTypes import *
+from AMFExtAlias import *
 
 ##################################################
 def decode(source):
@@ -235,27 +236,34 @@ class AMFDecoder:
 			assert not isinstance(trait.trait, TraitRef)
 			obj = trait.instance()
 			objref = self.put_object(obj)
-			member_names = trait.get_member_names()
-			for name in member_names:
-				obj.members.append(self.read_value())
-			if trait.get_referenced().is_dynamic():
-				name = self.read_utf8_vr()
-				while name != '':
-					value = self.read_value()
-					obj.dynamic_members.append((name, value))
+			if trait.is_external():
+				obj.decode(self)
+				#obj.value = self.read_value()
+			else:
+				member_names = trait.get_member_names()
+				for name in member_names:
+					obj.members.append(self.read_value())
+				if trait.is_dynamic():
 					name = self.read_utf8_vr()
+					while name != '':
+						value = self.read_value()
+						obj.dynamic_members.append((name, value))
+						name = self.read_utf8_vr()
 			return objref
 		elif u & 4:
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXX 111
 			assert (u >> 3) == 0
 			# U29O-traits-ext
-			trait = TraitExt(self.read_utf8_vr())
+			alias_name = self.read_utf8_vr()
+			trait = TraitExt(alias_name)
 			trait = self.put_trait(trait)
 
-			obj = ExtObject(trait)
+			ext_type = find_alias(alias_name)
+			obj = ext_type(trait)
 			index = len(self.complex_object_reference_table)
 			self.complex_object_reference_table.append(obj)
-			obj.members.append(self.read_value())
+			obj.decode(self)
+
 			return ObjectRef(obj, index)
 		else:
 			# XXXXXXXXXXXXXXXXXXXXXXXXXX? 011

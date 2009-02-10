@@ -74,6 +74,8 @@ class StaticTrait(Trait):
 		Trait.__init__(self, classname)
 	def is_dynamic(self):
 		return False
+	def is_external(self):
+		return False
 	def instance(self, ref):
 		return StaticObject(ref)
 	def __str__(self):
@@ -86,6 +88,8 @@ class DynamicTrait(Trait):
 		Trait.__init__(self, classname)
 	def is_dynamic(self):
 		return True
+	def is_external(self):
+		return False
 	def instance(self, ref):
 		return DynamicObject(ref)
 	def __str__(self):
@@ -97,10 +101,14 @@ class TraitExt(Trait):
 	def __init__(self, classname):
 		Trait.__init__(self, classname)
 		self.member_names.append(u'value')
+		self.ext_type = None
 	def is_dynamic(self):
 		return False
+	def is_external(self):
+		return True
 	def instance(self, ref):
-		return ExtObject(ref)
+		assert self.ext_type, 'ext_type is not initialized for %s' % self.classname
+		return self.ext_type(ref)
 	def __str__(self):
 		return "trait-ext<%s>" % self.classname
 	def __repr__(self):
@@ -125,6 +133,8 @@ class TraitRef(AMF3Type):
 		return self.get_referenced().instance(self)
 	def is_dynamic(self):
 		return self.get_referenced().is_dynamic()
+	def is_external(self):
+		return self.get_referenced().is_external()
 	def __str__(self):
 		return 'trait-ref:%s:%s' % (self.refindex, self.get_class_name())
 	def __repr__(self):
@@ -167,12 +177,13 @@ class DynamicObject(Object):
 
 class ExtObject(Object):
 	def __init__(self, trait):
+		assert self.__class__ != ExtObject, 'Please subclass ExtObject'
 		Object.__init__(self, trait)
-	def get_value(self):
-		return self.members[0]
-	def set_value(self, value):
-		assert len(self.members) == 0, 'Often the value of ext-object should be set only once. If you set it twice, we have to clear the members first in the code of set_value.'
-		self.members.append(value)
+		rt = trait.get_referenced()
+		if rt.ext_type == None:
+			rt.ext_type = self.__class__
+		else:
+			assert rt.ext_type == self.__class__
 	def __str__(self):
 		trait = self.trait.get_referenced()
 		assert trait.__class__ == TraitExt

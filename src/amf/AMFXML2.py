@@ -1,5 +1,7 @@
 
 from AMFTypes import *
+from AMFExtAlias import find_alias
+from AMFXML2Ext import *
 
 try:
 	from LXMLTree import LXMLTree as XMLTree
@@ -134,6 +136,8 @@ class ToXML:
 			tag = obj.__class__.__name__
 		node = self.create_child(parent, tag)
 		self.set_attribute(node, 'class', obj.__class__.__name__)
+		if isinstance(obj, ExtObject):
+			self.set_attribute(node, 'class', 'ExtObject')
 		self.set_attribute(node, 'id', str(refindex))
 		if refindex in self.complex_object_set:
 			# do nothing if referenced object has been defined somewhere
@@ -161,7 +165,8 @@ class ToXML:
 					member_node = self.create_value_node(dynamic_members_node, value, 'member')
 					self.set_attribute(member_node, 'name', name)
 			elif isinstance(trait, TraitExt):
-				self.create_value_node(node, obj.members[0])
+				xmler = find_xmler( trait.get_class_name() )
+				xmler.to_xml(self, obj, node)
 			else:
 				raise TypeError('Unkown trait type: %s' % trait.__class__)
 
@@ -445,9 +450,14 @@ class FromXML:
 		else:
 			trait_node, value_node = self.get_childern(node)
 			trait = self.get_trait(trait_node)
-			obj = ExtObject(trait)
+
+			ext_type = find_alias(trait.get_class_name())
+			obj = ext_type(trait)
 			self.complex_object_table[refindex] = obj
-			obj.set_value(self.get_value(value_node))
+
+			xmler = find_xmler( trait.get_class_name() )
+			xmler.from_xml(self, obj, value_node)
+
 			return ObjectRef(obj, refindex)
 
 	def get_referenced_object(self, node):
