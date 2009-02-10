@@ -3,7 +3,7 @@ import unittest
 
 from AMFDecoder import AMFDecoder
 from AMFEncoder import AMFEncoder
-from AMFXML import FromXML, ToXML
+from AMFXML2 import FromXML, ToXML
 
 ##################################################
 # {{{ Used to convert a file to repr-like string/file
