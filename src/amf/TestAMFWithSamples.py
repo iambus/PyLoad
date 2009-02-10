@@ -484,6 +484,7 @@ class TestSample(unittest.TestCase):
 				get_data_from_file('samples/13.txt'),
 				get_data_from_file('samples/blazeds-1.txt'),
 				get_data_from_file('samples/blazeds-2.txt'),
+				get_data_from_file('samples/blazeds-3.txt'),
 				]
 
 		# data that contains \r can't be handled very well
@@ -492,6 +493,8 @@ class TestSample(unittest.TestCase):
 				get_data_7(),
 				]
 	def assertRawPacketEqual(self, r1, r2):
+		r1 = r1.strip('\r\n')
+		r2 = r2.strip('\r\n')
 		self.assertEqual(len(r1), len(r2))
 
 	def runEncoderDecoder(self, sample):

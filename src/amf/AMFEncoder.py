@@ -395,7 +395,7 @@ if __name__ == '__main__':
 	sample_path = 'samples/client-ping-response.txt'
 	sample_path = 'samples/13.txt'
 	sample_path = 'samples/9.txt'
-	sample_path = 'samples/blazeds-1.txt'
+	sample_path = 'samples/blazeds-3.txt'
 
 	fp = open(sample_path, 'rb')
 	decoder = AMFDecoder(fp)

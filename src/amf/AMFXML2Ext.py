@@ -8,7 +8,8 @@ def register_ext_xmler(alias, xmler):
 
 def register_predefined_ext_xmlers():
 	register_ext_xmler('flex.messaging.io.ArrayCollection', DefaultXMLer())
-	register_ext_xmler('DSK', BlazeDSAbstractMessageXMLer())
+	register_ext_xmler('DSK', BlazeDSAcknowledgeMessageXMLer())
+	register_ext_xmler('DSC', BlazeDSCommandMessageXMLer())
 
 def find_xmler(obj):
 	return XMLER_MAP[obj]
@@ -26,7 +27,7 @@ class BlazeDSAbstractMessageXMLer:
 		pass
 
 	def to_xml(self, to_xml_er, obj, parent):
-		node = to_xml_er.create_child(parent, 'DSK')
+		node = to_xml_er.create_child(parent, obj.CLASS_ALIAS)
 
 		self.create_node(to_xml_er, node, obj.flag1, 'flag1')
 		self.create_node(to_xml_er, node, obj.flag2, 'flag2')
@@ -46,6 +47,11 @@ class BlazeDSAbstractMessageXMLer:
 
 		self.create_node(to_xml_er, node, obj.correlationId, 'correlationId')
 		self.create_node(to_xml_er, node, obj.correlationIdBytes, 'correlationIdBytes')
+
+		self.to_xml_more(to_xml_er, obj, node)
+	
+	def to_xml_more(self, to_xml_er, obj, node):
+		raise NotImplementedError('subclass me!')
 
 	def create_node(self, to_xml_er, parent, value, tag):
 		if value is not None:
@@ -72,6 +78,10 @@ class BlazeDSAbstractMessageXMLer:
 		obj.correlationId      = self.read_node(from_xml_er, node_iter.next())
 		obj.correlationIdBytes = self.read_node(from_xml_er, node_iter.next())
 
+		self.from_xml_more(from_xml_er, obj, node_iter)
+
+	def from_xml_more(self, from_xml_er, obj, node_iter):
+		raise NotImplementedError('subclass me!')
 
 	def read_node(self, from_xml_er, node):
 		if from_xml_er.get_attribute(node, 'class') is None:
@@ -79,6 +89,34 @@ class BlazeDSAbstractMessageXMLer:
 		else:
 			return from_xml_er.get_value(node)
 
+
+class BlazeDSAcknowledgeMessageXMLer(BlazeDSAbstractMessageXMLer):
+
+	def __init__(self):
+		BlazeDSAbstractMessageXMLer.__init__(self)
+
+	def to_xml_more(self, to_xml_er, obj, node):
+		pass
+
+	def from_xml_more(self, from_xml_er, obj, node_iter):
+		pass
+
+class BlazeDSCommandMessageXMLer(BlazeDSAbstractMessageXMLer):
+
+	def __init__(self):
+		BlazeDSAbstractMessageXMLer.__init__(self)
+
+	def to_xml(self, to_xml_er, obj, parent):
+		BlazeDSAbstractMessageXMLer.to_xml(self, to_xml_er, obj, parent)
+
+	def from_xml(self, from_xml_er, obj, value_node):
+		BlazeDSAbstractMessageXMLer.from_xml(self, from_xml_er, obj, value_node)
+
+	def to_xml_more(self, to_xml_er, obj, node):
+		self.create_node(to_xml_er, node, obj.operation, 'operation')
+
+	def from_xml_more(self, from_xml_er, obj, node_iter):
+		obj.operation = self.read_node(from_xml_er, node_iter.next())
 
 register_predefined_ext_xmlers()
 

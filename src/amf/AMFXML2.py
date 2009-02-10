@@ -576,14 +576,15 @@ if __name__ == '__main__':
 	fp = open('samples/client-ping-response.txt', 'rb')
 	fp = open('samples/9.txt', 'rb')
 	fp = open('samples/7.txt', 'rb')
-	fp = open('samples/blazeds-1.txt', 'rb')
+	fp = open('samples/blazeds-3.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	toxml = ToXML(packet)
 	xml = toxml.get_xml()
-	#print xml
+	print xml
 	fromxml = FromXML(xml)
-	#print fromxml.get_packet()
+	packet = fromxml.get_packet()
+	print packet
 
 
 # vim: foldmethod=marker:

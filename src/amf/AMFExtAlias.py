@@ -13,7 +13,8 @@ def register_alias_for(ext_type):
 
 def register_predefined_aliases():
 	register_alias('flex.messaging.io.ArrayCollection', DefaultExtObject)
-	register_alias('DSK', BlazeDSAbstractMessage)
+	register_alias('DSK', BlazeDSAcknowledgeMessage)
+	register_alias('DSC', BlazeDSCommandMessage)
 
 def find_alias(alias):
 	return ALIAS_MAP[alias]
@@ -95,7 +96,7 @@ class BlazeDSAbstractMessage(ExtObject):
 			self.clientId = decoder.read_value()
 
 		if (self.flag1 & DESTINATION_FLAG) != 0:
-			destination = decoder.read_value()
+			self.destination = decoder.read_value()
 
 		if (self.flag1 & HEADERS_FLAG) != 0:
 			self.headers = decoder.read_value()
@@ -122,9 +123,6 @@ class BlazeDSAbstractMessage(ExtObject):
 
 		if (self.flag3 & CORRELATION_ID_BYTES_FLAG) != 0:
 			self.correlationIdBytes = decoder.read_value()
-
-		flag = decoder.read_byte()
-		assert flag == 0, 'flag should be 0, but %d' % flag
 
 	def encode(self, encoder):
 		encoder.write_byte(self.flag1)
@@ -167,6 +165,20 @@ class BlazeDSAbstractMessage(ExtObject):
 		if (self.flag3 & CORRELATION_ID_BYTES_FLAG) != 0:
 			encoder.write_value(self.correlationIdBytes)
 
+
+class BlazeDSAcknowledgeMessage(BlazeDSAbstractMessage):
+	CLASS_ALIAS = 'DSK'
+
+	def __init__(self, trait):
+		BlazeDSAbstractMessage.__init__(self, trait)
+
+	def decode(self, decoder):
+		BlazeDSAbstractMessage.decode(self, decoder)
+		flag = decoder.read_byte()
+		assert flag == 0, 'flag should be 0, but %d' % flag
+
+	def encode(self, encoder):
+		BlazeDSAbstractMessage.encode(self, encoder)
 		flag = 0
 		encoder.write_byte(flag)
 
@@ -202,6 +214,74 @@ correlationIdBytes: %s
 
 	def __repr__(self):
 		return str(self)
+
+
+OPERATION_FLAG = 1
+class BlazeDSCommandMessage(BlazeDSAbstractMessage):
+	CLASS_ALIAS = 'DSC'
+
+	def __init__(self, trait):
+		BlazeDSAbstractMessage.__init__(self, trait)
+
+		self.operation = None
+
+	def decode(self, decoder):
+		BlazeDSAbstractMessage.decode(self, decoder)
+		flag = decoder.read_byte()
+		assert flag == 1
+		if flag & OPERATION_FLAG:
+			self.operation = decoder.read_value()
+
+	def encode(self, encoder):
+		BlazeDSAbstractMessage.encode(self, encoder)
+
+		assert self.operation is not None
+
+		flag = 0
+		if self.operation is not None:
+			flag |= OPERATION_FLAG
+			encoder.write_byte(flag)
+			encoder.write_value(self.operation)
+		else:
+			encoder.write_byte(flag)
+
+	def __str__(self):
+		trait = self.trait.get_referenced()
+		assert trait.__class__ == TraitExt
+
+		exp = '''body: %s
+clientId: %s
+destination: %s
+headers: %s
+messageId: %s
+timestamp: %s
+timeToLive: %s
+clientId: %s
+messageId: %s
+correlationId: %s
+correlationIdBytes: %s
+operation: %s
+''' % (self.body,
+                    self.clientId,
+                    self.destination,
+                    self.headers,
+                    self.messageId,
+                    self.timestamp,
+                    self.timeToLive,
+                    self.clientId,
+                    self.messageId,
+                    self.correlationId,
+                    self.correlationIdBytes,
+                    self.operation,
+                    )
+
+		return "ext-object<{%s}>=(%s)" % (trait, exp)
+
+	def __repr__(self):
+		return str(self)
+
+
+
 
 register_predefined_aliases()
 
