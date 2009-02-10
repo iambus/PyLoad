@@ -392,16 +392,19 @@ class AMFDecoder:
 
 
 if __name__ == '__main__':
-	fp = open('samples/login.txt', 'rb')
-	fp = open('samples/login-response.txt', 'rb')
-	fp = open('samples/client-ping.txt', 'rb')
-	fp = open('samples/client-ping-response.txt', 'rb')
-	fp = open('samples/5.txt', 'rb')
-	fp = open('samples/6.txt', 'rb')
-	fp = open('samples/7.txt', 'rb')
-	fp = open('samples/9.txt', 'rb')
-	fp = open('samples/13.txt', 'rb')
-	fp = open('samples/12.txt', 'rb')
+	sample_path = 'samples/login.txt'
+	sample_path = 'samples/login-response.txt'
+	sample_path = 'samples/client-ping.txt'
+	sample_path = 'samples/client-ping-response.txt'
+	sample_path = 'samples/5.txt'
+	sample_path = 'samples/6.txt'
+	sample_path = 'samples/7.txt'
+	sample_path = 'samples/9.txt'
+	sample_path = 'samples/13.txt'
+	sample_path = 'samples/12.txt'
+	sample_path = 'blazeds-1.txt'
+
+	fp = open(sample_path, 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	print packet
