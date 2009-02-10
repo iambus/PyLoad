@@ -84,7 +84,7 @@ class AMFDecoder:
 		rest = self.fp.read()
 		if rest != '':
 			if rest != '\r\n':
-				raise RuntimeError('Decode error: something left in stream...')
+				raise RuntimeError('Decode error: something left in stream...\nlength: %d\n%s' % (len(rest), repr(rest)))
 
 		return packet
 	# }}}
@@ -410,7 +410,7 @@ if __name__ == '__main__':
 	sample_path = 'samples/9.txt'
 	sample_path = 'samples/13.txt'
 	sample_path = 'samples/12.txt'
-	sample_path = 'blazeds-1.txt'
+	sample_path = 'samples/blazeds-1.txt'
 
 	fp = open(sample_path, 'rb')
 	decoder = AMFDecoder(fp)

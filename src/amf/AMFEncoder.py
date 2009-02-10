@@ -93,7 +93,7 @@ class AMFEncoder:
 	# {{{ write basic types
 
 	def write_byte(self, b):
-		#assert type(b) == int
+		#assert type(b) == int, 'type should be int, but %s' % type(b)
 		return self.fp.write(chr(b))
 
 	def write_u16(self, i):
@@ -395,6 +395,7 @@ if __name__ == '__main__':
 	sample_path = 'samples/client-ping-response.txt'
 	sample_path = 'samples/13.txt'
 	sample_path = 'samples/9.txt'
+	sample_path = 'samples/blazeds-1.txt'
 
 	fp = open(sample_path, 'rb')
 	decoder = AMFDecoder(fp)

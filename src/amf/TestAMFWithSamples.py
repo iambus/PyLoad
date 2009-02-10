@@ -482,6 +482,8 @@ class TestSample(unittest.TestCase):
 				get_data_from_file('samples/11.txt'),
 				get_data_from_file('samples/12.txt'),
 				get_data_from_file('samples/13.txt'),
+				get_data_from_file('samples/blazeds-1.txt'),
+				get_data_from_file('samples/blazeds-2.txt'),
 				]
 
 		# data that contains \r can't be handled very well

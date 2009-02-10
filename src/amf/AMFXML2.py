@@ -576,6 +576,7 @@ if __name__ == '__main__':
 	fp = open('samples/client-ping-response.txt', 'rb')
 	fp = open('samples/9.txt', 'rb')
 	fp = open('samples/7.txt', 'rb')
+	fp = open('samples/blazeds-1.txt', 'rb')
 	decoder = AMFDecoder(fp)
 	packet = decoder.decode()
 	toxml = ToXML(packet)
