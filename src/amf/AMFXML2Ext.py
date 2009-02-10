@@ -8,8 +8,9 @@ def register_ext_xmler(alias, xmler):
 
 def register_predefined_ext_xmlers():
 	register_ext_xmler('flex.messaging.io.ArrayCollection', DefaultXMLer())
-	register_ext_xmler('DSK', BlazeDSAcknowledgeMessageXMLer())
+	#register_ext_xmler('DSA', BlazeDSAsyncMessageXMLer())
 	register_ext_xmler('DSC', BlazeDSCommandMessageXMLer())
+	register_ext_xmler('DSK', BlazeDSAcknowledgeMessageXMLer())
 
 def find_xmler(obj):
 	return XMLER_MAP[obj]
@@ -89,6 +90,17 @@ class BlazeDSAbstractMessageXMLer:
 		else:
 			return from_xml_er.get_value(node)
 
+
+class BlazeDSAsyncMessageXMLer(BlazeDSAbstractMessageXMLer):
+
+	def __init__(self):
+		BlazeDSAbstractMessageXMLer.__init__(self)
+
+	def to_xml_more(self, to_xml_er, obj, node):
+		pass
+
+	def from_xml_more(self, from_xml_er, obj, node_iter):
+		pass
 
 class BlazeDSAcknowledgeMessageXMLer(BlazeDSAbstractMessageXMLer):
 

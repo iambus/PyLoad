@@ -13,8 +13,9 @@ def register_alias_for(ext_type):
 
 def register_predefined_aliases():
 	register_alias('flex.messaging.io.ArrayCollection', DefaultExtObject)
-	register_alias('DSK', BlazeDSAcknowledgeMessage)
+	#register_alias('DSA', BlazeDSAsyncMessage)
 	register_alias('DSC', BlazeDSCommandMessage)
+	register_alias('DSK', BlazeDSAcknowledgeMessage)
 
 def find_alias(alias):
 	return ALIAS_MAP[alias]
@@ -166,6 +167,52 @@ class BlazeDSAbstractMessage(ExtObject):
 			encoder.write_value(self.correlationIdBytes)
 
 
+class BlazeDSAsyncMessage(BlazeDSAbstractMessage):
+	CLASS_ALIAS = 'DSA'
+
+	def __init__(self, trait):
+		BlazeDSAbstractMessage.__init__(self, trait)
+
+	def decode(self, decoder):
+		BlazeDSAbstractMessage.decode(self, decoder)
+
+	def encode(self, encoder):
+		BlazeDSAbstractMessage.encode(self, encoder)
+
+	def __str__(self):
+		trait = self.trait.get_referenced()
+		assert trait.__class__ == TraitExt
+
+		exp = '''body: %s
+clientId: %s
+destination: %s
+headers: %s
+messageId: %s
+timestamp: %s
+timeToLive: %s
+clientId: %s
+messageId: %s
+correlationId: %s
+correlationIdBytes: %s
+''' % (self.body,
+                    self.clientId,
+                    self.destination,
+                    self.headers,
+                    self.messageId,
+                    self.timestamp,
+                    self.timeToLive,
+                    self.clientId,
+                    self.messageId,
+                    self.correlationId,
+                    self.correlationIdBytes,
+                    )
+
+		return "ext-object<{%s}>=(%s)" % (trait, exp)
+
+	def __repr__(self):
+		return str(self)
+
+
 class BlazeDSAcknowledgeMessage(BlazeDSAbstractMessage):
 	CLASS_ALIAS = 'DSK'
 
@@ -279,7 +326,6 @@ operation: %s
 
 	def __repr__(self):
 		return str(self)
-
 
 
 
