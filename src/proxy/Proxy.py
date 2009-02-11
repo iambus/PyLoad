@@ -58,6 +58,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
         self.reqstr.write(data)
 
     def resp(self, data):
+        assert isinstance(data, basestring)
         global respfilter
         if self.respstr:
             self.respstr.write(data)
@@ -272,20 +273,22 @@ def end_catch():
     respcallback = lambda x: False
 
 def WebFilter(data):
+    assert isinstance(data, basestring)
     import re
     m = re.search(r'^content-type:\s*(.*)', data, re.I|re.M)
     if m:
-        type = m.group(1)
-        log.debug('Content-Type: %s' % type)
-        return re.search(r'text|html|xml|application/x-amf', type, re.I)
+        content_type = m.group(1)
+        log.debug('Content-Type: %s' % content_type)
+        return re.search(r'text|html|xml|application/x-amf', content_type, re.I)
 
 
 def test():
+    begin_catch(filter = WebFilter)
     start(default_port)
 
 def test_thread():
     thread_start()
-    begin_catch(WebFilter)
+    begin_catch(filter = WebFilter)
     import time
     time.sleep(10)
     h = end_catch()
