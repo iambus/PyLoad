@@ -44,9 +44,11 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
     def end(self):
         log.debug('end:%s' % self)
         self.hit.reqstr = self.reqstr.getvalue()
+        assert self.hit.reqstr, 'You got an emtpy request?'
         self.reqstr.close()
         if self.respstr:
             self.hit.respstr = self.respstr.getvalue()
+            assert self.hit.respstr, 'You got an emtpy response?'
             self.respstr.close()
         else:
             self.hit.respstr = None
@@ -117,11 +119,13 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write("Proxy-agent: %s\r\n" % self.version_string())
                 self.wfile.write("\r\n")
                 self._read_write(sock, 300)
+                self.end()
+            else:
+                log.error("What's wrong?")
         finally:
             log.debug("Bye")
             sock.close()
             self.connection.close()
-            self.end()
 
     def do_REQ(self):
         log.debug('do_REQ:'+self.path)
@@ -152,11 +156,13 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
                 self.respinfo(*sock.getpeername())
                 sock.send(self.reqstr.getvalue())
                 self._read_write(sock)
+                self.end()
+            else:
+                log.error("What's wrong?")
         finally:
             log.debug("bye")
             sock.close()
             self.connection.close()
-            self.end()
 
     def _read_write(self, sock, max_idling=20):
         iw = [self.connection, sock]
