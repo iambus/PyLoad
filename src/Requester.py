@@ -6,7 +6,7 @@ import re
 
 import Template
 
-import time
+import TimeClock
 
 import Logger
 log = Logger.getLogger()
@@ -184,7 +184,7 @@ class Requester:
 		else:
 			req = Request(url=url, headers=headers)
 
-		start_time = time.clock() #XXX: is it a good place?
+		start_time = TimeClock.now() #XXX: is it a good place?
 		try:
 			resp = requester(req)
 		except URL_ERROR, e:
@@ -197,7 +197,7 @@ class Requester:
 			from Errors import TerminateRequest
 			#TODO: add trace information
 			raise TerminateRequest('%s:%s' % (e.__class__.__name__, e))
-		end_time = time.clock() #XXX: is it a good place?
+		end_time = TimeClock.now() #XXX: is it a good place?
 		rawbody = resp.read()
 		# XXX: Is it necessary?
 		resp.close()

@@ -3,7 +3,7 @@ import sqlite3
 import threading
 from Queue import Queue
 
-import time
+import TimeClock
 
 def remove_file(path):
 	import os, os.path
@@ -226,7 +226,7 @@ class SimpleReport(ReportBase):
 	def start(self, hits = (), pages = (), info = ()):
 		self.finished = False
 		self.queue = Queue()
-		self.start_time = time.clock()
+		self.start_time = TimeClock.now()
 
 		self.init_report(hits, pages, info)
 
@@ -246,7 +246,7 @@ class ThreadReport(ReportBase):
 	def start(self, hits = (), pages = (), info = ()):
 		self.finished = False
 		self.queue = Queue()
-		self.start_time = time.clock()
+		self.start_time = TimeClock.now()
 
 		reporter = self
 		class ReporterThread(threading.Thread):
