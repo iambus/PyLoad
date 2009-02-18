@@ -35,6 +35,32 @@ def getXYAreaSize(dc):
 	return w, h
 
 
+def computeXI(xmax):
+	if xmax < 30:
+		xi = 1
+	elif xmax < 60 * 10:
+		xi = 30
+	else:
+		xi = 60 * 2
+	return xi
+
+def computeYI(ymax):
+	if ymax < 1000:
+		yi = 100
+	elif ymax < 1000 * 2:
+		yi = 200
+	elif ymax < 1000 * 5:
+		yi = 500
+	elif ymax < 1000 * 10:
+		yi = 1000
+	elif ymax < 1000 * 60:
+		yi = 5000
+	elif ymax < 1000 * 120:
+		yi = 1000 * 10
+	else:
+		yi = 1000 * 30
+	return yi
+
 class LineChart(wx.Panel): 
 	def __init__(self, parent, times = None):
 		wx.Panel.__init__(self, parent)
@@ -79,29 +105,11 @@ class LineChart(wx.Panel):
 		self.xmax = max(zip(*self.data)[0])
 		self.ymax = max(zip(*self.data)[1])
 
-		if self.xmax < 30:
-			self.xi = 1
-		elif self.xmax < 60 * 10:
-			self.xi = 30
-		else:
-			self.xi = 60 * 2
+		self.xi = computeXI(self.xmax)
 
 		self.xmax = (self.xmax / self.xi + 1) * self.xi
 
-		if self.ymax < 1000:
-			self.yi = 100
-		elif self.ymax < 1000 * 2:
-			self.yi = 200
-		elif self.ymax < 1000 * 5:
-			self.yi = 500
-		elif self.ymax < 1000 * 10:
-			self.yi = 1000
-		elif self.ymax < 1000 * 60:
-			self.yi = 5000
-		elif self.ymax < 1000 * 120:
-			self.yi = 1000 * 10
-		else:
-			self.yi = 1000 * 30
+		self.yi = computeYI(self.ymax)
 
 		self.ymax = (self.ymax / self.yi + 1) * self.yi
 
