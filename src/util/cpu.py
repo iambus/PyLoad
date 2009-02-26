@@ -20,6 +20,7 @@ def record_loop(logname, interval, pid = None):
         current_cpu_usage = cpu_percentage_between_points(last_cpu, current_cpu)
         if fp:
             fp.write( '%s:%16s:%8.2f\n' % (last_time, current_time, current_cpu_usage) )
+            fp.flush()
         print '%.02f' % current_cpu_usage
 
         last_time, last_cpu = current_time, current_cpu
