@@ -8,30 +8,40 @@ from cpuinfo import read_current_point, cpu_percentage_between_points
 ###################  Recording  ##################
 ##################################################
 
+class NullStream:
+    name = ''
+    def write(self, ignore):
+        pass
+    def flush(self):
+        pass
+
+null_stream = NullStream()
+
+console = sys.stdout
+log = null_stream
+
 def read_current_time_and_cpu(pid = None):
     return time.time(), read_current_point(pid)
 
-def record_loop(logname, interval, pid = None):
-    fp = open(logname, 'w') if logname else None
+def record_loop(interval, pid = None):
     last_time, last_cpu = read_current_time_and_cpu(pid)
     while True:
         time.sleep(interval)
         current_time, current_cpu = read_current_time_and_cpu(pid)
         current_cpu_usage = cpu_percentage_between_points(last_cpu, current_cpu)
-        if fp:
-            fp.write( '%s:%16s:%8.2f\n' % (last_time, current_time, current_cpu_usage) )
-            fp.flush()
-        print '%.02f' % current_cpu_usage
+        log.write( '%s:%16s:%8.2f\n' % (last_time, current_time, current_cpu_usage) )
+        console.write('%.02f\n' % current_cpu_usage)
+        console.flush()
 
         last_time, last_cpu = current_time, current_cpu
 
-def record(logname, interval, pid = None):
+def record(interval, pid = None):
     try:
-        print 'Recording... [Press Ctrl+C to terminate]'
-        record_loop(logname, interval, pid)
+        console.write('Recording... [Press Ctrl+C to terminate]\n')
+        record_loop(interval, pid)
     except KeyboardInterrupt:
-        see_log_message = ' Log is saved in %s' % logname if logname else ''
-        print 'Finished.%s' % see_log_message
+        see_log_message = ' Log is saved in %s' % log.name if log.name else ''
+        console.write('Finished.%s\n' % see_log_message)
 
 ##################################################
 ################  Read Log File  #################
@@ -118,6 +128,7 @@ Options:
   -a, --analysis  Display CPU information in log file.
   -n, --no-log    When recording CPU information, don't write date to log file (simply print to stdout).
   -i, --interval  Delay interval. Default to 3 seconds.
+  -q, --quiet     No console output (log to file).
 
 Examples:
   python cpu.py [logpath]
@@ -135,13 +146,14 @@ def main():
 
 def run_command(argv):
     import getopt
-    optlist, args = getopt.getopt(argv, 'hp:arni:', [
+    optlist, args = getopt.getopt(argv, 'hp:arni:q', [
             'help',
             'pid',
             'analysis',
             'read',
             'no-log',
             'interval',
+            'quiet',
         ])
 
     pid = None
@@ -154,6 +166,7 @@ def run_command(argv):
 
     read_mode = None
     nolog = None
+    quiet = None
 
     for o, a in optlist:
         if o in ('-h', '--help'):
@@ -169,6 +182,8 @@ def run_command(argv):
             nolog = True
         elif o in ('-i', 'interval'):
             interval = float(a)
+        elif o in ('-q', 'quiet'):
+            quiet = True
         else:
             sys.exit('Unknown option %s' % o)
 
@@ -184,18 +199,32 @@ def run_command(argv):
     if nolog and logpath:
         sys.exit("Bad args: don't give log path if nolog specified")
 
+    if quiet and read_mode:
+        sys.exit("Bad args: quiet only works for recording mode")
+
+    if quiet and nolog:
+        sys.exit("Can't set 'quiet' option if 'nolog' specified")
+
     assert nolog or logpath
     assert not read_mode or logpath
 
     if read_mode and pid:
         sys.exit("-p (--pid) is only for recording.")
 
+    if quiet:
+        global console
+        console = null_stream
+    if logpath:
+        global log
+        log = open(logpath, 'w')
+
+
     if read_mode == 'r':
         compute_file(logpath)
     elif read_mode == 'a':
         analysis_file(logpath)
     else:
-        record(logpath, interval, pid)
+        record(interval, pid)
 
 
 if __name__ == '__main__':
