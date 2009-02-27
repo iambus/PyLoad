@@ -30,8 +30,8 @@ def record_loop(interval, pid = None):
         current_time, current_cpu = read_current_time_and_cpu(pid)
         current_cpu_usage = cpu_percentage_between_points(last_cpu, current_cpu)
         log.write( '%s:%16s:%8.2f\n' % (last_time, current_time, current_cpu_usage) )
+        log.flush()
         console.write('%.02f\n' % current_cpu_usage)
-        console.flush()
 
         last_time, last_cpu = current_time, current_cpu
 
