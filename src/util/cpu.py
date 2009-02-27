@@ -214,9 +214,6 @@ def run_command(argv):
     if quiet:
         global console
         console = null_stream
-    if logpath:
-        global log
-        log = open(logpath, 'w')
 
 
     if read_mode == 'r':
@@ -224,6 +221,9 @@ def run_command(argv):
     elif read_mode == 'a':
         analysis_file(logpath)
     else:
+        if logpath:
+            global log
+            log = open(logpath, 'w')
         record(interval, pid)
 
 
