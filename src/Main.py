@@ -349,7 +349,7 @@ class MainFrame(wx.Frame):
 		wildcard = "pickle (*.pkl)|*.pkl|"     \
 				   "All files (*.*)|*.*"
 		dialog = wx.FileDialog(
-				self, message="Open Project", defaultDir="",
+				self, message="Open Project", defaultDir="projects",
 				defaultFile="", wildcard=wildcard, style=wx.OPEN
 				)
 		dialog.SetFilterIndex(0)
@@ -364,7 +364,7 @@ class MainFrame(wx.Frame):
 		wildcard = "sqlite3 (*.db)|*.db|"     \
 				   "All files (*.*)|*.*"
 		dialog = wx.FileDialog(
-				self, message="Open Report", defaultDir="",
+				self, message="Open Report", defaultDir="reports",
 				defaultFile="", wildcard=wildcard, style=wx.OPEN
 				)
 		dialog.SetFilterIndex(0)
