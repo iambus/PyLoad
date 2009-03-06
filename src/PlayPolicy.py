@@ -135,7 +135,7 @@ class IterationBasedPlayPolicy:
 	def play_in_single_thread(self, scope = None):
 		g = self.global_factory.create()
 		users = []
-		scope = Scope()
+		scope = Scope(scope)
 		if self.reporter:
 			scope['global_reporter'] = self.reporter
 		g.before(scope)
@@ -151,7 +151,7 @@ class IterationBasedPlayPolicy:
 	def play_in_multiple_threads(self, scope = None):
 		g = self.global_factory.create()
 		users = []
-		scope = Scope()
+		scope = Scope(scope)
 		if self.reporter:
 			scope['global_reporter'] = self.reporter
 		g.before(scope)

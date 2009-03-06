@@ -120,7 +120,7 @@ def save_project(project, path):
 	project.raw_save(path)
 
 #FIXME: dirty and duplicated code
-def play_project(project, reporter = None, project_path = 'unkown'):
+def play_project(project, reporter = None, project_path = 'unkown', variables = None):
 	assert isinstance(project, Project)
 
 	if project.current_special == None:
@@ -167,7 +167,13 @@ def play_project(project, reporter = None, project_path = 'unkown'):
 	sys.path.append(os.path.join(sys.path[0], 'runtime'))
 	sys.path.append(os.path.join(sys.path[0], 'plugin'))
 
-	policy.play()
+	if variables:
+		from Scope import Scope
+		scope = Scope()
+		scope.variables = variables
+		policy.play(scope)
+	else:
+		policy.play()
 
 	if len(sys.path) >= 2 and sys.path[-2:] == ['runtime', 'plugin']:
 		sys.path.pop()

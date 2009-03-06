@@ -29,7 +29,7 @@ def run_command(argv):
 		sys.exit(2)
 
 	try:
-		optlist, args = getopt.getopt(argv, 'hp:r:cu:i:o:', [
+		optlist, args = getopt.getopt(argv, 'hp:r:cu:i:o:D:', [
 				'help',
 				'project=',
 				'report=',
@@ -54,6 +54,8 @@ def run_command(argv):
 	operation = None
 
 	if_show_classes = False
+
+	variables = {}
 
 	for o, a in optlist:
 		if o in ('-h', '--help'):
@@ -81,6 +83,9 @@ def run_command(argv):
 			if_show_classes = True
 			if operation == None:
 				operation = 'show-classes'
+		elif o in ('-D'):
+			key, value = a.split("=", 1)
+			variables[key] = value
 		else:
 			sys.exit('Unknown option %s' % o)
 
@@ -128,7 +133,7 @@ def run_command(argv):
 		for record in project.records:
 			record.set_host(host)
 
-	play_project(project, report_path, project_path)
+	play_project(project, report_path, project_path, variables = variables)
 
 
 def usage():
