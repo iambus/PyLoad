@@ -25,15 +25,15 @@ TabToPanel = {
 		}
 
 def LoadRequest(tab, hit):
+	tab.Unload()
 	if hit.reqstr:
-		tab.Unload()
 		tab.BindToFuncs(hit.get_reqstr, hit.set_reqstr)
 		tab.Load()
 		tab.editor.SetSyntax(hit.req_handler.syntax)
 
 def LoadResponse(tab, hit):
+	tab.Unload()
 	if hit.respstr:
-		tab.Unload()
 		tab.BindTo(hit, 'respstr')
 		tab.Load()
 		tab.editor.SetSyntax(hit.resp_handler.syntax)

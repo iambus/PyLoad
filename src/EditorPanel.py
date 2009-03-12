@@ -124,6 +124,8 @@ class EditorPanel(wx.Panel):
 
 		self.editor.EmptyUndoBuffer()
 
+		self.editor.SetValue('')
+
 
 	def Load(self, path = None):
 		assert self.path == None or self.temppath == None
