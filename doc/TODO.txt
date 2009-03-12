@@ -55,9 +55,9 @@ redirect stdout/stderr to log file (p3)
 
 100 users, why 200 threads? (p3)
 
-auto-save
-
 Add Change URL
 
 bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224: illegal multibyte sequence
 
+play on the fly
+xml tree viewer
