@@ -7,12 +7,17 @@ import BaseHTTPServer, select, socket, SocketServer, urlparse
 
 import cStringIO
 
-from Filter import EmptyFilter, DefaultContentFilter
+from Filter import EmptyFilter, DefaultContentFilter, DefaultRuleFilter
 import Logger
 log = Logger.getLogger()
 
 HitType = None
+class EmptyHit:
+    def finish(self):
+        pass
 
+# FIXME: too bad code...
+reqfilter = DefaultRuleFilter()
 respfilter = EmptyFilter()
 respcallback = EmptyFilter()
 
@@ -36,7 +41,10 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
         log.debug('init:%s' % self)
         if self.path == STOPPING_URL:
             raise StoppingFlag()
-        self.hit = HitType(self.path)
+        if reqfilter.test(self.path):
+            self.hit = EmptyHit()
+        else:
+            self.hit = HitType(self.path)
         #TODO: thread-safe
 
         self.reqstr = cStringIO.StringIO()
@@ -54,8 +62,10 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             self.hit.respstr = None
         self.hit.finish() # XXX: is it a correct place to finish?
-        global respcallback
-        respcallback(self.hit)
+        # XXX: bad code
+        if not isinstance(self.hit, EmptyHit):
+            global respcallback
+            respcallback(self.hit)
 
     def req(self, data):
         self.reqstr.write(data)
