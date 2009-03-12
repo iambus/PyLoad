@@ -270,7 +270,7 @@ class MainFrame(wx.Frame):
 
 		Proxy.begin_catch(
 				callback = self.nb.recordTab.tree.AppendNewHit,
-				filter = Proxy.WebFilter
+				filter = Proxy.DefaultContentFilter(),
 				)
 
 	def OnStop(self, event):

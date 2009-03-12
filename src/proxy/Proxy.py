@@ -7,13 +7,14 @@ import BaseHTTPServer, select, socket, SocketServer, urlparse
 
 import cStringIO
 
+from Filter import EmptyFilter, DefaultContentFilter
 import Logger
 log = Logger.getLogger()
 
 HitType = None
 
-respfilter = lambda x: False
-respcallback = lambda x: False
+respfilter = EmptyFilter()
+respcallback = EmptyFilter()
 
 running = 1
 
@@ -64,7 +65,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
         global respfilter
         if self.respstr:
             self.respstr.write(data)
-        elif respfilter(data):
+        elif not respfilter.test(data):
             self.respstr = cStringIO.StringIO()
             self.respstr.write(data)
 
@@ -275,26 +276,16 @@ def begin_catch(callback = None, filter = None, hittype = None):
 
 def end_catch():
     global respcallback, respfilter
-    respfilter = lambda x: False
-    respcallback = lambda x: False
-
-def WebFilter(data):
-    assert isinstance(data, basestring)
-    import re
-    m = re.search(r'^content-type:\s*(.*)', data, re.I|re.M)
-    if m:
-        content_type = m.group(1)
-        log.debug('Content-Type: %s' % content_type)
-        return re.search(r'text|html|xml|application/x-amf', content_type, re.I)
-
+    respfilter = EmptyFilter()
+    respcallback = EmptyFilter()
 
 def test():
-    begin_catch(filter = WebFilter)
+    begin_catch(filter = DefaultContentFilter())
     start(default_port)
 
 def test_thread():
     thread_start()
-    begin_catch(filter = WebFilter)
+    begin_catch(filter = DefaultContentFilter())
     import time
     time.sleep(10)
     h = end_catch()
