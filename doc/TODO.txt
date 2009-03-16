@@ -33,7 +33,9 @@ support GZip coder
 support composite coder
 support stateful coder
 
-add a request filter (p3)
+add a request filter (p3) (finished)
+
+support HTTPS proxy
 
 Minor:
 
