@@ -19,7 +19,7 @@ class EmptyHit:
 # FIXME: too bad code...
 reqfilter = DefaultRuleFilter()
 respfilter = EmptyFilter()
-respcallback = EmptyFilter()
+respcallback = lambda x: False
 
 running = 1
 
@@ -287,7 +287,7 @@ def begin_catch(callback = None, filter = None, hittype = None):
 def end_catch():
     global respcallback, respfilter
     respfilter = EmptyFilter()
-    respcallback = EmptyFilter()
+    respcallback = lambda x: False
 
 def test():
     begin_catch(filter = DefaultContentFilter())
