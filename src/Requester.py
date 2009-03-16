@@ -128,7 +128,7 @@ class Requester:
 		if x == None:
 			x = self.parse_n(reqstr)
 		if x == None:
-			log.error("Can't parse request:[[[%s]]]" % repr(reqstr))
+			log.error("Can't parse request to %s:[[[%s]]]" % (self.url, repr(reqstr)))
 			return
 
 		(self.request_line, headers_list, self.body) = x
