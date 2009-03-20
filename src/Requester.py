@@ -210,6 +210,9 @@ class Requester:
 		#response.code = resp.code
 		#response.info = resp.info()
 		#response.headers = resp.info().headers
+		response.start_time = start_time
+		response.end_time = end_time
+		response.time = end_time - start_time
 		return (response, start_time, end_time)
 
 	def parse_r_n(self, reqstr):
