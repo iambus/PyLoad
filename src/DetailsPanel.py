@@ -112,6 +112,9 @@ class DetailsPanel(wx.Panel):
 			# TODO: auto-select next node on Linux when a node is deleted (of course not here)
 			self.Unload()
 			return
+
+		self.Freeze()
+
 		'Avoid re-creating the same tabs'
 		c = data.__class__
 		tabNames = ClassToTabs[c]
@@ -130,6 +133,8 @@ class DetailsPanel(wx.Panel):
 			self.nb.AddPage(tab, tabName)
 			TabToInitFuncs[tabName](tab, data)
 		self.testButton.Show()
+		
+		self.Thaw()
 
 	def ReLoad(self, data):
 		'Always create new tabs'
