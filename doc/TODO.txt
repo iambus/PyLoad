@@ -48,7 +48,7 @@ debug feature: reload modules (p4)
 search: from begin after reach end (p3)
 naming conventions (p2)
 
-Fixing flashing issues of DetailsPanel/InfoPanel (p3)
+Fixing flashing issues of DetailsPanel/InfoPanel (p3) (finished)
 Make InfoPanel editable (p3)
 
 Update unit test since the Scope has been removed from Script/Player (p3)
