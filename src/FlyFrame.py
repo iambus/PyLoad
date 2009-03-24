@@ -51,6 +51,7 @@ class FlyFrame(wx.Frame):
 		
 		panel = FlyPanel(self, **vars)
 
+		# XXX: do we need this?
 		self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
 
 	def OnCloseWindow(self, event):
