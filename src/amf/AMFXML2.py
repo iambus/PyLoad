@@ -9,6 +9,12 @@ except ImportError, e:
 	print "[Warning] Can't use LXMLTree because of %s, use DomTree instead" % e
 	from DomTree import DomTree as XMLTree
 
+# XXX: How to express 1.#QNAN and -1.#QNAN in python?
+import struct
+QNAN = struct.unpack('!d', '\x7f\xff\xff\xff\xff\xff\xff\xff')[0]
+QNAN_ = struct.unpack('!d', '\xff\xff\xff\xff\xff\xff\xff\xff')[0]
+
+
 ##################################################
 def decode(packet):
 	# raw => packet => xml
@@ -392,7 +398,16 @@ class FromXML:
 		return int(self.get_text(node))
 
 	def get_float(self, node):
-		return float(self.get_text(node))
+		try:
+			float_str = self.get_text(node)
+			return float(float_str)
+		except ValueError:
+			if float_str == '1.#QNAN':
+				return QNAN
+			elif float_str == '-1.#QNAN':
+				return QNAN_
+			else:
+				raise
 
 	def get_null(self, node):
 		return NULL()
