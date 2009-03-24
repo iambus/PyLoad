@@ -67,5 +67,4 @@ bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224:
 play on the fly
 xml tree viewer
 Support Ctrl+C for CommandLine.py
-Performance is bad when loading and saving project
 
