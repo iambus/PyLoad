@@ -11,7 +11,7 @@ class FlyPanel(wx.Panel):
 	self.vars = vars
 	
 	self.editor = EditorPanel(self, -1)
-	self.testButton = wx.Button(self, -1, "Test")
+	self.testButton = wx.Button(self, -1, "Run Script")
 
 	if vars:
 		welcome = '# You can use the following variables:\n'

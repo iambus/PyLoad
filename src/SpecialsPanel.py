@@ -198,7 +198,7 @@ class SpecialsPanel(wx.Panel):
 					menu.Append(self.popupID3, "Duplicate")
 					#menu.FindItemByPosition(2).Enable(False)
 				menu.Append(self.popupID2, "Delete")
-			menu.Append(self.popupID4, "I'm interested")
+			menu.Append(self.popupID4, "I'm interested...")
 
 		self.PopupMenu(menu)
 		menu.Destroy()

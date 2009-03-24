@@ -338,7 +338,7 @@ class RecordPanel(wx.Panel):
 			menu.Append(self.popupID1, "Duplicate")
 			menu.Append(self.popupID2, "Delete")
 			menu.Append(self.popupID4, "Change Host")
-		menu.Append(self.popupID5, "I'm interested")
+		menu.Append(self.popupID5, "I'm interested...")
 
 		self.PopupMenu(menu)
 		menu.Destroy()
