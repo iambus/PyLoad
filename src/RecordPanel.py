@@ -2,6 +2,7 @@
 import wx
 import wx.lib.newevent
 import Record
+from FlyFrame import fly
 from Changes import make_change, remove_change
 
 # {{{ SimpleTree
@@ -296,6 +297,9 @@ class RecordPanel(wx.Panel):
 		data = self.tree.GetPyData(item)
 		data.set_host(host)
 
+	def OnFly(self, event):
+		item = self.tree.GetSelection()
+		fly(self, node = item, data = self.tree.GetPyData(item))
 	# }}}
 
 	########################################
@@ -311,10 +315,12 @@ class RecordPanel(wx.Panel):
 			self.popupID2 = wx.NewId()
 			self.popupID3 = wx.NewId()
 			self.popupID4 = wx.NewId()
+			self.popupID5 = wx.NewId()
 			self.Bind(wx.EVT_MENU, self.OnDuplicateItem, id=self.popupID1)
 			self.Bind(wx.EVT_MENU, self.OnDeleteItem, id=self.popupID2)
 			self.Bind(wx.EVT_MENU, self.OnNewPage, id=self.popupID3)
 			self.Bind(wx.EVT_MENU, self.OnRenameHost, id=self.popupID4)
+			self.Bind(wx.EVT_MENU, self.OnFly, id=self.popupID5)
 
 		menu = wx.Menu()
 		if isinstance(self.tree.GetPyData(item), Record.Record):
@@ -322,6 +328,7 @@ class RecordPanel(wx.Panel):
 		menu.Append(self.popupID1, "Duplicate")
 		menu.Append(self.popupID2, "Delete")
 		menu.Append(self.popupID4, "Change Host")
+		menu.Append(self.popupID5, "I'm interested")
 
 		self.PopupMenu(menu)
 		menu.Destroy()

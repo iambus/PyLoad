@@ -4,6 +4,7 @@ from Special import Special
 import Controller
 import Player
 import Record
+from FlyFrame import fly
 from Changes import make_change, remove_change
 
 import Logger
@@ -183,9 +184,11 @@ class SpecialsPanel(wx.Panel):
 			self.popupID1 = wx.NewId()
 			self.popupID2 = wx.NewId()
 			self.popupID3 = wx.NewId()
+			self.popupID4 = wx.NewId()
 			self.Bind(wx.EVT_MENU, self.OnNewSpecial, id=self.popupID1)
 			self.Bind(wx.EVT_MENU, self.OnDeleteItem, id=self.popupID2)
 			self.Bind(wx.EVT_MENU, self.OnDuplicateItem, id=self.popupID3)
+			self.Bind(wx.EVT_MENU, self.OnFly, id=self.popupID4)
 
 		menu = wx.Menu()
 		menu.Append(self.popupID1, "New Special")
@@ -195,6 +198,7 @@ class SpecialsPanel(wx.Panel):
 					menu.Append(self.popupID3, "Duplicate")
 					#menu.FindItemByPosition(2).Enable(False)
 				menu.Append(self.popupID2, "Delete")
+			menu.Append(self.popupID4, "I'm interested")
 
 		self.PopupMenu(menu)
 		menu.Destroy()
@@ -215,6 +219,11 @@ class SpecialsPanel(wx.Panel):
 		item = self.tree.GetSelection()
 		if item:
 			self.DuplicateItem(item)
+			
+	def OnFly(self, event):
+		item = self.tree.GetSelection()
+		assert item
+		fly(self, node = item, data = self.tree.GetPyData(item))
 	# }}}
 
 	# {{{ Add new nodes

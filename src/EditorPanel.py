@@ -167,6 +167,8 @@ class EditorPanel(wx.Panel):
 		# please use Load explicitly
 		#self.editor.SetValue(self.binding.get())
 
+	def GetValue(self):
+		return self.editor.GetValue()
 
 if __name__ == '__main__':
 
