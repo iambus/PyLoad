@@ -35,16 +35,24 @@ def walk_tree_in_repository(tree, func):
 		if c in immutable_classes:
 			return
 		seen.add(id(obj))
-		if isinstance(obj, Repository.Mixin):
-			func(obj)
+		
 		if c == dict:
 			for k, v in obj.items():
 				set_uuid(k)
 				set_uuid(v)
 			return
+		if c == list or c == tuple:
+			for i in obj:
+				set_uuid(i)
+			return
+
+		if isinstance(obj, Repository.Mixin):
+			func(obj)
+		
 		if hasattr(obj, '__iter__'):
 			for i in obj:
 				set_uuid(i)
+
 		for attr in dir(obj):
 			if attr.startswith('__'):
 				continue
@@ -56,7 +64,6 @@ def walk_tree_in_repository(tree, func):
 
 def clone(src, repository = None):
 	dest = copy.deepcopy(src)
-	
 	def register_obj(obj):
 		if repository:
 			obj.register_self_in(repository)
