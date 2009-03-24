@@ -8,7 +8,7 @@ def simple_deep_clone(src):
 	return copy.deepcopy(src)
 
 def walk_tree_in_repository(tree, func):
-	seen = []
+	seen = set()
 
 	import types
 	immutable_classes = (
@@ -27,14 +27,14 @@ def walk_tree_in_repository(tree, func):
 
 	def set_uuid(obj):
 		import Repository
-		if obj in seen:
+		if id(obj) in seen:
 			return
 		if not hasattr(obj, '__class__'):
 			return
 		c = obj.__class__
 		if c in immutable_classes:
 			return
-		seen.append(obj)
+		seen.add(id(obj))
 		if isinstance(obj, Repository.Mixin):
 			func(obj)
 		if c == dict:
