@@ -13,6 +13,17 @@ class FlyPanel(wx.Panel):
 	self.editor = EditorPanel(self, -1)
 	self.testButton = wx.Button(self, -1, "Test")
 
+	if vars:
+		welcome = '# You can use the following variables:\n'
+		for k in sorted(vars.keys()):
+			welcome += '# %s: %s\n' % (k, vars[k].__class__)
+		welcome += '#\n'
+		welcome += '# For example:\n'
+		welcome += '# print %s\n' % sorted(vars.keys())[0]
+		welcome += '#\n\n\n'
+		self.editor.SetValue(welcome)
+        # TODO: set mouse pointer position last row...
+
 	# Layout
 	self.SetAutoLayout(True)
 	self.editor.SetConstraints(
@@ -23,9 +34,11 @@ class FlyPanel(wx.Panel):
 	self.editor.saveButton.Hide()
 	self.Bind(wx.EVT_BUTTON, self.OnPlay, self.testButton)
 
+
     def OnPlay(self, event):
 	script = self.editor.GetValue()
 	exec script in self.vars
+
 
 class FlyFrame(wx.Frame):
     def __init__(self, parent, **vars):

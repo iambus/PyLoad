@@ -169,6 +169,9 @@ class EditorPanel(wx.Panel):
 
 	def GetValue(self):
 		return self.editor.GetValue()
+	
+	def SetValue(self, text):
+		self.editor.SetValue(text)
 
 if __name__ == '__main__':
 
