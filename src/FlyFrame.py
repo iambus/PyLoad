@@ -21,8 +21,13 @@ class FlyPanel(wx.Panel):
 		welcome += '# For example:\n'
 		welcome += '# print %s\n' % sorted(vars.keys())[0]
 		welcome += '#\n\n\n'
+
 		self.editor.SetValue(welcome)
-        # TODO: set mouse pointer position last row...
+   		
+		# set caret position after the comments
+		pos = len(welcome) - 1
+#		self.editor.editor.SetCurrentPos(pos)
+		self.editor.editor.SetSelection(pos, pos)
 
 	# Layout
 	self.SetAutoLayout(True)
