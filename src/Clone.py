@@ -7,8 +7,7 @@ def simple_clone(src):
 def simple_deep_clone(src):
 	return copy.deepcopy(src)
 
-def clone(src, repository = None):
-	dest = copy.deepcopy(src)
+def walk_tree_in_repository(tree, func):
 	seen = []
 
 	import types
@@ -37,10 +36,7 @@ def clone(src, repository = None):
 			return
 		seen.append(obj)
 		if isinstance(obj, Repository.Mixin):
-			if repository:
-				obj.register_self_in(repository)
-			else:
-				obj.register_self()
+			func(obj)
 		if c == dict:
 			for k, v in obj.items():
 				set_uuid(k)
@@ -54,7 +50,19 @@ def clone(src, repository = None):
 				continue
 			set_uuid(getattr(obj, attr))
 
-	set_uuid(dest)
+	set_uuid(tree)
+
+
+
+def clone(src, repository = None):
+	dest = copy.deepcopy(src)
+	
+	def register_obj(obj):
+		if repository:
+			obj.register_self_in(repository)
+		else:
+			obj.register_self()
+	walk_tree_in_repository(dest, register_obj)
 	return dest
 
 
