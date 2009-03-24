@@ -27,9 +27,11 @@ class User(Player):
 		self.player = player
 		self.iteration_count = iteration_count
 		self.iteration_factory = iteration_factory
+		self.user_index = -1
 
 	def play(self, scope = None):
 		scope = Scope(scope)
+		scope['_USER_INDEX_'] = self.user_index
 		assert self.scripts == [] and self.childern == []
 		global_reporter = scope.lookup('global_reporter')
 		if global_reporter:
@@ -41,6 +43,8 @@ class User(Player):
 			if self.iteration_factory:
 				self.before(scope)
 				for i in range(self.iteration_count):
+					# TODO: put _ITERATION_INDEX_ in iteration scope instead of user scope
+					scope['_ITERATION_INDEX_'] = i
 					iteration = self.iteration_factory.create()
 					iteration.player = self.player
 					Player.execute_here(self, iteration, scope)
@@ -48,6 +52,7 @@ class User(Player):
 			else:
 				try:
 					for i in range(self.iteration_count):
+						scope['_ITERATION_INDEX_'] = i
 						self.childern.append(self.player)
 					Player.play(self, scope)
 				finally:
@@ -136,6 +141,8 @@ class IterationBasedPlayPolicy:
 		g = self.global_factory.create()
 		users = []
 		scope = Scope(scope)
+		scope['_USER_COUNT_'] = self.user_count
+		scope['_ITERATION_COUNT_'] = self.iteration_count
 		if self.reporter:
 			scope['global_reporter'] = self.reporter
 		g.before(scope)
@@ -144,6 +151,7 @@ class IterationBasedPlayPolicy:
 			user.player = self.player
 			user.iteration_count = self.iteration_count
 			user.iteration_factory = self.iteration_factory
+			user.user_index = i
 			users.append(user)
 			user.play(scope)
 		g.after(scope)
@@ -152,6 +160,8 @@ class IterationBasedPlayPolicy:
 		g = self.global_factory.create()
 		users = []
 		scope = Scope(scope)
+		scope['_USER_COUNT_'] = self.user_count
+		scope['_ITERATION_COUNT_'] = self.iteration_count
 		if self.reporter:
 			scope['global_reporter'] = self.reporter
 		g.before(scope)
@@ -160,6 +170,7 @@ class IterationBasedPlayPolicy:
 			user.player = self.player
 			user.iteration_count = self.iteration_count
 			user.iteration_factory = self.iteration_factory
+			user.user_index = i
 			user = UserThread(user)
 			users.append(user)
 			user.play(scope)
