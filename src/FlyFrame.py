@@ -52,7 +52,7 @@ if __name__ == '__main__':
 	    self.Bind(wx.EVT_BUTTON, self.OnButton, b)
 
 	def OnButton(self, evt):
-	    show(self)
+	    fly(self, m = 'hello')
 
     import Test
     Test.TestPanel(TestPanel)
