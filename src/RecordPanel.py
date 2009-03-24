@@ -110,9 +110,17 @@ class RecordPanel(wx.Panel):
 		self.onSelChangedCallback = None
 
 	def InitMirror(self):
+		# drag
 		self.tree.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnBeginDragMirror)
+		
+		# label edit
 		self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginEdit, self.tree)
 		self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndEdit, self.tree)
+
+		# play on the fly menu
+		self.tree.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
+		self.tree.Bind(wx.EVT_RIGHT_UP, self.OnRightUp)
+
 		self.is_in_loading = False
 
 	# }}}
@@ -323,11 +331,13 @@ class RecordPanel(wx.Panel):
 			self.Bind(wx.EVT_MENU, self.OnFly, id=self.popupID5)
 
 		menu = wx.Menu()
-		if isinstance(self.tree.GetPyData(item), Record.Record):
-			menu.Append(self.popupID3, "New Page")
-		menu.Append(self.popupID1, "Duplicate")
-		menu.Append(self.popupID2, "Delete")
-		menu.Append(self.popupID4, "Change Host")
+		
+		if not self.isMirror:
+			if isinstance(self.tree.GetPyData(item), Record.Record):
+				menu.Append(self.popupID3, "New Page")
+			menu.Append(self.popupID1, "Duplicate")
+			menu.Append(self.popupID2, "Delete")
+			menu.Append(self.popupID4, "Change Host")
 		menu.Append(self.popupID5, "I'm interested")
 
 		self.PopupMenu(menu)
