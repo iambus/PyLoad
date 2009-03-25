@@ -66,4 +66,4 @@ bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224:
 
 xml tree viewer
 Support Ctrl+C for CommandLine.py
-
+loading big report is slow
