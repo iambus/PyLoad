@@ -172,6 +172,7 @@ def usage():
       --host         specify the server host:port. E.g. localhost:8000
   -o, --operation    should be 'play' (default value), 'clean', or 'report'.
       --show-classes show classes of objects used in project
+  -D                 define str variable in global scope
 
   Examples:
   1. To play a project:
@@ -184,7 +185,9 @@ def usage():
      python CommandLine.py -c project-name.pkl
   5. To show class usages in a project (for debug purpose):
      python CommandLine.py --show-classes project-name.pkl
-  6. To display help:
+  6. To define a str global variable nick with value 'Tom' before running project:
+     python CommandLine.py -Dnick=Tom project-name.pkl
+  7. To display help:
      python CommandLine.py -h'''
 
 ##################################################
