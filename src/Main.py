@@ -298,10 +298,10 @@ class MainFrame(wx.Frame):
 		self.Play()
 
 	def OnTerminate(self, event):
-		Record.CANCELLED = True
+		Record.CANCELLED = True # FIXME: Bad hack
 
 	def OnPlayStopped(self, event):
-		Record.CANCELLED = False
+		Record.CANCELLED = False # FIXME: bad hack
 		self.toolbar.EnableTool(self.toolPlay.GetId(), 1)
 		self.toolbar.EnableTool(self.toolTerminate.GetId(), 0)
 		menu = self.GetMenuBar().GetMenu(1)

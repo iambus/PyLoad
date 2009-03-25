@@ -133,7 +133,33 @@ def run_command(argv):
 		for record in project.records:
 			record.set_host(host)
 
-	play_project(project, report_path, project_path, variables = variables)
+	run_in_new_thread(lambda: play_project(project, report_path, project_path, variables = variables))
+
+
+
+def run_in_current_thread(func):
+	func()
+
+def run_in_new_thread(func):
+	import threading
+	class PlayingThread(threading.Thread):
+		def __init__(self, name='PlayingThread'):
+			threading.Thread.__init__(self, name=name)
+		def run(self):
+			func()
+	thread = PlayingThread() 
+	thread.start()
+	
+	while True:
+		try:
+			thread.join(60)
+		except:
+			# bad hack...
+			import Record
+			Record.CANCELLED = True
+			break
+		if not thread.isAlive():
+			break
 
 
 def usage():
