@@ -305,6 +305,39 @@ class RecordPanel(wx.Panel):
 		data = self.tree.GetPyData(item)
 		data.set_host(host)
 
+
+	def OnChangeURL(self, event):
+		item = self.tree.GetSelection()
+		hit = self.tree.GetPyData(item)
+
+		dialog = wx.TextEntryDialog(
+				self, 'Please enter new URL for this request:',
+				'Change URL')
+		dialog.SetValue(hit.url)
+		url = dialog.GetValue() if dialog.ShowModal() == wx.ID_OK else None
+		dialog.Destroy()
+
+		if url == None or url == '':
+			return
+
+		import re
+		if re.match(r'^[-\w\d.@%~]+(:\d+)?$', url):
+			url = 'http://'+url
+		elif re.match(r'^https?://[-\w\d.@%~]+(:\d+)?.*$', url):
+			pass
+		else:
+			dialog = wx.MessageDialog(self, 'The URL is not valid. Operation will be ignored.',
+								   'Bad URL',
+								   wx.OK | wx.ICON_WARNING
+								   )
+			dialog.ShowModal()
+			dialog.Destroy()
+			return
+
+
+		hit.set_url(url)
+
+
 	def OnFly(self, event):
 		item = self.tree.GetSelection()
 		fly(self, node = item, data = self.tree.GetPyData(item))
@@ -324,21 +357,25 @@ class RecordPanel(wx.Panel):
 			self.popupID3 = wx.NewId()
 			self.popupID4 = wx.NewId()
 			self.popupID5 = wx.NewId()
-			self.Bind(wx.EVT_MENU, self.OnDuplicateItem, id=self.popupID1)
-			self.Bind(wx.EVT_MENU, self.OnDeleteItem, id=self.popupID2)
-			self.Bind(wx.EVT_MENU, self.OnNewPage, id=self.popupID3)
+			self.popupID6 = wx.NewId()
+			self.Bind(wx.EVT_MENU, self.OnNewPage, id=self.popupID1)
+			self.Bind(wx.EVT_MENU, self.OnDuplicateItem, id=self.popupID2)
+			self.Bind(wx.EVT_MENU, self.OnDeleteItem, id=self.popupID3)
 			self.Bind(wx.EVT_MENU, self.OnRenameHost, id=self.popupID4)
-			self.Bind(wx.EVT_MENU, self.OnFly, id=self.popupID5)
+			self.Bind(wx.EVT_MENU, self.OnChangeURL, id=self.popupID5)
+			self.Bind(wx.EVT_MENU, self.OnFly, id=self.popupID6)
 
 		menu = wx.Menu()
 		
 		if not self.isMirror:
 			if isinstance(self.tree.GetPyData(item), Record.Record):
-				menu.Append(self.popupID3, "New Page")
-			menu.Append(self.popupID1, "Duplicate")
-			menu.Append(self.popupID2, "Delete")
+				menu.Append(self.popupID1, "New Page")
+			menu.Append(self.popupID2, "Duplicate")
+			menu.Append(self.popupID3, "Delete")
 			menu.Append(self.popupID4, "Change Host")
-		menu.Append(self.popupID5, "I'm interested...")
+			if isinstance(self.tree.GetPyData(item), Record.Hit):
+				menu.Append(self.popupID5, "Change URL")
+		menu.Append(self.popupID6, "I'm interested...")
 
 		self.PopupMenu(menu)
 		menu.Destroy()

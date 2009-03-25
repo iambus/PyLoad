@@ -106,6 +106,9 @@ class Hit(Player, PropertyMixin):
 		parts[1] = host
 		self.url = urlparse.urlunsplit(parts)
 
+	def set_url(self, url):
+		self.url = url
+
 	def set_label(self):
 		#TODO: generalize it
 		import re
