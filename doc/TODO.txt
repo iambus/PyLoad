@@ -2,16 +2,10 @@
 Major:
 
 Tree Editor
-	delete mutiple nodes (p3)
+	delete mutiple nodes (p2)
 
-Infotab (p2) (finised)
 extractor (p3)
 
-terminate playing (finished)
-
-Performance (p2)
-    Buffer request
-    Don't use proxy to send request
 Memory Leak (p2)
 
 UI Unit Tests (p4)
@@ -27,13 +21,9 @@ threading util (p3)
 
 unicode support/i18n (p4)
 
-clean dead reference in repository (p3) (finished)
-
 support GZip coder
 support composite coder
 support stateful coder
-
-add a request filter (p3) (finished)
 
 support HTTPS proxy
 
@@ -48,7 +38,6 @@ debug feature: reload modules (p4)
 search: from begin after reach end (p3)
 naming conventions (p2)
 
-Fixing flashing issues of DetailsPanel/InfoPanel (p3) (finished)
 Make InfoPanel editable (p3)
 
 Update unit test since the Scope has been removed from Script/Player (p3)
@@ -65,4 +54,6 @@ bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224:
 xml tree viewer
 loading big report is slow
 don't expand all tree nodes when something changed
+
+add a "edit with" context menu to editor
 
