@@ -57,3 +57,5 @@ don't expand all tree nodes when something changed
 
 add a "edit with" context menu to editor
 
+the current dir for open project dialog and open report dialog should be different.
+
