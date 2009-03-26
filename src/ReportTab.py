@@ -36,9 +36,11 @@ class ReportData:
 
 	def load_data(self, cursor):
 
+		# hit summary
 		cursor.execute('select id, label, avg, max, min, count from summary')
 		self.hit_summary = [row for row in cursor]
 
+		# hit data
 		cursor.execute('select hitid, timestamp, response_time from hits_v order by hitid, timestamp')
 		self.hit_data = [row for row in cursor]
 
@@ -47,12 +49,13 @@ class ReportData:
 		cursor.execute('select hitid, timestamp, response_time from hits_v_end order by hitid, timestamp')
 		self.hit_data_by_end_time = [row for row in cursor]
 
-
 		self.hit_datas = [self.hit_data_by_start_time, self.hit_data, self.hit_data_by_end_time]
 
+		# page summary
 		cursor.execute('select id, label, avg, max, min, count from page_summary')
 		self.page_summary = [row for row in cursor]
 
+		# page data
 		cursor.execute('select pageid, timestamp, response_time from pages_v order by pageid, timestamp')
 		self.page_data = [(row[0], int(row[1]), row[2]) for row in cursor]
 
@@ -61,13 +64,8 @@ class ReportData:
 		cursor.execute('select pageid, timestamp, response_time from pages_v_end order by pageid, timestamp')
 		self.page_data_by_end_time = [(row[0], int(row[1]), row[2]) for row in cursor]
 
-
 		self.page_datas = [self.page_data_by_start_time, self.page_data, self.page_data_by_end_time]
 
-		self.data_index = 1
-
-		self.datas = [self.hit_datas, self.page_datas]
-		self.type_index = 0
 
 		cursor.execute('select id, count from error_summary')
 		self.errors = dict([row for row in cursor])
@@ -145,6 +143,12 @@ class ReportTab(wx.Panel):
 		for attr in dir(data):
 			if not attr.startswith('_'):
 				setattr(self, attr, getattr(data, attr))
+
+		
+		self.data_index = 1
+
+		self.datas = [data.hit_datas, data.page_datas]
+		self.type_index = 0
 
 		self.ShowHits()
 
