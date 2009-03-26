@@ -43,12 +43,13 @@ class ReportData:
 		# hit data
 		cursor.execute('select hitid, start, end from hits')
 		self.raw_hits = [row for row in cursor]
+		self.raw_hits.sort()
 
 		self.hit_data = [ (hitid, start + end / 2, end - start) for hitid, start, end in self.raw_hits]
 		self.hit_data.sort()
 
 		self.hit_data_by_start_time = [ (hitid, start, end - start) for hitid, start, end in self.raw_hits]
-		self.hit_data_by_start_time.sort()
+#		self.hit_data_by_start_time.sort()
 		self.hit_data_by_end_time = [ (hitid, end, end - start) for hitid, start, end in self.raw_hits]
 		self.hit_data_by_end_time.sort()
 
@@ -61,12 +62,13 @@ class ReportData:
 		# page data
 		cursor.execute('select pageid, start, end, response_time from pages')
 		self.raw_pages = [row for row in cursor]
+		self.raw_pages.sort()
 		
 		self.page_data = [ (pageid, start + end / 2, response_time) for pageid, start, end, response_time in self.raw_pages ]
 		self.page_data.sort()
 
 		self.page_data_by_start_time = [ (pageid, start, response_time) for pageid, start, end, response_time in self.raw_pages ]
-		self.page_data_by_start_time.sort()
+#		self.page_data_by_start_time.sort()
 		self.page_data_by_end_time = [ (pageid, end, response_time) for pageid, start, end, response_time in self.raw_pages ]
 		self.page_data_by_end_time.sort()
 
