@@ -609,11 +609,11 @@ class SpecialsPanel(wx.Panel):
 			self.LoadSpecial(self.root, special)
 		self.NotifyObserver()
 
-	def UpdateSpecial(self, item):
-		special = self.tree.GetPyData(item)
-		self.tree.DeleteChildren(item)
+	def UpdateSpecial(self, specialNode):
+		special = self.tree.GetPyData(specialNode)
+		self.tree.DeleteChildren(specialNode)
 		for child in special.childern:
-			self.LoadData(item, child)
+			self.LoadData(specialNode, child)
 
 	def UpdateAll(self):
 		(child, cookie) = self.tree.GetFirstChild(self.root)
@@ -621,6 +621,46 @@ class SpecialsPanel(wx.Panel):
 			self.UpdateSpecial(child)
 			(child, cookie) = self.tree.GetNextChild(self.root, cookie)
 
+	def WalkTree(self, node, func):
+		stop = func(node)
+		if stop:
+			return stop
+		(child, cookie) = self.tree.GetFirstChild(node)
+		while child.IsOk():
+			self.WalkTree(child, func)
+			(child, cookie) = self.tree.GetNextChild(self.root, cookie)
+
+	def UpdateOne(self, kind, data):
+		def CheckNode(node):
+			nodeData = self.tree.GetPyData(node)
+			if nodeData is data:
+				if kind == 'c':
+					self.tree.SetItemText(node, data.label)
+				elif kind == 'd':
+					self.tree.DeleteChildren(node)
+					for child in data.childern:
+						self.LoadData(node, child)
+					return True
+				elif kind == 'a':
+					self.tree.DeleteChildren(node)
+					for child in data.childern:
+						self.LoadData(node, child)
+					return True
+				elif kind == '_':
+					# ignore
+					pass
+				else:
+					raise RuntimeError("Unkown update code: %s" % kind)
+			else:
+				pass
+		self.WalkTree(self.root, CheckNode)
+
+	def UpdateSome(self, changes = None):
+		if changes:
+			for kind, data in changes:
+				self.UpdateOne(kind, data)
+		else:
+			self.UpdateAll()
 
 	def NotifyObserver(self):
 		if self.onNewSpecialCallback:

@@ -46,7 +46,7 @@ class NoteBook(wx.Toolbook):
 		self.editTab.ResetSize()
 
 		self.editTab.recordPanel.SetMirrorOf(self.recordTab.tree)
-		self.recordTab.tree.AddObserver(self.editTab.specialsPanel.UpdateAll)
+		self.recordTab.tree.AddObserver(self.editTab.specialsPanel.UpdateSome)
 
 		self.playTab = PlayTab(self, project, reporter)
 		self.AddPage(self.playTab, 'Play', imageId=2)

@@ -170,7 +170,7 @@ class RecordPanel(wx.Panel):
 		data = self.tree.GetPyData(item)
 		assert type(data.label) == str or type (data.label) == unicode, 'Invalid label type:%s' % type(data.label)
 		data.label = event.GetLabel()
-		self.NotifyObservers()
+		self.NotifyObservers(('c', data))
 
 
 	def OnBeginDragMirror(self, event):
@@ -231,7 +231,7 @@ class RecordPanel(wx.Panel):
 		self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
 		self.tree.Expand(recordItem)
 
-		self.NotifyObservers()
+		self.NotifyObservers(('a', record))
 
 	@make_change
 	def OnDeleteItem(self, event):
@@ -266,6 +266,11 @@ class RecordPanel(wx.Panel):
 				Record.Hit : self.InsertHit,
 				}
 		mappings[newData.__class__](parentItem, oldItem, newData)
+
+		if parentData:
+			self.NotifyObservers(('a', parentData))
+		else:
+			self.NotifyObservers(('_', None))
 
 	def OnSize(self, event):
 		event.Skip()
@@ -398,17 +403,18 @@ class RecordPanel(wx.Panel):
 		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
 		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
 
-		self.NotifyObservers()
+		self.NotifyObservers(('_', None))
 
 	@make_change
 	def AppendHit(self, hit, updated = False):
 		assert False, "Don't call it now"
 		assert not self.isMirror
 		if updated:
+			# XXX: when this happen?
 			self.UpdateHit(hit)
+			self.NotifyObservers() # XXX: how to notify?
 		else:
 			self.AppendNewHit(hit)
-		self.NotifyObservers()
 
 	@make_change
 	def AppendNewHit(self, hit):
@@ -426,6 +432,8 @@ class RecordPanel(wx.Panel):
 			self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
 			self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
 
+			self.NotifyObservers(('a', record))
+
 		hitItem = self.tree.AppendItem(pageItem, hit.label)
 		self.tree.SetPyData(hitItem, hit)
 		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Normal)
@@ -434,7 +442,7 @@ class RecordPanel(wx.Panel):
 		self.tree.Expand(pageItem)
 		self.tree.Expand(hitItem)
 
-		self.NotifyObservers()
+		self.NotifyObservers(('a', page))
 
 	########################################
 	def MoveData(self, targetItem, sourceUUID):
@@ -454,8 +462,6 @@ class RecordPanel(wx.Panel):
 		else:
 			return
 
-		self.NotifyObservers()
-
 	def MoveUnder(self, sourceItem, targetItem):
 		#TODO: if source is already under target
 		sourceData = self.tree.GetPyData(sourceItem)
@@ -471,6 +477,7 @@ class RecordPanel(wx.Panel):
 		mappings[sourceData.__class__](targetItem, sourceData)
 
 		self.tree.Expand(targetItem)
+		self.NotifyObservers(('a', targetData))
 
 	def MoveAfter(self, sourceItem, targetItem):
 		#TODO: if source is already after target
@@ -494,6 +501,10 @@ class RecordPanel(wx.Panel):
 				Record.Hit : self.InsertHit,
 				}
 		mappings[sourceData.__class__](parentItem, targetItem, sourceData)
+		if parentData:
+			self.NotifyObservers(('a', parentData))
+		else:
+			self.NotifyObservers(('_', parentData))
 
 	#FIXME: name confliction?
 	@make_change
@@ -504,12 +515,12 @@ class RecordPanel(wx.Panel):
 		self.tree.Delete(item)
 		if parentData:
 			parentData.remove_child(data)
+			self.NotifyObservers(('d', parentData))
 		else:
 			# parent is root
 			assert parentItem == self.root
 			self.project.remove_record(data)
-
-		self.NotifyObservers()
+			self.NotifyObservers(('_', None))
 
 	########################################
 	#FIXME: duplicated code
@@ -613,12 +624,13 @@ class RecordPanel(wx.Panel):
 		self.one = one
 		self.one.mirrors.add(self)
 
-	def NotifyObservers(self):
+	def NotifyObservers(self, *changes):
 		if not self.isMirror:
 			for m in self.mirrors:
+				# TODO: don't reload everything...
 				m.LoadAllRecords()
 			for callback in self.observers:
-				callback()
+				callback(changes)
 
 	def LoadAllRecords(self):
 		assert self.isMirror
