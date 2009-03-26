@@ -512,6 +512,8 @@ class RecordPanel(wx.Panel):
 		data = self.tree.GetPyData(item)
 		parentItem = self.tree.GetItemParent(item)
 		parentData = self.tree.GetPyData(parentItem)
+		if self.tree.GetChildrenCount(parentItem) == 1:
+			self.tree.Collapse(parentItem)
 		self.tree.Delete(item)
 		if parentData:
 			parentData.remove_child(data)

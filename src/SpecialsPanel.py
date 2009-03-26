@@ -637,6 +637,8 @@ class SpecialsPanel(wx.Panel):
 				if kind == 'c':
 					self.tree.SetItemText(node, data.label)
 				elif kind == 'd':
+					if not data.childern:
+						self.tree.Collapse(node)
 					self.tree.DeleteChildren(node)
 					for child in data.childern:
 						self.LoadData(node, child)
