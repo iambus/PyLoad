@@ -13,7 +13,8 @@ class ReportDropTarget(wx.FileDropTarget):
 
 
 class ReportData:
-	def __init__(self, path):
+
+	def connect(self, path):
 		import os.path
 		if not os.path.isfile(path):
 			raise RuntimeError("%s doesn't exist" % path)
@@ -30,7 +31,10 @@ class ReportData:
 		path = path.encode('utf-8')
 
 		connection = sqlite3.connect(path)
-		cursor = connection.cursor()
+
+		return connection
+
+	def load_data(self, cursor):
 
 		cursor.execute('select id, label, avg, max, min, count from summary')
 		self.hit_summary = [row for row in cursor]
@@ -68,7 +72,18 @@ class ReportData:
 		cursor.execute('select id, count from error_summary')
 		self.errors = dict([row for row in cursor])
 
-		cursor.close()
+
+			
+	def __init__(self, path):
+
+		connection = self.connect(path)
+		cursor = connection.cursor()
+
+		try:
+			self.load_data(cursor)
+		finally:
+			cursor.close()
+			connection.close()
 
 
 class ReportTab(wx.Panel):
