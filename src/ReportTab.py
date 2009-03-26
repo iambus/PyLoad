@@ -12,59 +12,8 @@ class ReportDropTarget(wx.FileDropTarget):
 		self.callback(filenames[0])
 
 
-class ReportTab(wx.Panel):
-	def __init__(self, parent):
-		wx.Panel.__init__(self, parent, -1)
-
-		self.splitter = wx.SplitterWindow(self, style=wx.BORDER_NONE)
-
-		self.list = wx.ListCtrl(self.splitter, -1,
-				style=wx.LC_REPORT
-				#| wx.BORDER_SUNKEN
-				#| wx.BORDER_NONE
-				#| wx.LC_EDIT_LABELS
-				#| wx.LC_SORT_ASCENDING
-				#| wx.LC_NO_HEADER
-				#| wx.LC_VRULES
-				#| wx.LC_HRULES
-				| wx.LC_SINGLE_SEL
-				)
-		self.list.InsertColumn(0, "ID")
-		self.list.InsertColumn(1, "Label")
-		self.list.InsertColumn(2, "Avg")
-		self.list.InsertColumn(3, "Max")
-		self.list.InsertColumn(4, "Min")
-		self.list.InsertColumn(5, "Count")
-		self.list.InsertColumn(6, "Error")
-
-		self.list.SetColumnWidth(0, 60)
-		self.list.SetColumnWidth(1, 60)
-		self.list.SetColumnWidth(2, 60)
-		self.list.SetColumnWidth(3, 60)
-		self.list.SetColumnWidth(4, 60)
-		self.list.SetColumnWidth(5, 60)
-		self.list.SetColumnWidth(6, 60)
-
-
-		self.chartPanel = LineChartPanel.LineChart(self.splitter)
-		self.chartPanel.xformat = LineChartPanel.XTimeFormatter
-		self.chartPanel.yformat = LineChartPanel.YMSFormatter
-
-		self.splitter.SplitHorizontally(self.list, self.chartPanel, 180)
-
-		import Layout
-		Layout.SingleLayout(self, self.splitter)
-
-		self.SetDropTarget(ReportDropTarget(self.LoadReport))
-
-
-		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self.list)
-
-		self.Bind(wx.EVT_LIST_COL_RIGHT_CLICK, self.OnSwitch, self.list)
-
-		self.chartPanel.Bind(wx.EVT_MIDDLE_UP, self.OnSwitchTime, self.chartPanel)
-
-	def LoadReport(self, path):
+class ReportData:
+	def __init__(self, path):
 		import os.path
 		if not os.path.isfile(path):
 			raise RuntimeError("%s doesn't exist" % path)
@@ -138,6 +87,67 @@ class ReportTab(wx.Panel):
 			self.errors = {}
 
 		cursor.close()
+
+
+class ReportTab(wx.Panel):
+	def __init__(self, parent):
+		wx.Panel.__init__(self, parent, -1)
+
+		self.splitter = wx.SplitterWindow(self, style=wx.BORDER_NONE)
+
+		self.list = wx.ListCtrl(self.splitter, -1,
+				style=wx.LC_REPORT
+				#| wx.BORDER_SUNKEN
+				#| wx.BORDER_NONE
+				#| wx.LC_EDIT_LABELS
+				#| wx.LC_SORT_ASCENDING
+				#| wx.LC_NO_HEADER
+				#| wx.LC_VRULES
+				#| wx.LC_HRULES
+				| wx.LC_SINGLE_SEL
+				)
+		self.list.InsertColumn(0, "ID")
+		self.list.InsertColumn(1, "Label")
+		self.list.InsertColumn(2, "Avg")
+		self.list.InsertColumn(3, "Max")
+		self.list.InsertColumn(4, "Min")
+		self.list.InsertColumn(5, "Count")
+		self.list.InsertColumn(6, "Error")
+
+		self.list.SetColumnWidth(0, 60)
+		self.list.SetColumnWidth(1, 60)
+		self.list.SetColumnWidth(2, 60)
+		self.list.SetColumnWidth(3, 60)
+		self.list.SetColumnWidth(4, 60)
+		self.list.SetColumnWidth(5, 60)
+		self.list.SetColumnWidth(6, 60)
+
+
+		self.chartPanel = LineChartPanel.LineChart(self.splitter)
+		self.chartPanel.xformat = LineChartPanel.XTimeFormatter
+		self.chartPanel.yformat = LineChartPanel.YMSFormatter
+
+		self.splitter.SplitHorizontally(self.list, self.chartPanel, 180)
+
+		import Layout
+		Layout.SingleLayout(self, self.splitter)
+
+		self.SetDropTarget(ReportDropTarget(self.LoadReport))
+
+
+		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self.list)
+
+		self.Bind(wx.EVT_LIST_COL_RIGHT_CLICK, self.OnSwitch, self.list)
+
+		self.chartPanel.Bind(wx.EVT_MIDDLE_UP, self.OnSwitchTime, self.chartPanel)
+
+	def LoadReport(self, path):
+		# FIXME: refacotr here
+		data = ReportData(path)
+		# mix it in
+		for attr in dir(data):
+			if not attr.startswith('_'):
+				setattr(self, attr, getattr(data, attr))
 
 		self.ShowHits()
 
