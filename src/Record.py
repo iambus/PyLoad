@@ -222,14 +222,6 @@ class Hit(Player, PropertyMixin):
 
 	def validate_response(self, response):
 		handler = self.resp_handler or self.req_handler
-		if len(handler) == 2:
-			# older version of ContentTypeHandler doesn't have validators
-			# for back compatibility, we re-set handlers
-			self.req_handler = ContentTypeHandler.get_handler(self.oreqstr)
-			if self.orespstr:
-				self.resp_handler = ContentTypeHandler.get_handler(self.orespstr)
-			handler = self.resp_handler or self.req_handler
-
 		handler.validator.validate(response)
 
 
