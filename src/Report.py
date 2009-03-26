@@ -109,8 +109,7 @@ class ReportBase:
 					pages.pageid as pageid,
 					(start + end)/2 as timestamp,
 					pages.response_time as response_time
-				from pages, pages_info
-				where pages.pageid = pages_info.pageid''')
+				from pages''')
 		cursor.execute('''create view pages_v_start as
 				select
 					pages.pageid as pageid,
