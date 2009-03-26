@@ -38,39 +38,25 @@ class ReportData:
 		cursor.execute('select hitid, timestamp, response_time from hits_v order by hitid, timestamp')
 		self.hit_data = [row for row in cursor]
 
-		try:
-			cursor.execute('select hitid, timestamp, response_time from hits_v_start order by hitid, timestamp')
-			self.hit_data_by_start_time = [row for row in cursor]
-			cursor.execute('select hitid, timestamp, response_time from hits_v_end order by hitid, timestamp')
-			self.hit_data_by_end_time = [row for row in cursor]
-		except:
-			print '[Warning] No start/end time information, always use middle time'
-			self.hit_data_by_start_time = self.hit_data
-			self.hit_data_by_end_time = self.hit_data
+		cursor.execute('select hitid, timestamp, response_time from hits_v_start order by hitid, timestamp')
+		self.hit_data_by_start_time = [row for row in cursor]
+		cursor.execute('select hitid, timestamp, response_time from hits_v_end order by hitid, timestamp')
+		self.hit_data_by_end_time = [row for row in cursor]
+
 
 		self.hit_datas = [self.hit_data_by_start_time, self.hit_data, self.hit_data_by_end_time]
 
-		try:
-			cursor.execute('select id, label, avg, max, min, count from page_summary')
-			self.page_summary = [row for row in cursor]
+		cursor.execute('select id, label, avg, max, min, count from page_summary')
+		self.page_summary = [row for row in cursor]
 
-			cursor.execute('select pageid, timestamp, response_time from pages_v order by pageid, timestamp')
-			self.page_data = [(row[0], int(row[1]), row[2]) for row in cursor]
+		cursor.execute('select pageid, timestamp, response_time from pages_v order by pageid, timestamp')
+		self.page_data = [(row[0], int(row[1]), row[2]) for row in cursor]
 
-			try:
-				cursor.execute('select pageid, timestamp, response_time from pages_v_start order by pageid, timestamp')
-				self.page_data_by_start_time = [(row[0], int(row[1]), row[2]) for row in cursor]
-				cursor.execute('select pageid, timestamp, response_time from pages_v_end order by pageid, timestamp')
-				self.page_data_by_end_time = [(row[0], int(row[1]), row[2]) for row in cursor]
-			except:
-				print '[Warning] No page start/end time information, always use middle time'
-				self.page_data_by_start_time = self.page_data
-				self.page_data_by_end_time = self.page_data
+		cursor.execute('select pageid, timestamp, response_time from pages_v_start order by pageid, timestamp')
+		self.page_data_by_start_time = [(row[0], int(row[1]), row[2]) for row in cursor]
+		cursor.execute('select pageid, timestamp, response_time from pages_v_end order by pageid, timestamp')
+		self.page_data_by_end_time = [(row[0], int(row[1]), row[2]) for row in cursor]
 
-		except:
-			print '[Warning] No page information, always use hits'
-			self.page_summary = self.hit_summary
-			self.page_data = self.hit_data
 
 		self.page_datas = [self.page_data_by_start_time, self.page_data, self.page_data_by_end_time]
 
@@ -79,12 +65,8 @@ class ReportData:
 		self.datas = [self.hit_datas, self.page_datas]
 		self.type_index = 0
 
-		try:
-			cursor.execute('select id, count from error_summary')
-			self.errors = dict([row for row in cursor])
-		except:
-			print '[Warning] No errors information'
-			self.errors = {}
+		cursor.execute('select id, count from error_summary')
+		self.errors = dict([row for row in cursor])
 
 		cursor.close()
 
