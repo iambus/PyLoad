@@ -41,13 +41,16 @@ class ReportData:
 		self.hit_summary = [row for row in cursor]
 
 		# hit data
-		cursor.execute('select hitid, timestamp, response_time from hits_v order by hitid, timestamp')
-		self.hit_data = [row for row in cursor]
+		cursor.execute('select hitid, start, end from hits')
+		self.raw_hits = [row for row in cursor]
 
-		cursor.execute('select hitid, timestamp, response_time from hits_v_start order by hitid, timestamp')
-		self.hit_data_by_start_time = [row for row in cursor]
-		cursor.execute('select hitid, timestamp, response_time from hits_v_end order by hitid, timestamp')
-		self.hit_data_by_end_time = [row for row in cursor]
+		self.hit_data = [ (hitid, start + end / 2, end - start) for hitid, start, end in self.raw_hits]
+		self.hit_data.sort()
+
+		self.hit_data_by_start_time = [ (hitid, start, end - start) for hitid, start, end in self.raw_hits]
+		self.hit_data_by_start_time.sort()
+		self.hit_data_by_end_time = [ (hitid, end, end - start) for hitid, start, end in self.raw_hits]
+		self.hit_data_by_end_time.sort()
 
 		self.hit_datas = [self.hit_data_by_start_time, self.hit_data, self.hit_data_by_end_time]
 
@@ -56,17 +59,20 @@ class ReportData:
 		self.page_summary = [row for row in cursor]
 
 		# page data
-		cursor.execute('select pageid, timestamp, response_time from pages_v order by pageid, timestamp')
-		self.page_data = [(row[0], int(row[1]), row[2]) for row in cursor]
+		cursor.execute('select pageid, start, end, response_time from pages')
+		self.raw_pages = [row for row in cursor]
+		
+		self.page_data = [ (pageid, start + end / 2, response_time) for pageid, start, end, response_time in self.raw_pages ]
+		self.page_data.sort()
 
-		cursor.execute('select pageid, timestamp, response_time from pages_v_start order by pageid, timestamp')
-		self.page_data_by_start_time = [(row[0], int(row[1]), row[2]) for row in cursor]
-		cursor.execute('select pageid, timestamp, response_time from pages_v_end order by pageid, timestamp')
-		self.page_data_by_end_time = [(row[0], int(row[1]), row[2]) for row in cursor]
+		self.page_data_by_start_time = [ (pageid, start, response_time) for pageid, start, end, response_time in self.raw_pages ]
+		self.page_data_by_start_time.sort()
+		self.page_data_by_end_time = [ (pageid, end, response_time) for pageid, start, end, response_time in self.raw_pages ]
+		self.page_data_by_end_time.sort()
 
 		self.page_datas = [self.page_data_by_start_time, self.page_data, self.page_data_by_end_time]
 
-
+		# errors data
 		cursor.execute('select id, count from error_summary')
 		self.errors = dict([row for row in cursor])
 
