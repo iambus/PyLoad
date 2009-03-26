@@ -59,3 +59,5 @@ add a "edit with" context menu to editor
 
 the current dir for open project dialog and open report dialog should be different.
 
+add date/revision information to project/report files
+
