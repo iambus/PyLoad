@@ -2,24 +2,10 @@
 import wx
 import wx.lib.newevent
 import Record
+from Tree import Tree
 from FlyFrame import fly
 from Changes import make_change, remove_change
 
-# {{{ SimpleTree
-class SimpleTree(wx.TreeCtrl):
-	def __init__(self, parent):
-		wx.TreeCtrl.__init__(self, parent, 
-				style =
-				wx.TR_DEFAULT_STYLE
-				#wx.TR_HAS_BUTTONS
-				| wx.TR_EDIT_LABELS
-				#| wx.TR_MULTIPLE
-				| wx.TR_HIDE_ROOT
-				| wx.TR_HAS_VARIABLE_ROW_HEIGHT
-				)
-	def SelectedData(self):
-		return self.GetPyData(self.GetSelection())
-# }}}
 
 # {{{ DropTarget
 class MyDropTarget(wx.PyDropTarget):
@@ -71,22 +57,20 @@ class RecordPanel(wx.Panel):
 	########################################
 
 	def InitializeRoot(self):
-		self.tree = SimpleTree(self)
+		self.tree = Tree(self)
 
-		iconSize = (16,16)
-		iconList = wx.ImageList(iconSize[0], iconSize[1])
-		self.recordIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize))
-		self.recordOpenIcon = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize))
-		self.pageIcon       = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize))
-		self.pageOpenIcon   = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize))
-		self.actionIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, iconSize))
+		iconSize = self.tree.iconSize
+		icons = {
+			Record.Record : (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
+			                 wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize)),
+			Record.Page   : (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
+			                 wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize)),
+			Record.Hit    :  wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, iconSize), 
+				}
 
-		self.tree.SetImageList(iconList)
-		self.iconList = iconList
-		self.root = self.tree.AddRoot("All records")
-		self.tree.SetPyData(self.root, None)
-		self.tree.SetItemImage(self.root, self.recordIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(self.root, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
+		self.tree.SetIcons(icons)
+		self.root = self.tree.root
+
 
 	def InitSelf(self):
 		# drag and drop
@@ -225,10 +209,7 @@ class RecordPanel(wx.Panel):
 		#XXX: pages, or childern?
 		record.pages.append(page)
 
-		pageItem = self.tree.AppendItem(recordItem, page.label)
-		self.tree.SetPyData(pageItem, page)
-		self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
+		self.tree.AddNode(recordItem, page)
 		self.tree.Expand(recordItem)
 
 		self.NotifyObservers(('a', record))
@@ -260,12 +241,7 @@ class RecordPanel(wx.Panel):
 		index = childern.index(oldData)
 		childern.insert(index+1, newData)
 
-		mappings = {
-				Record.Record : self.InsertRecord,
-				Record.Page : self.InsertPage,
-				Record.Hit : self.InsertHit,
-				}
-		mappings[newData.__class__](parentItem, oldItem, newData)
+		self.tree.InsertTree(parentItem, oldItem, newData)
 
 		if parentData:
 			self.NotifyObservers(('a', parentData))
@@ -398,10 +374,7 @@ class RecordPanel(wx.Panel):
 		assert not self.isMirror
 		self.project.add_record(record)
 
-		recordItem = self.tree.AppendItem(self.root, "%s" % record.label)
-		self.tree.SetPyData(recordItem, record)
-		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
+		self.tree.AddNode(self.root, record)
 
 		self.NotifyObservers(('_', None))
 
@@ -427,16 +400,11 @@ class RecordPanel(wx.Panel):
 		else:
 			# New page
 			page = record.last_page()
-			pageItem = self.tree.AppendItem(recordItem, page.path)
-			self.tree.SetPyData(pageItem, page)
-			self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
-			self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
+			pageItem = self.tree.AddNode(recordItem, page)
 
 			self.NotifyObservers(('a', record))
 
-		hitItem = self.tree.AppendItem(pageItem, hit.label)
-		self.tree.SetPyData(hitItem, hit)
-		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Normal)
+		hitItem = self.tree.AddNode(pageItem, hit)
 
 		self.tree.Expand(recordItem)
 		self.tree.Expand(pageItem)
@@ -469,14 +437,8 @@ class RecordPanel(wx.Panel):
 		self.DeleteItem(sourceItem)
 
 		targetData.add_child(sourceData)
-		mappings = {
-				Record.Record : self.LoadRecord,
-				Record.Page : self.LoadPage,
-				Record.Hit : self.LoadHit,
-				}
-		mappings[sourceData.__class__](targetItem, sourceData)
+		self.tree.AddTree(targetItem, sourceData)
 
-		self.tree.Expand(targetItem)
 		self.NotifyObservers(('a', targetData))
 
 	def MoveAfter(self, sourceItem, targetItem):
@@ -495,12 +457,7 @@ class RecordPanel(wx.Panel):
 		index = childern.index(targetData)
 		childern.insert(index+1, sourceData)
 
-		mappings = {
-				Record.Record : self.InsertRecord,
-				Record.Page : self.InsertPage,
-				Record.Hit : self.InsertHit,
-				}
-		mappings[sourceData.__class__](parentItem, targetItem, sourceData)
+		self.tree.InsertTree(parentItem, targetItem, sourceData)
 		if parentData:
 			self.NotifyObservers(('a', parentData))
 		else:
@@ -525,68 +482,6 @@ class RecordPanel(wx.Panel):
 			self.NotifyObservers(('_', None))
 
 	########################################
-	#FIXME: duplicated code
-	def LoadRecord(self, item, r):
-		recordItem = self.tree.AppendItem(item, r.label)
-		self.tree.SetPyData(recordItem, r)
-		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
-
-		for p in r.pages:
-			self.LoadPage(recordItem, p)
-
-		self.tree.Expand(recordItem)
-
-	def LoadPage(self, item, p):
-		pageItem = self.tree.AppendItem(item, p.label)
-		self.tree.SetPyData(pageItem, p)
-		self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
-
-		for h in p.hits:
-			self.LoadHit(pageItem, h)
-
-		self.tree.Expand(pageItem)
-
-	def LoadHit(self, item, h):
-		hitItem = self.tree.AppendItem(item, h.label)
-		self.tree.SetPyData(hitItem, h)
-		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Selected)
-
-		self.tree.Expand(hitItem)
-
-	def InsertRecord(self, item, prev, r):
-		recordItem = self.tree.InsertItem(item, prev, r.label)
-		self.tree.SetPyData(recordItem, r)
-		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
-
-		for p in r.pages:
-			self.LoadPage(recordItem, p)
-
-		self.tree.Expand(recordItem)
-
-	#FIXME: duplicated code
-	#FIXME: bad names -- "insert"?
-	def InsertPage(self, item, prev, p):
-		pageItem = self.tree.InsertItem(item, prev, p.label)
-		self.tree.SetPyData(pageItem, p)
-		self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
-
-		for h in p.hits:
-			self.LoadHit(pageItem, h)
-
-		self.tree.Expand(pageItem)
-
-	def InsertHit(self, item, prev, h):
-		hitItem = self.tree.InsertItem(item, prev, h.label)
-		self.tree.SetPyData(hitItem, h)
-		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Selected)
-
-		self.tree.Expand(hitItem)
 
 	def FindItem(self, uuid):
 		return self.FindItemFrom(self.root, uuid)
@@ -649,28 +544,7 @@ class RecordPanel(wx.Panel):
 
 	def LoadRecord(self, record):
 		#assert self.isMirror
-		recordItem = self.tree.AppendItem(self.root, "%s" % record.label)
-		self.tree.SetPyData(recordItem, record)
-		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
-
-		for p in record.pages:
-			pageItem = self.tree.AppendItem(recordItem, p.label)
-			self.tree.SetPyData(pageItem, p)
-			self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
-			self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
-
-			for h in p.hits:
-				hitItem = self.tree.AppendItem(pageItem, h.label)
-				self.tree.SetPyData(hitItem, h)
-				self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Normal)
-				self.tree.SetItemImage(hitItem, self.actionIcon, wx.TreeItemIcon_Selected)
-
-				self.tree.Expand(hitItem)
-
-			self.tree.Expand(pageItem)
-
-		self.tree.Expand(recordItem)
+		self.tree.AddTree(self.root, record)
 	# }}}
 
 	########################################

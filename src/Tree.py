@@ -60,7 +60,7 @@ class Tree(wx.TreeCtrl):
 		node = self.InsertNode(parent, prev, data)
 		if hasattr(data, 'childern'):
 			for c in data.childern:
-				self.InsertTree(node, c)
+				self.AddTree(node, c)
 			self.Expand(node)
 		return node
 
