@@ -45,7 +45,7 @@ class ReportData:
 		self.raw_hits = [row for row in cursor]
 		self.raw_hits.sort()
 
-		self.hit_data = [ (hitid, start + end / 2, end - start) for hitid, start, end in self.raw_hits]
+		self.hit_data = [ (hitid, (start + end) / 2, end - start) for hitid, start, end in self.raw_hits]
 		self.hit_data.sort()
 
 		self.hit_data_by_start_time = [ (hitid, start, end - start) for hitid, start, end in self.raw_hits]
@@ -64,7 +64,7 @@ class ReportData:
 		self.raw_pages = [row for row in cursor]
 		self.raw_pages.sort()
 		
-		self.page_data = [ (pageid, start + end / 2, response_time) for pageid, start, end, response_time in self.raw_pages ]
+		self.page_data = [ (pageid, (start + end) / 2, response_time) for pageid, start, end, response_time in self.raw_pages ]
 		self.page_data.sort()
 
 		self.page_data_by_start_time = [ (pageid, start, response_time) for pageid, start, end, response_time in self.raw_pages ]
@@ -259,5 +259,5 @@ def Standalone(filename = None):
 
 if __name__ == '__main__':
 	import Test
-	Test.TestPanel(ReportTab, lambda p:p.LoadReport('reports/last-report.db'))
+	Test.TestPanel(ReportTab, lambda p:p.LoadReport('reports/tmp/q.db'))
 
