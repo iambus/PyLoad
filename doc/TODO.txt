@@ -69,3 +69,5 @@ adding request object in scope.
 
 bug: can't drag page a after page a in specal tree
 
+refresh URL in Info after changed
+
