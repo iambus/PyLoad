@@ -206,8 +206,8 @@ class Requester:
 		response.rawbody = rawbody
 		response.body = None
 		response.url = resp.geturl()
-		#TODO: recover these attributes here after URL2 supports
-		#response.code = resp.code
+		response.code = resp.code
+		#TODO: recover these attributes here after URL_C supports
 		#response.info = resp.info()
 		#response.headers = resp.info().headers
 		response.start_time = start_time

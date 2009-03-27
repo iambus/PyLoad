@@ -48,7 +48,7 @@ class Request:
 class Response:
 	def __init__(self, url):
 		self.url = url
-		self.code = None # TODO: set code
+		self.code = None
 
 		self.stream = StringIO()
 		self.body_callback = self.stream.write
@@ -94,6 +94,7 @@ def open_with_curl(c, req):
 		c.setopt(pycurl.PROXY, http_proxy)
 
 	c.perform()
+	resp.code = c.getinfo(pycurl.RESPONSE_CODE)
 
 	return resp
 
