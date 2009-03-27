@@ -13,14 +13,6 @@ class ContentTypeHandler(tuple):
 		from editor.Syntax import Syntax
 		return tuple.__new__(self, (coder, Syntax(syntax), validator))
 
-	def get_coder(self):
-		return self.coder
-
-	def get_syntax(self):
-		return self.syntax
-
-	def get(self):
-		return (self.coder, self.syntax)
 
 	def __getattr__(self, name):
 		if name == 'coder':
@@ -36,7 +28,7 @@ class ContentTypeHandler(tuple):
 
 	#FIXME: maybe not good enough...
 	def __deepcopy__(self, ignored):
-		return ContentTypeHandler(self.coder, self.syntax)
+		return ContentTypeHandler(self.coder, self.syntax, self.validator)
 
 
 def get_handler(content):
