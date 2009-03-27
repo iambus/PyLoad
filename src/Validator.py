@@ -10,16 +10,22 @@ class Validator:
 class ResponseValidator(Validator):
 	pass
 
+
+def validata_response_code(response):
+	if response.code == 404:
+		raise ValidationError('404 error: %s\n%s' % (response.url, repr(response.rawbody)))
+	# TODO: validate more kinds of response codes
+
 class DefaultResponseValidator(ResponseValidator):
 	@classmethod
 	def validate(cls, response):
-		# TODO: validate HTTP response code
-		pass
+		validata_response_code(response)
 
 class AMFResponseValidator(ResponseValidator):
 	@classmethod
 	def validate(cls, response):
 		try:
+			validata_response_code(response)
 			if response.rawfind('flex.messaging.messages.ErrorMessage'):
 				members = response.xfindall('.//members/member')
 				messages = {}
