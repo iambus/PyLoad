@@ -61,8 +61,10 @@ the current dir for open project dialog and open report dialog should be differe
 
 add date/revision information to project/report files (p3)
 
-bug: error column in report is always empty? (p2)
+bug: error column in report is always empty? (not sure, seems sometimes...) (p2)
 
 improve performance of parsing request (p2)
 
-check status code of response time (p1)
+adding request object in scope.
+
+
