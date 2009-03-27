@@ -82,33 +82,30 @@ class SpecialsPanel(wx.Panel):
 	def InitTree(self):
 		self.tree = Tree(self)
 
-		iconSize = (16,16)
-		iconList = wx.ImageList(iconSize[0], iconSize[1])
+		iconSize = self.tree.iconSize
+		icons = {
+				Special: (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
+				          wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize)),
 
-		self.specialIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize))
-		self.specialOpenIcon = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize))
+				Record.Record: (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
+				                wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize)),
 
-		self.recordIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize))
-		self.recordOpenIcon = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize))
+				Record.Page: (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
+				              wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize)),
 
-		self.pageIcon       = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize))
-		self.pageOpenIcon   = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize))
-		self.hitIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, iconSize))
+				Record.Hit: wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, iconSize),
 
-		self.scriptIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_NEW, wx.ART_OTHER, iconSize))
-		self.ifIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_QUESTION,      wx.ART_OTHER, iconSize))
-		self.ifOpenIcon = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_QUESTION, wx.ART_OTHER, iconSize))
-		self.loopIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_REDO,      wx.ART_OTHER, iconSize))
-		self.loopOpenIcon = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_REDO, wx.ART_OTHER, iconSize))
-		self.blockIcon     = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize))
-		self.blockOpenIcon = iconList.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, iconSize))
+				Controller.Script: wx.ArtProvider_GetBitmap(wx.ART_NEW, wx.ART_OTHER, iconSize),
+				Controller.If    : (wx.ArtProvider_GetBitmap(wx.ART_QUESTION,      wx.ART_OTHER, iconSize),
+				                    wx.ArtProvider_GetBitmap(wx.ART_QUESTION, wx.ART_OTHER, iconSize)),
+				Controller.Loop  : (wx.ArtProvider_GetBitmap(wx.ART_REDO,      wx.ART_OTHER, iconSize),
+				                    wx.ArtProvider_GetBitmap(wx.ART_REDO, wx.ART_OTHER, iconSize)),
+				Controller.Block : (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
+				                    wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, iconSize)),
+				}
+		self.tree.SetIcons(icons)
 
-		self.tree.SetImageList(iconList)
-		self.iconList = iconList
-		self.root = self.tree.AddRoot("All Specials")
-		self.tree.SetPyData(self.root, None)
-		self.tree.SetItemImage(self.root, self.specialIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(self.root, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
+		self.root = self.tree.root
 	# }}}
 
 	# {{{ Event Handler
@@ -217,12 +214,9 @@ class SpecialsPanel(wx.Panel):
 		special = Special()
 		self.project.add_special(special)
 		special.label = 'New Special'
-		specialItem = self.tree.AppendItem(self.root, "New Special")
-		self.tree.SetPyData(specialItem, special)
-		self.tree.SetItemImage(specialItem, self.specialIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(specialItem, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
+		item = self.tree.AddNode(self.root, special)
 
-		self.tree.SelectItem(specialItem)
+		self.tree.SelectItem(item)
 
 	def InsertNewController(self, item, controller):
 		itemData = self.tree.GetPyData(item)
@@ -401,187 +395,20 @@ class SpecialsPanel(wx.Panel):
 	# {{{ Load kinds of Data (the data to be loaded should have been added as parent node's child)
 	@make_change
 	def LoadData(self, item, data):
-		mappings = {
-				Record.Record : self.LoadRecord,
-				Record.Page : self.LoadPage,
-				Record.Hit : self.LoadHit,
-				Player.Script : self.LoadScript,
-				Controller.If : self.LoadIf,
-				Controller.Loop : self.LoadLoop,
-				Controller.Block : self.LoadBlock,
-				}
-		mappings[data.__class__](item, data)
+		self.tree.AddTree(item, data)
 
 	def LoadSpecial(self, item, s):
-		specialItem = self.tree.AppendItem(item, s.label)
-		self.tree.SetPyData(specialItem, s)
-		self.tree.SetItemImage(specialItem, self.specialIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(specialItem, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
+		self.tree.AddTree(item, s)
 
-		for c in s.childern:
-			self.LoadData(specialItem, c)
 
-		self.tree.Expand(specialItem)
-
-	def LoadRecord(self, item, r):
-		recordItem = self.tree.AppendItem(item, r.label)
-		self.tree.SetPyData(recordItem, r)
-		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
-
-		for p in r.pages:
-			self.LoadPage(recordItem, p)
-
-		self.tree.Expand(recordItem)
-
-	def LoadPage(self, item, p):
-		pageItem = self.tree.AppendItem(item, p.label)
-		self.tree.SetPyData(pageItem, p)
-		self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
-
-		for h in p.hits:
-			self.LoadHit(pageItem, h)
-
-		self.tree.Expand(pageItem)
-
-	def LoadHit(self, item, h):
-		hitItem = self.tree.AppendItem(item, h.label)
-		self.tree.SetPyData(hitItem, h)
-		self.tree.SetItemImage(hitItem, self.hitIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(hitItem, self.hitIcon, wx.TreeItemIcon_Selected)
-
-		self.tree.Expand(hitItem)
-
-	def LoadScript(self, item, scriptData):
-		subItem = self.tree.AppendItem(item, scriptData.label)
-		self.tree.SetPyData(subItem, scriptData)
-		self.tree.SetItemImage(subItem, self.scriptIcon, wx.TreeItemIcon_Normal)
-	
-	def LoadIf(self, item, ifData):
-		subItem = self.tree.AppendItem(item, ifData.label)
-		self.tree.SetPyData(subItem, ifData)
-		self.tree.SetItemImage(subItem, self.ifIcon, wx.TreeItemIcon_Normal)
-
-		for child in ifData.childern:
-			self.LoadData(subItem, child)
-
-		self.tree.Expand(subItem)
-
-	def LoadLoop(self, item, loopData):
-		subItem = self.tree.AppendItem(item, loopData.label)
-		self.tree.SetPyData(subItem, loopData)
-		self.tree.SetItemImage(subItem, self.loopIcon, wx.TreeItemIcon_Normal)
-
-		for child in loopData.childern:
-			self.LoadData(subItem, child)
-
-		self.tree.Expand(subItem)
-
-	def LoadBlock(self, item, blockData):
-		subItem = self.tree.AppendItem(item, blockData.label)
-		self.tree.SetPyData(subItem, blockData)
-		self.tree.SetItemImage(subItem, self.blockIcon, wx.TreeItemIcon_Normal)
-
-		for child in blockData.childern:
-			self.LoadData(subItem, child)
-
-		self.tree.Expand(subItem)
 	# }}}
 
 	# {{{ Insert kinds of Data AFTER a node (the data to be loaded should have been added as parent node's child)
-	#FIXME: duplicated code
 	#FIXME: bad names -- why "insert" suppose "the data to be loaded should have been added as parent node's child"?
 	@make_change
 	def InsertData(self, item, prev, data):
-		mappings = {
-				Record.Record : self.InsertRecord,
-				Record.Page : self.InsertPage,
-				Record.Hit : self.InsertHit,
-				Player.Script : self.InsertScript,
-				Controller.If : self.InsertIf,
-				Controller.Loop : self.InsertLoop,
-				Controller.Block : self.InsertBlock,
-				Special : self.InsertSpecial,
-				}
-		mappings[data.__class__](item, prev, data)
+		self.tree.InsertTree(item, prev, data)
 
-	def InsertSpecial(self, item, prev, s):
-		assert item == self.root
-		specialItem = self.tree.InsertItem(item, prev, s.label)
-		self.tree.SetPyData(specialItem, s)
-		self.tree.SetItemImage(specialItem, self.specialIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(specialItem, self.specialOpenIcon, wx.TreeItemIcon_Expanded)
-
-		for child in s.childern:
-			self.LoadData(specialItem, child)
-
-		self.tree.Expand(specialItem)
-
-	def InsertRecord(self, item, prev, r):
-		recordItem = self.tree.InsertItem(item, prev, r.label)
-		self.tree.SetPyData(recordItem, r)
-		self.tree.SetItemImage(recordItem, self.recordIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(recordItem, self.recordOpenIcon, wx.TreeItemIcon_Expanded)
-
-		for p in r.pages:
-			self.LoadPage(recordItem, p)
-
-		self.tree.Expand(recordItem)
-
-	def InsertPage(self, item, prev, p):
-		pageItem = self.tree.InsertItem(item, prev, p.label)
-		self.tree.SetPyData(pageItem, p)
-		self.tree.SetItemImage(pageItem, self.pageIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(pageItem, self.pageOpenIcon, wx.TreeItemIcon_Expanded)
-
-		for h in p.hits:
-			self.LoadHit(pageItem, h)
-
-		self.tree.Expand(pageItem)
-
-	def InsertHit(self, item, prev, h):
-		hitItem = self.tree.InsertItem(item, prev, h.label)
-		self.tree.SetPyData(hitItem, h)
-		self.tree.SetItemImage(hitItem, self.hitIcon, wx.TreeItemIcon_Normal)
-		self.tree.SetItemImage(hitItem, self.hitIcon, wx.TreeItemIcon_Selected)
-
-		self.tree.Expand(hitItem)
-
-	def InsertScript(self, item, prev, scriptData):
-		subItem = self.tree.InsertItem(item, prev, scriptData.label)
-		self.tree.SetPyData(subItem, scriptData)
-		self.tree.SetItemImage(subItem, self.scriptIcon, wx.TreeItemIcon_Normal)
-	
-	def InsertIf(self, item, prev, ifData):
-		subItem = self.tree.InsertItem(item, prev, ifData.label)
-		self.tree.SetPyData(subItem, ifData)
-		self.tree.SetItemImage(subItem, self.ifIcon, wx.TreeItemIcon_Normal)
-
-		for child in ifData.childern:
-			self.LoadData(subItem, child)
-
-		self.tree.Expand(subItem)
-
-	def InsertLoop(self, item, prev, loopData):
-		subItem = self.tree.InsertItem(item, prev, loopData.label)
-		self.tree.SetPyData(subItem, loopData)
-		self.tree.SetItemImage(subItem, self.loopIcon, wx.TreeItemIcon_Normal)
-
-		for child in loopData.childern:
-			self.LoadData(subItem, child)
-
-		self.tree.Expand(subItem)
-
-	def InsertBlock(self, item, prev, blockData):
-		subItem = self.tree.InsertItem(item, prev, blockData.label)
-		self.tree.SetPyData(subItem, blockData)
-		self.tree.SetItemImage(subItem, self.blockIcon, wx.TreeItemIcon_Normal)
-
-		for child in blockData.childern:
-			self.LoadData(subItem, child)
-
-		self.tree.Expand(subItem)
 	# }}}
 
 	##################################################
