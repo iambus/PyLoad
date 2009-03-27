@@ -52,16 +52,17 @@ bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224:
 
 
 xml tree viewer
-loading big report is slow
-don't expand all tree nodes when something changed
+loading big report is slow (p2)
+don't expand all tree nodes when something changed (p1)
 
-add a "edit with" context menu to editor
+add a "edit with" context menu to editor (p3)
 
-the current dir for open project dialog and open report dialog should be different.
+the current dir for open project dialog and open report dialog should be different. (p3)
 
-add date/revision information to project/report files
+add date/revision information to project/report files (p3)
 
-bug: error column in report is always empty?
+bug: error column in report is always empty? (p2)
 
-improve performance of parsing request
+improve performance of parsing request (p2)
 
+check status code of response time (p1)
