@@ -80,3 +80,30 @@ class Tree(wx.TreeCtrl):
 			return self.GetSelection()
 
 
+if __name__ == '__main__':
+	class P(wx.Panel):
+		def __init__(self, parent):
+			wx.Panel.__init__(self, parent, -1)
+			self.tree = Tree(self, True)
+			import Layout
+			Layout.SingleLayout(self, self.tree)
+			self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
+		def OnSelChanged(self, event):
+			item = event.GetItem()
+			data = self.tree.GetPyData(item)
+			print data
+	class Data:
+		def __init__(self, label = 'new'):
+			self.label = label
+	def loadNodes(p):
+		tree = p.tree
+		icon = wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, (16, 16))
+		tree.SetIcons({Data: icon})
+		tree.AddNode(tree.root, Data('1'))
+		n = tree.AddNode(tree.root, Data('2'))
+		tree.AddNode(tree.root, Data('3'))
+		tree.AddNode(tree.root, Data('4'))
+		tree.AddNode(n, Data('x'))
+	import Test
+	Test.TestPanel(P, loadNodes)
+
