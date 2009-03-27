@@ -80,7 +80,7 @@ class SpecialsPanel(wx.Panel):
 		self.onNewSpecialCallback = None
 
 	def InitTree(self):
-		self.tree = Tree(self)
+		self.tree = Tree(self, multiple = False)
 
 		iconSize = self.tree.iconSize
 		icons = {
@@ -193,17 +193,17 @@ class SpecialsPanel(wx.Panel):
 		self.NotifyObserver()
 
 	def OnDeleteItem(self, event):
-		item = self.tree.GetSelection()
+		item = self.tree.GetSelected()
 		if item:
 			self.DeleteItem(item)
 
 	def OnDuplicateItem(self, event):
-		item = self.tree.GetSelection()
+		item = self.tree.GetSelected()
 		if item:
 			self.DuplicateItem(item)
 			
 	def OnFly(self, event):
-		item = self.tree.GetSelection()
+		item = self.tree.GetSelected()
 		assert item
 		fly(self, node = item, data = self.tree.GetPyData(item))
 	# }}}

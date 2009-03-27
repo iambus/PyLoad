@@ -3,16 +3,18 @@ import wx
 import sys
 
 class Tree(wx.TreeCtrl):
-	def __init__(self, parent, icons = None):
-		wx.TreeCtrl.__init__(self, parent, 
-				style =
-				wx.TR_DEFAULT_STYLE
-				#wx.TR_HAS_BUTTONS
-				| wx.TR_EDIT_LABELS
-				#| wx.TR_MULTIPLE
-				| wx.TR_HIDE_ROOT
-				| wx.TR_HAS_VARIABLE_ROW_HEIGHT
-				)
+	def __init__(self, parent, multiple = False):
+		style = (wx.TR_DEFAULT_STYLE
+				 #wx.TR_HAS_BUTTONS
+				 | wx.TR_EDIT_LABELS
+				 #| wx.TR_MULTIPLE
+				 | wx.TR_HIDE_ROOT
+				 | wx.TR_HAS_VARIABLE_ROW_HEIGHT)
+		if multiple:
+			style |= wx.TR_MULTIPLE
+		self.multiple = multiple
+
+		wx.TreeCtrl.__init__(self, parent, style = style)
 		self.root = self.AddRoot("You can't see me:)")
 		self.SetPyData(self.root, None)
 
@@ -65,7 +67,16 @@ class Tree(wx.TreeCtrl):
 		return node
 
 	def SelectedData(self):
-		return self.GetPyData(self.GetSelection())
+		return self.GetPyData(self.GetSelected())
 
+	def SelectedDatas(self):
+		return map(self.GetPyData, self.GetSelections())
+
+	def GetSelected(self):
+		if self.multiple:
+			all = self.GetSelections()
+			return all[0] if all else None
+		else:
+			return self.GetSelection()
 
 

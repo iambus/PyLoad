@@ -57,7 +57,7 @@ class RecordPanel(wx.Panel):
 	########################################
 
 	def InitializeRoot(self):
-		self.tree = Tree(self)
+		self.tree = Tree(self, multiple = False)
 
 		iconSize = self.tree.iconSize
 		icons = {
@@ -113,8 +113,8 @@ class RecordPanel(wx.Panel):
 
 	# {{{ event handlers
 	def OnSelChanged(self, event):
-		self.item = event.GetItem()
-		data = self.tree.GetPyData(self.item)
+		item = event.GetItem()
+		data = self.tree.GetPyData(item)
 		if self.onSelChangedCallback:
 			self.onSelChangedCallback(data)
 
@@ -199,7 +199,7 @@ class RecordPanel(wx.Panel):
 	def OnNewPage(self, event):
 		assert not self.isMirror
 
-		recordItem = self.tree.GetSelection()
+		recordItem = self.tree.GetSelected()
 		record = self.tree.GetPyData(recordItem)
 		if not isinstance(record, Record.Record):
 			return
@@ -216,12 +216,12 @@ class RecordPanel(wx.Panel):
 
 	@make_change
 	def OnDeleteItem(self, event):
-		item = self.tree.GetSelection()
+		item = self.tree.GetSelected()
 		self.DeleteItem(item)
 
 	@make_change
 	def OnDuplicateItem(self, event):
-		oldItem = self.tree.GetSelection()
+		oldItem = self.tree.GetSelected()
 		oldData = self.tree.GetPyData(oldItem)
 		parentItem = self.tree.GetItemParent(oldItem)
 		parentData = self.tree.GetPyData(parentItem)
@@ -282,13 +282,13 @@ class RecordPanel(wx.Panel):
 			return
 
 
-		item = self.tree.GetSelection()
+		item = self.tree.GetSelected()
 		data = self.tree.GetPyData(item)
 		data.set_host(host)
 
 
 	def OnChangeURL(self, event):
-		item = self.tree.GetSelection()
+		item = self.tree.GetSelected()
 		hit = self.tree.GetPyData(item)
 
 		dialog = wx.TextEntryDialog(
@@ -320,7 +320,7 @@ class RecordPanel(wx.Panel):
 
 
 	def OnFly(self, event):
-		item = self.tree.GetSelection()
+		item = self.tree.GetSelected()
 		fly(self, node = item, data = self.tree.GetPyData(item))
 	# }}}
 
