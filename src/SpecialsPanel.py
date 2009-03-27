@@ -4,6 +4,7 @@ from Special import Special
 import Controller
 import Player
 import Record
+from Tree import Tree
 from FlyFrame import fly
 from Changes import make_change, remove_change
 
@@ -50,22 +51,6 @@ class MyDropTarget(wx.PyDropTarget):
 		return d  
 # }}}
 
-# {{{ SpecialsTree
-class SpecialsTree(wx.TreeCtrl):
-	def __init__(self, parent):
-		wx.TreeCtrl.__init__(self, parent, 
-				style =
-				wx.TR_DEFAULT_STYLE
-				#wx.TR_HAS_BUTTONS
-				| wx.TR_EDIT_LABELS
-				#| wx.TR_MULTIPLE
-				| wx.TR_HIDE_ROOT
-				| wx.TR_HAS_VARIABLE_ROW_HEIGHT
-				)
-	def SelectedData(self):
-		return self.GetPyData(self.GetSelection())
-# }}}
-
 class SpecialsPanel(wx.Panel):
 	# {{{ init
 	def __init__(self, parent):
@@ -95,7 +80,7 @@ class SpecialsPanel(wx.Panel):
 		self.onNewSpecialCallback = None
 
 	def InitTree(self):
-		self.tree = SpecialsTree(self)
+		self.tree = Tree(self)
 
 		iconSize = (16,16)
 		iconList = wx.ImageList(iconSize[0], iconSize[1])
