@@ -237,9 +237,13 @@ class SpecialsPanel(wx.Panel):
 		special = Special()
 		self.project.add_special(special)
 		special.label = 'New Special'
+		self.tree.UnselectAll()
 		item = self.tree.AddNode(self.root, special)
-
 		self.tree.SelectItem(item)
+		# XXX: why do I have to load it manually?
+		if self.onSelChangedCallback:
+			self.onSelChangedCallback(special)
+
 
 	def InsertNewController(self, item, controller):
 		itemData = self.tree.GetPyData(item)
