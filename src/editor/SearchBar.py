@@ -1,117 +1,9 @@
 
 import wx
 
-# {{{ PlainSearchBar
-class PlainSearchBar(wx.Panel):
-	def __init__(self, parent):
-		wx.Panel.__init__(self, parent, -1)
-
-
-		self.xButton = wx.Button(self, -1, 'X')
-		searchLabel = wx.StaticText(self, -1, "Search: ", pos=(10, 20), style=wx.ALIGN_CENTRE)
-		self.searchField = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER)
-		self.searchButton = wx.Button(self, -1, 'Search')
-		self.previousButton = wx.Button(self, -1, 'Previous')
-		self.nextButton = wx.Button(self, -1, 'Next')
-		self.reCheck = wx.CheckBox(self, -1, "Regular Expression")
-
-		sizer = wx.FlexGridSizer(cols=7, hgap=10, vgap=10)
-		sizer.AddGrowableCol(2)
-		sizer.Add(self.xButton, 0, wx.ALL)
-		sizer.Add(searchLabel, 0, wx.ALL)
-		sizer.Add(self.searchField, 1, wx.EXPAND)
-		sizer.Add(self.searchButton, 0, wx.ALL)
-		sizer.Add(self.previousButton, 0, wx.ALL)
-		sizer.Add(self.nextButton, 0, wx.ALL)
-		sizer.Add(self.reCheck, 0, wx.ALL)
-
-		self.SetSizer(sizer)
-# }}}
-
-# {{{ SimpleSearchBar
-# TODO: enable tab key
-class SimpleSearchBar(wx.Panel):
-	def __init__(self, parent):
-		wx.Panel.__init__(self, parent, -1)
-
-		self.searchField = wx.SearchCtrl(self, -1, size=(200,-1), style=wx.TE_PROCESS_ENTER)
-		self.searchField.ShowSearchButton(True)
-		self.searchField.ShowCancelButton(True)
-		self.searchField.SetMenu(self.MakeMenu())
-
-		sizer = wx.FlexGridSizer(cols=7, hgap=10, vgap=10)
-		sizer.AddGrowableCol(2)
-		sizer.Add(self.searchField, 1, wx.EXPAND)
-
-		self.SetSizer(sizer)
-
-		# bindings
-		self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnSearch, self.searchField)
-		self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancel, self.searchField)
-		self.Bind(wx.EVT_TEXT_ENTER, self.OnEnterSearch, self.searchField)
-		self.Bind(wx.EVT_TEXT, self.OnIncrSearch, self.searchField)
-
-		#
-		self.searchCallback = None
-		self.highlightCallback = None
-		self.cancelSearchCallback = None
-
-
-	def MakeMenu(self):
-		menu = wx.Menu()
-		self.forwardItem = menu.Append(-1, "Forward", kind = wx.ITEM_RADIO)
-		self.backwordItem = menu.Append(-1, "Backword", kind = wx.ITEM_RADIO)
-		self.reItem = menu.Append(-1, "Regular Expression", kind = wx.ITEM_CHECK)
-		#self.hightlightItem = menu.Append(-1, "Highlight All", kind = wx.ITEM_CHECK)
-		self.highlightItem = menu.Append(-1, "Highlight All")
-		self.Bind(wx.EVT_MENU, self.OnHighlight, self.highlightItem)
-		return menu
-	
-	def OnEvent(self, event):
-		print event
-
-	def OnSearch(self, event):
-		self.Search()
-	
-	def OnEnterSearch(self, event):
-		self.Search()
-	
-	def OnIncrSearch(self, event):
-		# do incremental search only when 'regular expression' is not used
-		if not self.IsReChecked():
-			self.Search()
-	
-	def OnCancel(self, event):
-		pass
-
-	def OnHighlight(self, event):
-		self.Highlight()
-
-	def IsReChecked(self):
-		return self.reItem.IsChecked()
-
-	def IsNext(self):
-		return self.forwardItem.IsChecked()
-
-	def GetSearchText(self):
-		return self.searchField.GetValue() 
-
-	def Search(self):
-		if self.searchCallback:
-			self.searchCallback(self.GetSearchText(), self.IsNext(), False, self.IsReChecked())
-
-	def Highlight(self):
-		if self.highlightCallback:
-			self.highlightCallback(self.GetSearchText())
-
-	def CancelSearch(self, event):
-		if self.cancelSearchCallback:
-			self.cancelSearchCallback()
-# }}}
-
 
 # TODO: support "highlight all"
-class GoodSearchBar(wx.Panel):
+class SearchBar(wx.Panel):
 	def __init__(self, parent):
 		wx.Panel.__init__(self, parent, -1)
 
@@ -122,12 +14,12 @@ class GoodSearchBar(wx.Panel):
 
 		iconSize = (16, 16)
 		#self.downButton = wx.Button(self, -1, 'Next')
-		downIcon = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN, wx.ART_OTHER, (16,16))
-		self.downButton = wx.BitmapButton(self, -1, downIcon, iconSize, (iconSize[0]+10, iconSize[1]+10))
+		downIcon = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN, wx.ART_OTHER, iconSize)
+		self.downButton = wx.BitmapButton(self, -1, downIcon, iconSize, (26, 26))
 		self.downButton.SetToolTipString("Next")
 		#self.upButton = wx.Button(self, -1, 'Prev')
-		upIcon = wx.ArtProvider_GetBitmap(wx.ART_GO_UP, wx.ART_OTHER, (16,16))
-		self.upButton = wx.BitmapButton(self, -1, upIcon, iconSize, (iconSize[0]+10, iconSize[1]+10))
+		upIcon = wx.ArtProvider_GetBitmap(wx.ART_GO_UP, wx.ART_OTHER, iconSize)
+		self.upButton = wx.BitmapButton(self, -1, upIcon, iconSize, (26, 26))
 		self.upButton.SetToolTipString("Prvious")
 
 		self.caseCheck = wx.CheckBox(self, -1, "Match Case")
@@ -268,8 +160,6 @@ class GoodSearchBar(wx.Panel):
 		if self.highlightCallback:
 			self.highlightCallback(self.GetSearchText())
 
-
-SearchBar = GoodSearchBar
 
 if __name__ == '__main__':
 
