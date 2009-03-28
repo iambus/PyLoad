@@ -78,12 +78,32 @@ class Tree(wx.TreeCtrl):
 			return all[0] if all else None
 		else:
 			return self.GetSelection()
+
 	def GetAllSelected(self):
 		if self.multiple:
 			return self.GetSelections()
 		else:
-			return [self.GetSelection()]
+			node = self.GetSelection()
+			return [node] if node else []
 
+	def GetSelectedRoots(self):
+		nodes = self.GetAllSelected()
+		if len(nodes) > 1:
+			return self.GetMultipleSelectedRoots(self.root)
+		else:
+			return nodes
+
+	def GetMultipleSelectedRoots(self, node):
+		#assert self.multiple
+		if node != self.root and self.IsSelected(node):
+			return [node]
+		else:
+			nodes = []
+			(child, cookie) = self.GetFirstChild(node)
+			while child.IsOk():
+				nodes.extend(self.GetMultipleSelectedRoots(child))
+				(child, cookie) = self.GetNextChild(node, cookie)
+			return nodes
 
 if __name__ == '__main__':
 	class P(wx.Panel):

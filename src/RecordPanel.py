@@ -116,9 +116,14 @@ class RecordPanel(wx.Panel):
 		# TODO: if unselected
 		item = event.GetItem()
 		if item:
-			data = self.tree.GetPyData(item)
 			if self.onSelChangedCallback:
-				self.onSelChangedCallback(data)
+				all = self.tree.GetAllSelected()
+				if len(all) == 1:
+					item = all[0]
+					data = self.tree.GetPyData(item)
+					self.onSelChangedCallback(data)
+				else:
+					self.onSelChangedCallback(None)
 
 	def OnRightDown(self, event):
 		item = self.GetItemByPosition(event.GetPosition())
@@ -217,9 +222,9 @@ class RecordPanel(wx.Panel):
 		self.NotifyObservers(('a', record))
 
 	@make_change
-	def OnDeleteItem(self, event):
-		item = self.tree.GetSelected()
-		self.DeleteItem(item)
+	def OnDeleteItems(self, event):
+		items = self.tree.GetSelectedRoots()
+		map(self.DeleteItem, items)
 
 	@make_change
 	def OnDuplicateItem(self, event):
@@ -284,9 +289,10 @@ class RecordPanel(wx.Panel):
 			return
 
 
-		item = self.tree.GetSelected()
-		data = self.tree.GetPyData(item)
-		data.set_host(host)
+		items = self.tree.GetSelectedRoots()
+		for item in items:
+			data = self.tree.GetPyData(item)
+			data.set_host(host)
 
 
 	def OnChangeURL(self, event):
@@ -343,22 +349,29 @@ class RecordPanel(wx.Panel):
 			self.popupID6 = wx.NewId()
 			self.Bind(wx.EVT_MENU, self.OnNewPage, id=self.popupID1)
 			self.Bind(wx.EVT_MENU, self.OnDuplicateItem, id=self.popupID2)
-			self.Bind(wx.EVT_MENU, self.OnDeleteItem, id=self.popupID3)
+			self.Bind(wx.EVT_MENU, self.OnDeleteItems, id=self.popupID3)
 			self.Bind(wx.EVT_MENU, self.OnRenameHost, id=self.popupID4)
 			self.Bind(wx.EVT_MENU, self.OnChangeURL, id=self.popupID5)
 			self.Bind(wx.EVT_MENU, self.OnFly, id=self.popupID6)
 
 		menu = wx.Menu()
 		
-		if not self.isMirror:
-			if isinstance(self.tree.GetPyData(item), Record.Record):
-				menu.Append(self.popupID1, "New Page")
-			menu.Append(self.popupID2, "Duplicate")
-			menu.Append(self.popupID3, "Delete")
-			menu.Append(self.popupID4, "Change Host")
-			if isinstance(self.tree.GetPyData(item), Record.Hit):
-				menu.Append(self.popupID5, "Change URL")
-		menu.Append(self.popupID6, "I'm interested...")
+		nodes = self.tree.GetAllSelected()
+		if len(nodes) > 1:
+			if not self.isMirror:
+				#menu.Append(self.popupID2, "Duplicate")
+				menu.Append(self.popupID3, "Delete")
+				menu.Append(self.popupID4, "Change Host")
+		else:
+			if not self.isMirror:
+				if isinstance(self.tree.GetPyData(item), Record.Record):
+					menu.Append(self.popupID1, "New Page")
+				menu.Append(self.popupID2, "Duplicate")
+				menu.Append(self.popupID3, "Delete")
+				menu.Append(self.popupID4, "Change Host")
+				if isinstance(self.tree.GetPyData(item), Record.Hit):
+					menu.Append(self.popupID5, "Change URL")
+			menu.Append(self.popupID6, "I'm interested...")
 
 		self.PopupMenu(menu)
 		menu.Destroy()
@@ -471,7 +484,7 @@ class RecordPanel(wx.Panel):
 		data = self.tree.GetPyData(item)
 		parentItem = self.tree.GetItemParent(item)
 		parentData = self.tree.GetPyData(parentItem)
-		if self.tree.GetChildrenCount(parentItem) == 1:
+		if parentItem != self.root and self.tree.GetChildrenCount(parentItem) == 1:
 			self.tree.Collapse(parentItem)
 		self.tree.Delete(item)
 		if parentData:

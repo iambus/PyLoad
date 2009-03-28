@@ -152,9 +152,14 @@ class SpecialsPanel(wx.Panel):
 		# TODO: if unselected
 		item = event.GetItem()
 		if item:
-			data = self.tree.GetPyData(item)
 			if self.onSelChangedCallback:
-				self.onSelChangedCallback(data)
+				all = self.tree.GetAllSelected()
+				if len(all) == 1:
+					item = all[0]
+					data = self.tree.GetPyData(item)
+					self.onSelChangedCallback(data)
+				else:
+					self.onSelChangedCallback(None)
 
 	def OnRightDown(self, event):
 		item, flags = self.tree.HitTest(event.GetPosition())
@@ -162,26 +167,34 @@ class SpecialsPanel(wx.Panel):
 			self.tree.SelectItem(item)
 
 	def OnRightUp(self, event):
-		item, flags = self.tree.HitTest(event.GetPosition())
 		if not hasattr(self, "popupID1"):
 			self.popupID1 = wx.NewId()
 			self.popupID2 = wx.NewId()
 			self.popupID3 = wx.NewId()
 			self.popupID4 = wx.NewId()
 			self.Bind(wx.EVT_MENU, self.OnNewSpecial, id=self.popupID1)
-			self.Bind(wx.EVT_MENU, self.OnDeleteItem, id=self.popupID2)
+			self.Bind(wx.EVT_MENU, self.OnDeleteItems, id=self.popupID2)
 			self.Bind(wx.EVT_MENU, self.OnDuplicateItem, id=self.popupID3)
 			self.Bind(wx.EVT_MENU, self.OnFly, id=self.popupID4)
 
 		menu = wx.Menu()
 		menu.Append(self.popupID1, "New Special")
-		if item:
-			if self.UnderModifiable(item):
-				if self.IsCloneable(item):
-					menu.Append(self.popupID3, "Duplicate")
-					#menu.FindItemByPosition(2).Enable(False)
-				menu.Append(self.popupID2, "Delete")
-			menu.Append(self.popupID4, "I'm interested...")
+
+		#item, flags = self.tree.HitTest(event.GetPosition())
+		nodes = self.tree.GetAllSelected()
+		print nodes
+		if len(nodes) > 0:
+			if len(nodes) > 1:
+				if any(map(self.UnderModifiable, nodes)):
+					menu.Append(self.popupID2, "Delete")
+			else:
+				item = nodes[0]
+				if self.UnderModifiable(item):
+					if self.IsCloneable(item):
+						menu.Append(self.popupID3, "Duplicate")
+						#menu.FindItemByPosition(2).Enable(False)
+					menu.Append(self.popupID2, "Delete")
+				menu.Append(self.popupID4, "I'm interested...")
 
 		self.PopupMenu(menu)
 		menu.Destroy()
@@ -193,10 +206,9 @@ class SpecialsPanel(wx.Panel):
 		self.AppendNewSpecial()
 		self.NotifyObserver()
 
-	def OnDeleteItem(self, event):
-		item = self.tree.GetSelected()
-		if item:
-			self.DeleteItem(item)
+	def OnDeleteItems(self, event):
+		items = self.tree.GetSelectedRoots()
+		map(self.DeleteItem, items)
 
 	def OnDuplicateItem(self, event):
 		item = self.tree.GetSelected()
