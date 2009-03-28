@@ -62,6 +62,7 @@ adding request object in scope. (p2)
 
 search text in tree
 
+bug fix: syntax highlight is wrong if JavaScript is embeded in HTML
 
 
 
