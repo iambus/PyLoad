@@ -25,7 +25,7 @@ class MyDropTarget(wx.PyDropTarget):
 		if flags & wx.TREE_HITTEST_NOWHERE:
 			return d
 
-		self.panel.MoveData(item, self.data.GetData())
+		self.panel.MoveData(item, self.data.GetData().split())
 
 		return d  
 # }}}
@@ -183,9 +183,15 @@ class RecordPanel(wx.Panel):
 
 	def OnBeginDragSelf(self, event):
 		assert not self.isMirror
-		item = event.GetItem()
-		tree = event.GetEventObject()
-		uuid = tree.GetPyData(item).uuid
+		datas = map(self.tree.GetPyData, self.tree.GetAllSelected())
+		if not datas:
+			return event.Veto()
+		if len(datas) > 1:
+			kind = datas[0].__class__
+			if not all(map(lambda d: d.__class__ == kind, datas[1:])):
+				return event.Veto()
+
+		uuid = ' '.join([data.uuid for data in datas])
 		def DoDragDrop():
 			dd = wx.CustomDataObject("record")
 			dd.SetData(uuid)
@@ -426,20 +432,29 @@ class RecordPanel(wx.Panel):
 		self.NotifyObservers(('a', page))
 
 	########################################
-	def MoveData(self, targetItem, sourceUUID):
+	def MoveData(self, targetItem, sourceUUIDs):
 		assert not self.isMirror
+		sourceUUID = sourceUUIDs[0]
 		sourceItem = self.FindItem(sourceUUID)
 		sourceData = self.tree.GetPyData(sourceItem)
 		targetData = self.tree.GetPyData(targetItem)
 		if sourceData == targetData:
 			return
 
+		sourceUUIDs = sourceUUIDs[1:]
 		if sourceData.__class__ == targetData.__class__:
+			sourceUUIDs.reverse()
+			for nextUUID in sourceUUIDs:
+				self.MoveAfter(self.FindItem(nextUUID), targetItem)
 			self.MoveAfter(sourceItem, targetItem)
 		elif sourceData.__class__ == Record.Hit and targetData.__class__ == Record.Page:
 			self.MoveUnder(sourceItem, targetItem)
+			for nextUUID in sourceUUIDs:
+				self.MoveUnder(self.FindItem(nextUUID), targetItem)
 		elif sourceData.__class__ == Record.Page and targetData.__class__ == Record.Record:
 			self.MoveUnder(sourceItem, targetItem)
+			for nextUUID in sourceUUIDs:
+				self.MoveUnder(self.FindItem(nextUUID), targetItem)
 		else:
 			return
 
