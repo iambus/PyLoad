@@ -210,13 +210,13 @@ class GoodSearchBar(wx.Panel):
 
 	def Next(self):
 		keyword = self.GetSearchText()
-		self.UpdateSearchHistory(keyword)
+		self.AddSearchHistory(keyword)
 		if self.searchCallback:
 			self.searchCallback(keyword, True, self.matchCase(), self.IsReChecked())
 
 	def Prev(self):
 		keyword = self.GetSearchText()
-		self.UpdateSearchHistory(keyword)
+		self.AddSearchHistory(keyword)
 		if self.searchCallback:
 			self.searchCallback(keyword, False, self.matchCase(), self.IsReChecked())
 
@@ -230,7 +230,7 @@ class GoodSearchBar(wx.Panel):
 		self.searchField.SetMenu(menu)
 		self.menu = menu
 
-	def UpdateSearchHistory(self, keyword):
+	def AddSearchHistory(self, keyword):
 		if not keyword:
 			return
 		for item in self.menu.GetMenuItems():
@@ -247,6 +247,13 @@ class GoodSearchBar(wx.Panel):
 		if self.menu.GetMenuItemCount() > self.maxHistory:
 			self.menu.RemoveItem(list(self.menu.GetMenuItems())[-1])
 
+	def UpdateSearchHistory(self, keywords):
+		map(self.menu.RemoveItem, list(self.menu.GetMenuItems())[2:])
+		if len(keywords) > self.maxHistory:
+			keywords = keywords[-self.maxHistory:]
+		for keyword in keywords:
+			item = wx.MenuItem(self.menu, wx.NewId(), keyword)
+			self.menu.AppendItem(item)
 
 	def CancelSearch(self, event):
 		if self.cancelSearchCallback:
@@ -265,7 +272,8 @@ if __name__ == '__main__':
 	#app.RedirectStdio()
 
 	frame = wx.Frame(None, -1, "Editor", size = (800, 600))
-	SearchBar(frame)
+	sb = SearchBar(frame)
+	sb.UpdateSearchHistory(['a', 'b', 'c'])
 
 	frame.Center()
 	frame.Show(True)
