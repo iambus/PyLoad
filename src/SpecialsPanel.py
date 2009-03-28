@@ -39,7 +39,8 @@ class MyDropTarget(wx.PyDropTarget):
 
 		if self.controllerData.GetData():
 			data = self.controllerData.GetData()
-			self.panel.DropNewData(item, data)
+			for uuid in data.split():
+				self.panel.DropNewData(item, uuid)
 			#XXX: why I have to set it none?
 			self.controllerData.SetData('')
 		if self.specialData.GetData():
@@ -80,7 +81,7 @@ class SpecialsPanel(wx.Panel):
 		self.onNewSpecialCallback = None
 
 	def InitTree(self):
-		self.tree = Tree(self, multiple = False)
+		self.tree = Tree(self, multiple = True)
 
 		iconSize = self.tree.iconSize
 		icons = {
@@ -182,7 +183,6 @@ class SpecialsPanel(wx.Panel):
 
 		#item, flags = self.tree.HitTest(event.GetPosition())
 		nodes = self.tree.GetAllSelected()
-		print nodes
 		if len(nodes) > 0:
 			if len(nodes) > 1:
 				if any(map(self.UnderModifiable, nodes)):

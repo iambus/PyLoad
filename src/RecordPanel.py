@@ -57,7 +57,7 @@ class RecordPanel(wx.Panel):
 	########################################
 
 	def InitializeRoot(self):
-		self.tree = Tree(self, multiple = False)
+		self.tree = Tree(self, multiple = True)
 
 		iconSize = self.tree.iconSize
 		icons = {
@@ -166,9 +166,7 @@ class RecordPanel(wx.Panel):
 
 	def OnBeginDragMirror(self, event):
 		assert self.isMirror
-		item = event.GetItem()
-		tree = event.GetEventObject()
-		uuid = tree.GetPyData(item).uuid
+		uuid = ' '.join([data.uuid for data in map(self.tree.GetPyData, self.tree.GetSelectedRoots())])
 		def DoDragDrop():
 			dd = wx.CustomDataObject("xxx")
 			dd.SetData(uuid)
