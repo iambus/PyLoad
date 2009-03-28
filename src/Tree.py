@@ -34,6 +34,7 @@ class Tree(wx.TreeCtrl):
 		self.SetImageList(iconList)
 		self.iconList = iconList
 
+
 	def SetNode(self, node, data):
 		self.SetPyData(node, data)
 		icons = self.icons[data.__class__]
@@ -65,6 +66,7 @@ class Tree(wx.TreeCtrl):
 				self.AddTree(node, c)
 			self.Expand(node)
 		return node
+
 
 	def SelectedData(self):
 		return self.GetPyData(self.GetSelected())
@@ -105,6 +107,13 @@ class Tree(wx.TreeCtrl):
 				(child, cookie) = self.GetNextChild(node, cookie)
 			return nodes
 
+	def CanReach(self, child, parent):
+		while child != self.root:
+			if child == parent:
+				return True
+			child = self.GetItemParent(child)
+
+# {{{ main
 if __name__ == '__main__':
 	class P(wx.Panel):
 		def __init__(self, parent):
@@ -144,4 +153,6 @@ if __name__ == '__main__':
 		tree.AddNode(n, Data('x'))
 	import Test
 	Test.TestPanel(P, loadNodes)
+# }}}
 
+# vim: foldmethod=marker:

@@ -44,8 +44,8 @@ class MyDropTarget(wx.PyDropTarget):
 			#XXX: why I have to set it none?
 			self.controllerData.SetData('')
 		if self.specialData.GetData():
-			data = self.specialData.GetData()
-			self.panel.MoveData(item, data)
+			nodeIDs = map(int, self.specialData.GetData().split())
+			self.panel.MoveNodes(item, nodeIDs)
 			#XXX: why I have to set it none?
 			self.specialData.SetData('')
 
@@ -131,13 +131,22 @@ class SpecialsPanel(wx.Panel):
 		self.NotifyObserver()
 
 	def OnBeginDrag(self, event):
-		item = event.GetItem()
-		self.dragging_item = item
-		tree = event.GetEventObject()
-		uuid = tree.GetPyData(item).uuid
+		nodes = self.tree.GetSelectedRoots()
+
+		datas = map(self.tree.GetPyData, nodes)
+		classes = [data.__class__ for data in datas]
+		if any(map(lambda c: c == Special, classes)) and any(map(lambda c: c != Special, classes)):
+			return event.Veto()
+
+		if not any(map(self.IsMoveable, nodes)):
+			return event.Veto()
+
+		nodeIDs = map(str, map(id, nodes))
+		self.dragging_items = nodes # FIXME: bad trick
+
 		def DoDragDrop():
 			dd = wx.CustomDataObject("special")
-			dd.SetData(uuid)
+			dd.SetData(' '.join(nodeIDs))
 
 			data = wx.DataObjectComposite()
 			data.Add(dd)
@@ -208,6 +217,7 @@ class SpecialsPanel(wx.Panel):
 
 	def OnDeleteItems(self, event):
 		items = self.tree.GetSelectedRoots()
+		items = filter(self.UnderModifiable, items)
 		map(self.DeleteItem, items)
 
 	def OnDuplicateItem(self, event):
@@ -244,8 +254,8 @@ class SpecialsPanel(wx.Panel):
 
 
 	def UseData(self, item, data):
-		parentdata = self.tree.GetPyData(item)
-		parentdata.add_child(data)
+		parentData = self.tree.GetPyData(item)
+		parentData.add_child(data)
 
 		self.LoadData(item, data)
 
@@ -288,42 +298,50 @@ class SpecialsPanel(wx.Panel):
 	# }}}
 
 	# {{{ Moving nodes
-	def MoveData(self, targetItem, data):
-		sourceItem = self.dragging_item
-		self.dragging_item = None
-		sourceData = self.tree.GetPyData(sourceItem)
+	def MoveNodes(self, targetItem, sourceItems):
+		sourceItems = self.dragging_items
+		self.dragging_items = None
+
 		targetData = self.tree.GetPyData(targetItem)
-		if sourceData == targetData:
+		targetParentItem = self.tree.GetItemParent(targetItem)
+		if not self.IsModifiable(targetParentItem):
+			#print "Can't modify partent"
 			return
+
+		sourceItems = filter(self.IsMoveable, sourceItems)
+		sourceItems = filter(lambda s: s != targetItem, sourceItems)
+		if any(map(lambda s: self.tree.CanReach(targetItem, s), sourceItems)):
+			# can't put a father under child
+			#print "can't put a father under child"
+			return
+		if not sourceItems:
+			#print "Nothing to move"
+			return
+
+		sourceItem = sourceItems[0]
+		sourceItems = sourceItems[1:]
+		sourceData = self.tree.GetPyData(sourceItem)
 
 		sourceParentItem = self.tree.GetItemParent(sourceItem)
-		targetParentItem = self.tree.GetItemParent(targetItem)
-		sourceParentData = self.tree.GetPyData(sourceParentItem)
-		targetParentData = self.tree.GetPyData(targetParentItem)
-
-		p = targetParentItem
-		while p != self.root:
-			if p == sourceItem:
-				# can't move father node under a child node
-				return
-			p = self.tree.GetItemParent(p)
-
-		#TODO: can we introduce a "subable" interface?
-		subable = (Special, Controller.If, Controller.Loop, Controller.Block)
-		unsubable = (Record.Record, Record.Page, Record.Hit, Player.Script)
-
-		if sourceParentData.__class__ in unsubable or targetParentData.__class__ in unsubable:
-			return
 
 		if sourceData.__class__ == Special:
 			if targetData.__class__ == Special:
+				sourceItems.reverse()
+				for nextItem in sourceItems:
+					self.MoveAfter(nextItem, targetItem)
 				self.MoveAfter(sourceItem, targetItem)
 			else:
 				# You can only move a special after another special
+				#print "You can only move a special after another special"
 				pass
-		elif targetData.__class__ in subable:
+		elif self.IsModifiable(targetItem):
 			self.MoveUnder(sourceItem, targetItem)
+			for nextItem in sourceItems:
+				self.MoveUnder(nextItem, targetItem)
 		else:
+			sourceItems.reverse()
+			for nextItem in sourceItems:
+				self.MoveAfter(nextItem, targetItem)
 			self.MoveAfter(sourceItem, targetItem)
 
 		self.NotifyObserver()
@@ -505,6 +523,9 @@ class SpecialsPanel(wx.Panel):
 		unmodifiable = (Record.Record, Record.Page, Record.Hit)
 		data = self.tree.GetPyData(item)
 		return data.__class__ not in unmodifiable
+
+	def IsMoveable(self, item):
+		return self.IsModifiable(self.tree.GetItemParent(item))
 
 	def UnderModifiable(self, item):
 		parentItem = self.tree.GetItemParent(item)

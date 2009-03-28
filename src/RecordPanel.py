@@ -590,6 +590,7 @@ class RecordPanel(wx.Panel):
 
 # }}}
 
+# {{{ main
 if __name__ == '__main__':
 	import Record
 	import Project
@@ -599,6 +600,6 @@ if __name__ == '__main__':
 		p.AppendNewRecord(Record.Record())
 	import Test
 	Test.TestPanel(RecordPanel, init)
-
+# }}}
 
 # vim: foldmethod=marker:
