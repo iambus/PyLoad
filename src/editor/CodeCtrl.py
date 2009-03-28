@@ -198,13 +198,17 @@ class CodeCtrl(stc.StyledTextCtrl):
     #------------------------------
 
     #TODO: match-case
-    def SearchText(self, text, forward = True, regex = False):
+    def SearchText(self, text, forward = True, matchCase = False, regex = False):
         if text == '':
             self.CancelSearch()
             return
         fullText = self.GetText()
         selectedText = self.GetSelectedText()
         if not regex:
+            if not matchCase:
+                fullText = fullText.lower()
+                text = text.lower()
+                selectedText = selectedText.lower()
             if forward:
                 start = self.GetSelection()[0]
                 if selectedText == text:
@@ -220,7 +224,10 @@ class CodeCtrl(stc.StyledTextCtrl):
         else:
             import re
             try:
-                regexp = re.compile(text)
+                if matchCase:
+                    regexp = re.compile(text)
+                else:
+                    regexp = re.compile(text, re.I)
             except:
                 # Invalid regular expression. Ignore it.
                 return
