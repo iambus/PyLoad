@@ -127,7 +127,8 @@ class RecordPanel(wx.Panel):
 
 	def OnRightDown(self, event):
 		item = self.GetItemByPosition(event.GetPosition())
-		if item:
+		if item and not self.tree.IsSelected(item):
+			self.tree.UnselectAll()
 			self.tree.SelectItem(item)
 
 	def OnRightUp(self, event):

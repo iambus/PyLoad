@@ -173,7 +173,8 @@ class SpecialsPanel(wx.Panel):
 
 	def OnRightDown(self, event):
 		item, flags = self.tree.HitTest(event.GetPosition())
-		if item:
+		if item and not self.tree.IsSelected(item):
+			self.tree.UnselectAll()
 			self.tree.SelectItem(item)
 
 	def OnRightUp(self, event):
