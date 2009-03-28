@@ -130,16 +130,18 @@ class GoodSearchBar(wx.Panel):
 		self.upButton = wx.BitmapButton(self, -1, upIcon, iconSize, (iconSize[0]+10, iconSize[1]+10))
 		self.upButton.SetToolTipString("Prvious")
 
-		self.caseCheck = wx.CheckBox(self, -1, "Match case")
+		self.caseCheck = wx.CheckBox(self, -1, "Match Case")
+		self.caseCheck.SetToolTipString("Match Case")
 		self.reCheck = wx.CheckBox(self, -1, "RE")
+		self.reCheck.SetToolTipString("Use Regular Expression")
 
 		sizer = wx.FlexGridSizer(cols=5, hgap=4, vgap=10)
 		sizer.AddGrowableCol(4)
 		sizer.Add(self.searchField, 1, wx.EXPAND)
-		sizer.Add(self.downButton, 2)
-		sizer.Add(self.upButton, 3)
-		sizer.Add(self.caseCheck, 4)
-		sizer.Add(self.reCheck, 5)
+		sizer.Add(self.downButton, 2, wx.ALIGN_CENTER_VERTICAL)
+		sizer.Add(self.upButton, 3, wx.ALIGN_CENTER_VERTICAL)
+		sizer.Add(self.caseCheck, 4, wx.ALIGN_CENTER_VERTICAL)
+		sizer.Add(self.reCheck, 5, wx.ALIGN_CENTER_VERTICAL)
 
 		self.SetSizer(sizer)
 
@@ -220,6 +222,7 @@ class GoodSearchBar(wx.Panel):
 
 	def InitHistory(self):
 		self.history = []
+		self.maxHistory = 10
 		menu = wx.Menu()
 		labelMenu = menu.Append(-1, "Recent Search")
 		labelMenu.Enable(False)
@@ -238,10 +241,10 @@ class GoodSearchBar(wx.Panel):
 		self.menu.InsertItem(2, item)
 
 		self.history.insert(0, keyword)
-		if len(self.history) > 10:
+		if len(self.history) > self.maxHistory:
 			self.history.pop()
 
-		if self.menu.GetMenuItemCount() > 10:
+		if self.menu.GetMenuItemCount() > self.maxHistory:
 			self.menu.RemoveItem(list(self.menu.GetMenuItems())[-1])
 
 
