@@ -44,7 +44,12 @@ class EditorPanel(wx.Panel):
 		self.search.cancelSearchCallback = self.editor.CancelSearch
 
 
+		self.InitMenu()
+
 		# bindings
+		self.editor.UsePopUp(False)
+		self.editor.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+
 		self.Bind(wx.stc.EVT_STC_CHANGE, self.OnModified, self.editor)
 
 		self.Bind(wx.EVT_BUTTON, self.OnVi, self.viButton)
@@ -71,6 +76,51 @@ class EditorPanel(wx.Panel):
 
 		if self.path:
 			self.Load()
+
+	def InitMenu(self):
+		self.ID_UNDO      = wx.NewId()
+		self.ID_REDO      = wx.NewId()
+		self.ID_CUT       = wx.NewId()
+		self.ID_COPY      = wx.NewId()
+		self.ID_PASTE     = wx.NewId()
+		self.ID_DELETE    = wx.NewId()
+		self.ID_SELECTALL = wx.NewId()
+
+		menu = wx.Menu()
+		menu.Append(self.ID_UNDO,       "Undo")
+		menu.Append(self.ID_REDO,       "Redo")
+		menu.AppendSeparator()
+		menu.Append(self.ID_CUT,        "Cut")
+		menu.Append(self.ID_COPY,       "Copy")
+		menu.Append(self.ID_PASTE,      "Paste")
+		menu.Append(self.ID_DELETE,     "Delete")
+		menu.AppendSeparator()
+		menu.Append(self.ID_SELECTALL, "Select All")
+		#menu.AppendSeparator()
+
+		self.Bind(wx.EVT_MENU, lambda e: self.editor.Undo(), id = self.ID_UNDO)
+		self.Bind(wx.EVT_MENU, lambda e: self.editor.Redo(), id = self.ID_REDO)
+		self.Bind(wx.EVT_MENU, lambda e: self.editor.Cut(), id = self.ID_CUT)
+		self.Bind(wx.EVT_MENU, lambda e: self.editor.Copy(), id = self.ID_COPY)
+		self.Bind(wx.EVT_MENU, lambda e: self.editor.Paste(), id = self.ID_PASTE)
+		self.Bind(wx.EVT_MENU, lambda e: self.editor.Clear(), id = self.ID_DELETE)
+		self.Bind(wx.EVT_MENU, lambda e: self.editor.SelectAll(), id = self.ID_SELECTALL)
+
+		self.menu = menu
+
+	def UpdateMenu(self):
+		selection = self.editor.GetSelection()
+		hasSelectedSomething = selection[0] != selection[1]
+		self.menu.Enable(self.ID_UNDO, self.editor.CanUndo())
+		self.menu.Enable(self.ID_REDO, self.editor.CanRedo())
+		self.menu.Enable(self.ID_CUT, hasSelectedSomething)
+		self.menu.Enable(self.ID_COPY, hasSelectedSomething)
+		self.menu.Enable(self.ID_PASTE, self.editor.CanPaste())
+		self.menu.Enable(self.ID_DELETE, hasSelectedSomething)
+
+	def OnContextMenu(self, event):
+		self.UpdateMenu()
+		self.PopupMenu(self.menu)
 
 	def OnModified(self, event):
 		#FIXME: how to clear the Modify status?
@@ -172,6 +222,7 @@ class EditorPanel(wx.Panel):
 	
 	def SetValue(self, text):
 		self.editor.SetValue(text)
+
 
 if __name__ == '__main__':
 
