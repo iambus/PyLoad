@@ -205,20 +205,23 @@ class CodeCtrl(stc.StyledTextCtrl):
         fullText = self.GetText()
         selectedText = self.GetSelectedText()
         if not regex:
+            start, end = self.GetSelection()
             if not matchCase:
                 fullText = fullText.lower()
                 text = text.lower()
                 selectedText = selectedText.lower()
             if forward:
-                start = self.GetSelection()[0]
                 if selectedText == text:
                     start += len(selectedText)
                 next = fullText.find(text, start)
+                if next == -1:
+                    next = fullText.find(text, 0, end - 1)
             else:
-                end = self.GetSelection()[1]
                 if selectedText == text:
                     end -= len(selectedText)
                 next = fullText.rfind(text, 0, end)
+                if next == -1:
+                    next = fullText.rfind(text, start + 1)
             if next != -1:
                 self.SetSelection(next, next+len(text))
         else:
@@ -231,13 +234,14 @@ class CodeCtrl(stc.StyledTextCtrl):
             except:
                 # Invalid regular expression. Ignore it.
                 return
+            start, end = self.GetSelection()
             if forward:
-                start = self.GetSelection()[0]
                 if regexp.search(selectedText):
                     start += len(selectedText)
                 m = regexp.search(fullText, start)
+                if not m:
+                    m = regexp.search(fullText, 0, end - 1)
             else:
-                end = self.GetSelection()[1]
                 if regexp.search(selectedText):
                     end -= len(selectedText)
                 # FIXME: '12345', '\d\d\d' should return '345' instead of '123'
@@ -248,6 +252,14 @@ class CodeCtrl(stc.StyledTextCtrl):
                         m = iter.next()
                 except StopIteration:
                     pass
+                if not m:
+                    iter = regexp.finditer(fullText, start + 1)
+                    m = None
+                    try:
+                        while True:
+                            m = iter.next()
+                    except StopIteration:
+                        pass
             if m:
                 self.SetSelection(m.start(), m.end())
 

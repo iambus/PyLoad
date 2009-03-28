@@ -32,7 +32,6 @@ add script/if/loop to pop menu (p3)
 
 debug feature: reload modules (p4)
 
-search: from begin after reach end (p3)
 naming conventions (p2)
 
 Make InfoPanel editable (p3)
@@ -64,6 +63,5 @@ improve performance of parsing request (p3)
 
 adding request object in scope. (p2)
 
-bug: deselect a node doesn't trigger EVT_TREE_SEL_CHANGED event (p2)
 
 
