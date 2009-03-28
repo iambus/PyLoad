@@ -1,9 +1,6 @@
 
 Major:
 
-Tree Editor
-	delete mutiple nodes (p2)
-
 extractor (p3)
 
 Memory Leak (p2)
@@ -66,8 +63,6 @@ bug: error column in report is always empty? (not sure, seems sometimes...) (p2)
 improve performance of parsing request (p2)
 
 adding request object in scope.
-
-bug: can't drag page a after page a in specal tree
 
 refresh URL in Info after changed
 
