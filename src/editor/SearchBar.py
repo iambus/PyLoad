@@ -247,13 +247,18 @@ class GoodSearchBar(wx.Panel):
 		if self.menu.GetMenuItemCount() > self.maxHistory:
 			self.menu.RemoveItem(list(self.menu.GetMenuItems())[-1])
 
-	def UpdateSearchHistory(self, keywords):
+	def GetSearchHistory(self, keywords):
+		self.history = []
+		self.history.extend(keywords)
 		map(self.menu.RemoveItem, list(self.menu.GetMenuItems())[2:])
 		if len(keywords) > self.maxHistory:
 			keywords = keywords[-self.maxHistory:]
 		for keyword in keywords:
 			item = wx.MenuItem(self.menu, wx.NewId(), keyword)
 			self.menu.AppendItem(item)
+
+	def GetSearchHistory(self):
+		return self.history
 
 	def CancelSearch(self, event):
 		if self.cancelSearchCallback:
@@ -273,7 +278,7 @@ if __name__ == '__main__':
 
 	frame = wx.Frame(None, -1, "Editor", size = (800, 600))
 	sb = SearchBar(frame)
-	sb.UpdateSearchHistory(['a', 'b', 'c'])
+	sb.GetSearchHistory(['a', 'b', 'c'])
 
 	frame.Center()
 	frame.Show(True)
