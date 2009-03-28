@@ -527,16 +527,14 @@ class SpecialsPanel(wx.Panel):
 		return data.__class__ not in unmodifiable
 
 	def IsMoveable(self, item):
-		return self.IsModifiable(self.tree.GetItemParent(item))
+		return self.UnderModifiable(item)
 
 	def UnderModifiable(self, item):
 		parentItem = self.tree.GetItemParent(item)
 		return self.IsModifiable(parentItem)
 
 	def IsCloneable(self, item):
-		uncloneable = (Record.Record, Record.Page, Record.Hit)
-		data = self.tree.GetPyData(item)
-		return data.__class__ not in uncloneable
+		return self.UnderModifiable(item)
 
 if __name__ == '__main__':
 	import Test

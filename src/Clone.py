@@ -77,11 +77,10 @@ def clone_for_special(src):
 	from Record import Record, Page, Hit
 	from Player import Player
 
-	cloneable = []
 	uncloneable = [Record, Page, Hit]
 
 	if src.__class__ in uncloneable:
-		return None
+		return src
 
 	def replace_with_uuid(node):
 		assert node.__class__ not in uncloneable

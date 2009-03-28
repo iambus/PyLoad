@@ -72,7 +72,7 @@ class Tree(wx.TreeCtrl):
 		return self.GetPyData(self.GetSelected())
 
 	def SelectedDatas(self):
-		return map(self.GetPyData, self.GetSelections())
+		return map(self.GetPyData, self.GetAllSelected())
 
 	def GetSelected(self):
 		if self.multiple:
