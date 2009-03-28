@@ -181,9 +181,9 @@ class EditorPanel(wx.Panel):
 		self.extEditors = []
 		if EDITORS:
 			menu.AppendSeparator()
-			editMenu = wx.Menu()
-			menu.AppendMenu(-1, "Edit with...", editMenu)
-			#editMenu = menu
+			#editMenu = wx.Menu()
+			#menu.AppendMenu(-1, "Edit with...", editMenu)
+			editMenu = menu
 			def Handler(editor):
 				if callable(editor):
 					return lambda e: self.EditByFunc(editor)
