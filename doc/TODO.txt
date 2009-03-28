@@ -64,8 +64,6 @@ improve performance of parsing request (p3)
 
 adding request object in scope. (p2)
 
-refresh URL in Info after changed (p2)
-
 bug: deselect a node doesn't trigger EVT_TREE_SEL_CHANGED event (p2)
 
 

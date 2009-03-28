@@ -106,35 +106,17 @@ class DetailsPanel(wx.Panel):
 				self.nb.DeletePage(n)
 			return n
 
-	def Load(self, data):
+	def Load(self, data, update = False):
 		if data == None:
 			# possible on Linux
 			# TODO: auto-select next node on Linux when a node is deleted (of course not here)
 			self.Unload()
 			return
 
-		self.Freeze()
-
-		'Avoid re-creating the same tabs'
-		c = data.__class__
-		tabNames = ClassToTabs[c]
-
-		n = self.GiveSharedTabs(tabNames)
-
-		for i in range(n):
-			tab = self.nb.GetPage(i)
-			tabName = tabNames[i]
-			self.nb.SetPageText(i, tabName)
-			TabToInitFuncs[tabName](tab, data)
-
-		for i in range(n, len(tabNames)):
-			tabName = tabNames[i]
-			tab = TabToPanel[tabName](self.nb)
-			self.nb.AddPage(tab, tabName)
-			TabToInitFuncs[tabName](tab, data)
-		self.testButton.Show()
-		
-		self.Thaw()
+		if update:
+			self.UpdateInfo(data)
+		else:
+			self.LoadData(data)
 
 	def ReLoad(self, data):
 		'Always create new tabs'
@@ -150,6 +132,36 @@ class DetailsPanel(wx.Panel):
 	def Unload(self):
 		self.nb.DeleteAllPages()
 		self.testButton.Hide()
+
+	def LoadData(self, data):
+		self.Freeze()
+		try:
+			'Avoid re-creating the same tabs'
+			c = data.__class__
+			tabNames = ClassToTabs[c]
+
+			n = self.GiveSharedTabs(tabNames)
+
+			for i in range(n):
+				tab = self.nb.GetPage(i)
+				tabName = tabNames[i]
+				self.nb.SetPageText(i, tabName)
+				TabToInitFuncs[tabName](tab, data)
+
+			for i in range(n, len(tabNames)):
+				tabName = tabNames[i]
+				tab = TabToPanel[tabName](self.nb)
+				self.nb.AddPage(tab, tabName)
+				TabToInitFuncs[tabName](tab, data)
+			self.testButton.Show()
+		finally:
+			self.Thaw()
+
+	def UpdateInfo(self, data):
+		tabName = self.nb.GetPageText(0)
+		assert tabName == 'Info'
+		tab = self.nb.GetPage(0)
+		tab.Load(data)
 
 if __name__ == '__main__':
 	import Test

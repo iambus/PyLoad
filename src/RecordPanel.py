@@ -297,6 +297,8 @@ class RecordPanel(wx.Panel):
 		for item in items:
 			data = self.tree.GetPyData(item)
 			data.set_host(host)
+			if self.onSelChangedCallback:
+				self.onSelChangedCallback(data, True)
 
 
 	def OnChangeURL(self, event):
@@ -329,6 +331,8 @@ class RecordPanel(wx.Panel):
 
 
 		hit.set_url(url)
+		if self.onSelChangedCallback:
+			self.onSelChangedCallback(hit, True)
 
 
 	def OnFly(self, event):
