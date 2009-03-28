@@ -99,6 +99,7 @@ class EditorPanel(wx.Panel):
 		self.binding = binding
 		self.path = filepath
 		self.temppath = None
+		self.lock = False
 
 		self.editor = CodeCtrl(self, -1,
                        size=(200, 100), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
@@ -216,6 +217,7 @@ class EditorPanel(wx.Panel):
 
 	# {{{ External Editors
 	def LockEditor(self):
+		assert not self.lock, "Locked by others"
 		self.lock = True
 		for id, editor in self.extEditors:
 			if not callable(editor):
@@ -223,6 +225,7 @@ class EditorPanel(wx.Panel):
 		self.viButton.Enable(False)
 
 	def UnlockEditor(self):
+		assert self.lock, "Not locked yet!"
 		self.lock = True
 		for id, editor in self.extEditors:
 			if not callable(editor):
