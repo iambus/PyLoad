@@ -72,7 +72,7 @@ def OpenFile(parent, ignore):
 
 EDITORS = [
 		('Vim', 'gvim -b %s'),
-		('Emacs', 'Emacs %s'),
+		('Emacs', 'emacs %s'),
 		('', ''),
 		('Print to Console', WriteToConsole),
 		('Save As...', SaveToFile),
