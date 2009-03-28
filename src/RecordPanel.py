@@ -113,10 +113,12 @@ class RecordPanel(wx.Panel):
 
 	# {{{ event handlers
 	def OnSelChanged(self, event):
+		# TODO: if unselected
 		item = event.GetItem()
-		data = self.tree.GetPyData(item)
-		if self.onSelChangedCallback:
-			self.onSelChangedCallback(data)
+		if item:
+			data = self.tree.GetPyData(item)
+			if self.onSelChangedCallback:
+				self.onSelChangedCallback(data)
 
 	def OnRightDown(self, event):
 		item = self.GetItemByPosition(event.GetPosition())

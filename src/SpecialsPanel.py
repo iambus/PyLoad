@@ -149,6 +149,7 @@ class SpecialsPanel(wx.Panel):
 		DoDragDrop()
 
 	def OnSelChanged(self, event):
+		# TODO: if unselected
 		item = event.GetItem()
 		if item:
 			data = self.tree.GetPyData(item)

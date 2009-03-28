@@ -78,6 +78,11 @@ class Tree(wx.TreeCtrl):
 			return all[0] if all else None
 		else:
 			return self.GetSelection()
+	def GetAllSelected(self):
+		if self.multiple:
+			return self.GetSelections()
+		else:
+			return [self.GetSelection()]
 
 
 if __name__ == '__main__':
@@ -88,10 +93,23 @@ if __name__ == '__main__':
 			import Layout
 			Layout.SingleLayout(self, self.tree)
 			self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
-		def OnSelChanged(self, event):
+		def OnSelChangedBad(self, event):
 			item = event.GetItem()
 			data = self.tree.GetPyData(item)
 			print data
+		def OnSelChangedGood(self, event):
+			nodes = self.tree.GetAllSelected()
+			if len(nodes) != 1:
+				return
+			item = event.GetItem()
+			data = self.tree.GetPyData(nodes[0])
+			print data
+		def OnSelChangedVeryGood(self, event):
+			item = event.GetItem()
+			if item:
+				data = self.tree.GetPyData(item)
+				print data
+		OnSelChanged = OnSelChangedVeryGood
 	class Data:
 		def __init__(self, label = 'new'):
 			self.label = label
