@@ -522,7 +522,7 @@ class SpecialsPanel(wx.Panel):
 		return specials
 
 	def IsModifiable(self, item):
-		unmodifiable = (Record.Record, Record.Page, Record.Hit)
+		unmodifiable = (Record.Record, Record.Page, Record.Hit, Controller.Script)
 		data = self.tree.GetPyData(item)
 		return data.__class__ not in unmodifiable
 
