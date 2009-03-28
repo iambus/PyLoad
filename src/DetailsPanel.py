@@ -30,6 +30,7 @@ def LoadRequest(tab, hit):
 		tab.BindToFuncs(hit.get_reqstr, hit.set_reqstr)
 		tab.Load()
 		tab.editor.SetSyntax(hit.req_handler.syntax)
+		tab.search.useGlobalHistory = True
 
 def LoadResponse(tab, hit):
 	tab.Unload()
@@ -37,6 +38,7 @@ def LoadResponse(tab, hit):
 		tab.BindTo(hit, 'respstr')
 		tab.Load()
 		tab.editor.SetSyntax(hit.resp_handler.syntax)
+		tab.search.useGlobalHistory = True
 
 def LoadScript(tab, variable, name):
 	tab.Unload()
@@ -44,6 +46,7 @@ def LoadScript(tab, variable, name):
 	tab.Load()
 	import editor.syntax.python
 	tab.editor.SetSyntax(editor.syntax.python)
+	tab.search.useGlobalHistory = True
 
 TabToInitFuncs = {
 	'Info' : lambda tab, data: tab.Load(data),

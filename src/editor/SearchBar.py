@@ -1,6 +1,8 @@
 
 import wx
 
+GLOBAL_HISTORY = []
+MAX_GLOBAL_HISTORY = 10
 
 # TODO: support "highlight all"
 class SearchBar(wx.Panel):
@@ -38,16 +40,15 @@ class SearchBar(wx.Panel):
 		self.SetSizer(sizer)
 
 		# bindings
-		#self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnSearch, self.searchField)
+		self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnCallMenu, self.searchField)
 		self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancel, self.searchField)
 		self.Bind(wx.EVT_TEXT_ENTER, self.OnEnterSearch, self.searchField)
 		self.Bind(wx.EVT_TEXT, self.OnIncrSearch, self.searchField)        
 
-		self.Bind(wx.EVT_MENU, self.OnHistory)
+		self.Bind(wx.EVT_MENU, self.OnUseHistory)
  
 		self.Bind(wx.EVT_BUTTON, self.OnNext, self.downButton)
 		self.Bind(wx.EVT_BUTTON, self.OnPrev, self.upButton)
-
 
 		#
 		self.searchCallback = None
@@ -73,7 +74,7 @@ class SearchBar(wx.Panel):
 			if self.searchCallback:
 				self.searchCallback(self.GetSearchText(), True, self.matchCase(), self.IsReChecked())
 
-	def OnHistory(self, event):
+	def OnUseHistory(self, event):
 		itemID = event.GetId()
 		item = self.menu.FindItemById(itemID)
 		if item != None:
@@ -81,6 +82,9 @@ class SearchBar(wx.Panel):
 		else:
 			event.Skip()
 
+	def OnCallMenu(self, event):
+		if self.useGlobalHistory:
+			self.SetSearchHistory(GLOBAL_HISTORY)
 	
 	def OnCancel(self, event):
 		pass
@@ -102,17 +106,18 @@ class SearchBar(wx.Panel):
 
 	def Next(self):
 		keyword = self.GetSearchText()
-		self.AddSearchHistory(keyword)
+		self.UpdateSearchHistory(keyword)
 		if self.searchCallback:
 			self.searchCallback(keyword, True, self.matchCase(), self.IsReChecked())
 
 	def Prev(self):
 		keyword = self.GetSearchText()
-		self.AddSearchHistory(keyword)
+		self.UpdateSearchHistory(keyword)
 		if self.searchCallback:
 			self.searchCallback(keyword, False, self.matchCase(), self.IsReChecked())
 
 	def InitHistory(self):
+		self.useGlobalHistory = False
 		self.history = []
 		self.maxHistory = 10
 		menu = wx.Menu()
@@ -121,6 +126,12 @@ class SearchBar(wx.Panel):
 		menu.AppendSeparator()
 		self.searchField.SetMenu(menu)
 		self.menu = menu
+
+	def UpdateSearchHistory(self, keyword):
+		if self.useGlobalHistory:
+			self.AddGlobalSearchHistory(keyword)
+		else:
+			self.AddSearchHistory(keyword)
 
 	def AddSearchHistory(self, keyword):
 		if not keyword:
@@ -139,7 +150,15 @@ class SearchBar(wx.Panel):
 		if self.menu.GetMenuItemCount() > self.maxHistory:
 			self.menu.RemoveItem(list(self.menu.GetMenuItems())[-1])
 
-	def GetSearchHistory(self, keywords):
+	def AddGlobalSearchHistory(self, keyword):
+		if not keyword:
+			return
+		global GLOBAL_HISTORY
+		GLOBAL_HISTORY.insert(0, keyword)
+		if len(GLOBAL_HISTORY) > MAX_GLOBAL_HISTORY:
+			GLOBAL_HISTORY.pop()
+
+	def SetSearchHistory(self, keywords):
 		self.history = []
 		self.history.extend(keywords)
 		map(self.menu.RemoveItem, list(self.menu.GetMenuItems())[2:])
@@ -168,7 +187,8 @@ if __name__ == '__main__':
 
 	frame = wx.Frame(None, -1, "Editor", size = (800, 600))
 	sb = SearchBar(frame)
-	sb.GetSearchHistory(['a', 'b', 'c'])
+	sb.SetSearchHistory(['a', 'b', 'c'])
+	#sb.useGlobalHistory = True
 
 	frame.Center()
 	frame.Show(True)
