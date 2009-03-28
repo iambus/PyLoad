@@ -149,6 +149,9 @@ class EditorPanel(wx.Panel):
 
 	# {{{ Menu
 	def InitMenu(self):
+		menu = wx.Menu()
+		self.menu = menu
+
 		self.ID_UNDO      = wx.NewId()
 		self.ID_REDO      = wx.NewId()
 		self.ID_CUT       = wx.NewId()
@@ -157,7 +160,6 @@ class EditorPanel(wx.Panel):
 		self.ID_DELETE    = wx.NewId()
 		self.ID_SELECTALL = wx.NewId()
 
-		menu = wx.Menu()
 		menu.Append(self.ID_UNDO,       "Undo")
 		menu.Append(self.ID_REDO,       "Redo")
 		menu.AppendSeparator()
@@ -179,6 +181,9 @@ class EditorPanel(wx.Panel):
 		self.extEditors = []
 		if EDITORS:
 			menu.AppendSeparator()
+			editMenu = wx.Menu()
+			menu.AppendMenu(-1, "Edit with...", editMenu)
+			#editMenu = menu
 			def Handler(editor):
 				if callable(editor):
 					return lambda e: self.EditByFunc(editor)
@@ -187,14 +192,12 @@ class EditorPanel(wx.Panel):
 			for label, editor in EDITORS:
 				if label:
 					id = wx.NewId()
-					menu.Append(id, label)
+					editMenu.Append(id, label)
 					callback = Handler(editor)
 					self.Bind(wx.EVT_MENU, callback, id = id)
 					self.extEditors.append((id, editor))
 				else:
-					menu.AppendSeparator()
-
-		self.menu = menu
+					editMenu.AppendSeparator()
 
 	def UpdateMenu(self):
 		selection = self.editor.GetSelection()
