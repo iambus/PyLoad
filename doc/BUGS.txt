@@ -1,0 +1,5 @@
+
+
+1. When you deselect a node, or select some nodes, then single-select one of them, the Info tab doesn't update. This is a bug of wxWidgets/wxPython: http://trac.wxwidgets.org/ticket/626. A newer wxPython may fix this issue.
+
+
