@@ -336,8 +336,6 @@ if __name__ == '__main__':
 	frame = wx.Frame(None, -1, "Editor", size = (800, 600))
 	#EditorPanel(frame, 'F:/temp/_')
 	p = EditorPanel(frame)
-	import Record
-	
 
 	frame.Center()
 	frame.Show(True)
