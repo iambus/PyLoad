@@ -388,6 +388,8 @@ class SpecialsPanel(wx.Panel):
 
 		assert self.IsModifiable(parentItem)
 
+		if parentItem != self.root and self.tree.GetChildrenCount(parentItem, recursively = False) == 1:
+			self.tree.Collapse(parentItem)
 		self.tree.Delete(item)
 		if parentData:
 			parentData.remove_child(data)
