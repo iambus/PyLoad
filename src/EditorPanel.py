@@ -11,6 +11,53 @@ from Binding import *
 import Logger
 log = Logger.getLogger()
 
+##################################################
+
+# {{{ Function Editors
+def WriteToConsole(text):
+	print text
+
+# FIXME: duplicated code in Main.py
+def SaveToFile(parent, text):
+	wildcard = "Text (*.txt)|*.txt|"     \
+			   "All files (*.*)|*.*"
+	dialog = wx.FileDialog(
+			parent, message="Save file as ...", defaultDir="",
+			defaultFile="", wildcard=wildcard, style=wx.SAVE
+			)
+	dialog.SetFilterIndex(0)
+	if dialog.ShowModal() == wx.ID_OK:
+		path = dialog.GetPath()
+	dialog.Destroy()
+	if not path:
+		return
+
+	# Give a warning if file exists
+	import os.path
+	if os.path.exists(path):
+		dialog = wx.MessageDialog(parent, '%s exists. Do you want to overwrite it?' % path,
+				'Save Confirmation',
+				wx.YES_NO | wx.ICON_WARNING
+				)
+		selection = dialog.ShowModal()
+		dialog.Destroy()
+		if selection != wx.ID_YES:
+			return
+
+	fp = open(path, 'w')
+	fp.write(text)
+	fp.close()
+# }}}
+
+EDITORS = [
+		('Vim', 'gvim -b %s'),
+		('Emacs', 'Emacs %s'),
+		('', ''),
+		('Print to Console', WriteToConsole),
+		('Save As...', SaveToFile),
+]
+
+##################################################
 def GenerateTempFilePath(content = None):
 	#TODO: use a better approach...
 	import tempfile
@@ -22,6 +69,7 @@ def GenerateTempFilePath(content = None):
 	fp.close()
 	return path
 
+##################################################
 class EditorPanel(wx.Panel):
 	def __init__(self, parent, binding = None, filepath = None):
 		wx.Panel.__init__(self, parent, -1)
@@ -57,7 +105,7 @@ class EditorPanel(wx.Panel):
 		#self.Bind(wx.EVT_BUTTON, self.OnSearch, self.searchButton)
 		#self.Bind(wx.EVT_TEXT_ENTER, self.OnSearch, self.searchField)
 
-		self.Bind(wx.EVT_END_PROCESS, self.OnViEnded)
+		self.Bind(wx.EVT_END_PROCESS, self.OnEditEnded)
 
 		# layout
 		bsizer = wx.FlexGridSizer(cols=6, hgap=10, vgap=10)
@@ -77,6 +125,7 @@ class EditorPanel(wx.Panel):
 		if self.path:
 			self.Load()
 
+	# {{{ Menu
 	def InitMenu(self):
 		self.ID_UNDO      = wx.NewId()
 		self.ID_REDO      = wx.NewId()
@@ -96,7 +145,6 @@ class EditorPanel(wx.Panel):
 		menu.Append(self.ID_DELETE,     "Delete")
 		menu.AppendSeparator()
 		menu.Append(self.ID_SELECTALL, "Select All")
-		#menu.AppendSeparator()
 
 		self.Bind(wx.EVT_MENU, lambda e: self.editor.Undo(), id = self.ID_UNDO)
 		self.Bind(wx.EVT_MENU, lambda e: self.editor.Redo(), id = self.ID_REDO)
@@ -105,6 +153,24 @@ class EditorPanel(wx.Panel):
 		self.Bind(wx.EVT_MENU, lambda e: self.editor.Paste(), id = self.ID_PASTE)
 		self.Bind(wx.EVT_MENU, lambda e: self.editor.Clear(), id = self.ID_DELETE)
 		self.Bind(wx.EVT_MENU, lambda e: self.editor.SelectAll(), id = self.ID_SELECTALL)
+
+		self.extEditors = []
+		if EDITORS:
+			menu.AppendSeparator()
+			def Handler(editor):
+				if callable(editor):
+					return lambda e: self.EditByFunc(editor)
+				else:
+					return lambda e: self.EditWith(editor)
+			for label, editor in EDITORS:
+				if label:
+					id = wx.NewId()
+					menu.Append(id, label)
+					callback = Handler(editor)
+					self.Bind(wx.EVT_MENU, callback, id = id)
+					self.extEditors.append((id, editor))
+				else:
+					menu.AppendSeparator()
 
 		self.menu = menu
 
@@ -121,13 +187,31 @@ class EditorPanel(wx.Panel):
 	def OnContextMenu(self, event):
 		self.UpdateMenu()
 		self.PopupMenu(self.menu)
+	# }}}
 
-	def OnModified(self, event):
-		#FIXME: how to clear the Modify status?
-		if self.binding or self.path:
-			self.saveButton.Enable()
-	
-	def OnVi(self, event):
+	# {{{ External Editors
+	def LockEditor(self):
+		self.lock = True
+		for id, editor in self.extEditors:
+			if not callable(editor):
+				self.menu.Enable(id, False)
+		self.viButton.Enable(False)
+
+	def UnlockEditor(self):
+		self.lock = True
+		for id, editor in self.extEditors:
+			if not callable(editor):
+				self.menu.Enable(id, True)
+		self.viButton.Enable(True)
+
+	def EditByFunc(self, func):
+		text = self.editor.GetValue()
+		try:
+			func(text)
+		except TypeError:
+			func(self, text)
+
+	def EditWith(self, editor):
 		assert self.temppath == None
 		if self.path:
 			path = self.path
@@ -136,11 +220,17 @@ class EditorPanel(wx.Panel):
 			path = self.temppath
 		assert self.path != None or self.temppath != None
 		assert path != None
-		cmd = 'gvim -b '+path
+		cmd = editor % path
 		self.process = wx.Process(self)
 		pid = wx.Execute(cmd, wx.EXEC_ASYNC, self.process)
+		if pid:
+			self.LockEditor()
+		else:
+			# can't find program
+			self.temppath = None
+			self.process.Destroy()
 
-	def OnViEnded(self, event):
+	def OnEditEnded(self, event):
 		assert self.path == None or self.temppath == None
 		assert self.path != None or self.temppath != None
 		path = self.path or self.temppath
@@ -158,6 +248,17 @@ class EditorPanel(wx.Panel):
 
 		self.process.Destroy()
 
+		self.UnlockEditor()
+
+	def OnVi(self, event):
+		self.EditWith('gvim -b %s')
+	# }}}
+
+	def OnModified(self, event):
+		#FIXME: how to clear the Modify status?
+		if self.binding or self.path:
+			self.saveButton.Enable()
+	
 	@make_change
 	def OnSave(self, event):
 		self.Save()
@@ -165,6 +266,7 @@ class EditorPanel(wx.Panel):
 
 	def OnSearch(self, event):
 		raise NotImplementedError()
+
 
 	def Unload(self):
 		self.binding = None
@@ -224,6 +326,8 @@ class EditorPanel(wx.Panel):
 		self.editor.SetValue(text)
 
 
+##################################################
+
 if __name__ == '__main__':
 
 	app = wx.PySimpleApp()
@@ -239,3 +343,5 @@ if __name__ == '__main__':
 	frame.Show(True)
 	app.MainLoop()
 
+
+# vim: foldmethod=marker:

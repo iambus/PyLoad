@@ -26,7 +26,6 @@ support HTTPS proxy
 
 Minor:
 
-EditorPanel disable button, disable editing (p3)
 editor loading it slow (p3)
 add script/if/loop to pop menu (p3)
 
@@ -50,8 +49,6 @@ bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224:
 xml tree viewer
 loading big report is slow (p3)
 don't expand all tree nodes when something changed (p1)
-
-add a "edit with" context menu to editor (p3)
 
 the current dir for open project dialog and open report dialog should be different. (p3)
 
