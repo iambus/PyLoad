@@ -45,8 +45,29 @@ def SaveToFile(parent, text):
 			return
 
 	fp = open(path, 'w')
-	fp.write(text)
-	fp.close()
+	try:
+		fp.write(text)
+	finally:
+		fp.close()
+
+# FIXME: duplicated code in Main.py
+def OpenFile(parent, ignore):
+	wildcard = "text (*.txt)|*.txt|"     \
+			   "All files (*.*)|*.*"
+	dialog = wx.FileDialog(
+			parent, message="Open File", defaultDir="",
+			defaultFile="", wildcard=wildcard, style=wx.OPEN
+			)
+	dialog.SetFilterIndex(0)
+	if dialog.ShowModal() == wx.ID_OK:
+		path = dialog.GetPath()
+	dialog.Destroy()
+	if path:
+		fp = open(path, 'r')
+		try:
+			return fp.read()
+		finally:
+			fp.close()
 # }}}
 
 EDITORS = [
@@ -55,6 +76,7 @@ EDITORS = [
 		('', ''),
 		('Print to Console', WriteToConsole),
 		('Save As...', SaveToFile),
+		('Open', OpenFile),
 ]
 
 ##################################################
@@ -207,9 +229,11 @@ class EditorPanel(wx.Panel):
 	def EditByFunc(self, func):
 		text = self.editor.GetValue()
 		try:
-			func(text)
+			text = func(text)
 		except TypeError:
-			func(self, text)
+			text = func(self, text)
+		if isinstance(text, basestring):
+			self.editor.SetValue(text)
 
 	def EditWith(self, editor):
 		assert self.temppath == None
