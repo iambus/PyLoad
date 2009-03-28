@@ -46,7 +46,7 @@ bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224:
 
 
 
-xml tree viewer
+xml tree viewer: source/tree tabs, property table, text area, xpath field
 loading big report is slow (p3)
 don't expand all tree nodes when something changed (p1)
 
