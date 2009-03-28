@@ -49,7 +49,7 @@ bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224:
 
 
 xml tree viewer
-loading big report is slow (p2)
+loading big report is slow (p3)
 don't expand all tree nodes when something changed (p1)
 
 add a "edit with" context menu to editor (p3)
@@ -60,9 +60,12 @@ add date/revision information to project/report files (p3)
 
 bug: error column in report is always empty? (not sure, seems sometimes...) (p2)
 
-improve performance of parsing request (p2)
+improve performance of parsing request (p3)
 
-adding request object in scope.
+adding request object in scope. (p2)
 
-refresh URL in Info after changed
+refresh URL in Info after changed (p2)
+
+bug: deselect a node doesn't trigger EVT_TREE_SEL_CHANGED event (p2)
+
 
