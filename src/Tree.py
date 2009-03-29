@@ -26,6 +26,7 @@ class Tree(wx.TreeCtrl):
 		self.rootDatas = None
 
 		self.background = self.GetBackgroundColour()
+		self.foreground = self.GetForegroundColour()
 
 		self.iconSize = (16, 16) if sys.platform != 'linux2' else (24, 24)
 
@@ -164,6 +165,37 @@ class Tree(wx.TreeCtrl):
 		for data in rootDatas:
 			self.AddTree(self.root, data)
 		self.SetBackgroundColour(self.background)
+
+
+	# Highlight node
+
+	def HighlightTree(self, func, weakly = True):
+		def doThing(node):
+			self.SetItemTextColour(node, 'red')
+			self.SetItemBackgroundColour(node, '#ffffdd')
+		def when(node):
+			return func(self.GetPyData(node))
+		for node in self.GetChildrenNodes(self.root):
+			self.WalkTree(node, doThing, when, weakly)
+
+	def UnHighlightTree(self):
+		def doThing(node):
+			self.SetItemTextColour(node, self.foreground)
+			self.SetItemBackgroundColour(node, self.background)
+		for node in self.GetChildrenNodes(self.root):
+			self.WalkTree(node, doThing)
+
+	def WalkTree(self, node, doThing, when = None, weakly = False):
+		hasChildrenMatched = False
+		for child in self.GetChildrenNodes(node):
+			if self.WalkTree(child, doThing, when, weakly):
+				hasChildrenMatched = True
+
+		if not when or when(node) or (weakly and hasChildrenMatched):
+			doThing(node)
+			return True
+		else:
+			return False
 
 
 	# Get selected data
