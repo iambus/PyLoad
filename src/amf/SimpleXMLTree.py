@@ -13,7 +13,7 @@ class IXMLTree:
 	def create_child(self, parent, tag):
 		raise NotImplementedError()
 
-	def get_childern(self, parent):
+	def get_children(self, parent):
 		raise NotImplementedError()
 
 	def set_text(self, node, value):

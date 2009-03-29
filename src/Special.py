@@ -15,8 +15,8 @@ class Special(Player.Player):
 				node.set_host(host)
 				return
 			else:
-				for child in node.childern:
+				for child in node.children:
 					set_your_host(child, host)
-		for c in self.childern:
+		for c in self.children:
 			set_your_host(c, host)
 

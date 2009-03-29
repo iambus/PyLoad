@@ -85,11 +85,11 @@ def clone_for_special(src):
 	def replace_with_uuid(node):
 		assert node.__class__ not in uncloneable
 		if isinstance(node, Player):
-			for i in range(len(node.childern)):
-				if node.childern[i].__class__ in uncloneable:
-					node.childern[i] = node.childern[i].uuid
+			for i in range(len(node.children)):
+				if node.children[i].__class__ in uncloneable:
+					node.children[i] = node.children[i].uuid
 				else:
-					replace_with_uuid(node.childern[i])
+					replace_with_uuid(node.children[i])
 			for i in range(len(node.scripts)):
 				if node.scripts[i].__class__ in uncloneable:
 					node.scripts[i] = node.scripts[i].uuid
@@ -100,11 +100,11 @@ def clone_for_special(src):
 		import Repository
 		assert node.__class__ not in uncloneable
 		if isinstance(node, Player):
-			for i in range(len(node.childern)):
-				if type(node.childern[i]) in (str, unicode):
-					node.childern[i] = Repository.lookup(node.childern[i])
+			for i in range(len(node.children)):
+				if type(node.children[i]) in (str, unicode):
+					node.children[i] = Repository.lookup(node.children[i])
 				else:
-					replace_uuid_back(node.childern[i])
+					replace_uuid_back(node.children[i])
 			for i in range(len(node.scripts)):
 				if type(node.scripts[i]) in (str, unicode):
 					node.scripts[i] = Repository.lookup(node.scripts[i])

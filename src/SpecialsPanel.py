@@ -285,9 +285,9 @@ class SpecialsPanel(wx.Panel):
 			if parentData.__class__ in subable:
 				# insert after
 				sourceData = self.GetDataFromUUID(uuid)
-				childern = parentData.childern
-				index = childern.index(targetData)
-				childern.insert(index+1, sourceData)
+				children = parentData.children
+				index = children.index(targetData)
+				children.insert(index+1, sourceData)
 				self.InsertData(parentItem, targetItem, sourceData)
 
 	def GetDataFromUUID(self, uuid):
@@ -372,12 +372,12 @@ class SpecialsPanel(wx.Panel):
 		self.DeleteItem(sourceItem)
 
 		if parentData:
-			childern = parentData.childern
+			children = parentData.children
 		else:
-			childern = self.project.specials
+			children = self.project.specials
 
-		index = childern.index(targetData)
-		childern.insert(index+1, sourceData)
+		index = children.index(targetData)
+		children.insert(index+1, sourceData)
 
 		self.InsertData(parentItem, targetItem, sourceData)
 
@@ -421,12 +421,12 @@ class SpecialsPanel(wx.Panel):
 			return
 
 		if parentData:
-			childern = parentData.childern
+			children = parentData.children
 		else:
-			childern = self.project.specials
+			children = self.project.specials
 
-		index = childern.index(oldData)
-		childern.insert(index+1, newData)
+		index = children.index(oldData)
+		children.insert(index+1, newData)
 
 		self.InsertData(parentItem, oldItem, newData)
 	# }}}
@@ -463,7 +463,7 @@ class SpecialsPanel(wx.Panel):
 	def UpdateSpecial(self, specialNode):
 		special = self.tree.GetPyData(specialNode)
 		self.tree.DeleteChildren(specialNode)
-		for child in special.childern:
+		for child in special.children:
 			self.LoadData(specialNode, child)
 
 	def UpdateAll(self):
@@ -488,15 +488,15 @@ class SpecialsPanel(wx.Panel):
 				if kind == 'c':
 					self.tree.SetItemText(node, data.label)
 				elif kind == 'd':
-					if not data.childern:
+					if not data.children:
 						self.tree.Collapse(node)
 					self.tree.DeleteChildren(node)
-					for child in data.childern:
+					for child in data.children:
 						self.LoadData(node, child)
 					return True
 				elif kind == 'a':
 					self.tree.DeleteChildren(node)
-					for child in data.childern:
+					for child in data.children:
 						self.LoadData(node, child)
 					return True
 				elif kind == '_':

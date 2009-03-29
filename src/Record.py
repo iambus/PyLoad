@@ -233,7 +233,7 @@ class Page(Player):
 		self.path = path
 		self.label = path
 		self.hits = []
-		self.childern = self.hits
+		self.children = self.hits
 
 	def add_hit(self, hit):
 		# Return True if this hit is in page
@@ -267,7 +267,7 @@ class Record(Player, PropertyMixin):
 		Player.__init__(self)
 		PropertyMixin.__init__(self)
 		self.pages = []
-		self.childern = self.pages
+		self.children = self.pages
 	
 	def add_hit(self, hit):
 		# Return True if page alread exists

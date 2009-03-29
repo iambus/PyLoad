@@ -13,13 +13,13 @@ class Iteration(Player):
 		Player.__init__(self)
 		self.player = player
 	def play(self, scope = None):
-		assert self.scripts == [] and self.childern == []
-		self.childern = [self.player]
+		assert self.scripts == [] and self.children == []
+		self.children = [self.player]
 		try:
 			Player.play(self, scope)
 		except Errors.TerminateIteration, e:
 			log.exception('Iteration terminated because of %s' % e)
-		self.childern = []
+		self.children = []
 
 class User(Player):
 	def __init__(self, player = None, iteration_count = 1, iteration_factory = None):
@@ -32,7 +32,7 @@ class User(Player):
 	def play(self, scope = None):
 		scope = Scope(scope)
 		scope['_USER_INDEX_'] = self.user_index
-		assert self.scripts == [] and self.childern == []
+		assert self.scripts == [] and self.children == []
 		global_reporter = scope.lookup('global_reporter')
 		if global_reporter:
 			reporter = global_reporter.get_reporter()
@@ -53,10 +53,10 @@ class User(Player):
 				try:
 					for i in range(self.iteration_count):
 						scope['_ITERATION_INDEX_'] = i
-						self.childern.append(self.player)
+						self.children.append(self.player)
 					Player.play(self, scope)
 				finally:
-					self.childern = []
+					self.children = []
 		except Errors.TerminateUser, e:
 			log.exception('User terminated because of %s' % e)
 		if reporter:

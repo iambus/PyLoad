@@ -25,7 +25,7 @@ class Player(Playable):
 		Playable.__init__(self)
 
 		self.scripts = []
-		self.childern = []
+		self.children = []
 
 		self.beforescript = Script('')
 		self.afterscript = Script('')
@@ -36,7 +36,7 @@ class Player(Playable):
 	
 	def add_child(self, child):
 		assert isinstance(child, Playable)
-		self.childern.append(child)
+		self.children.append(child)
 
 	def remove_script(self, script):
 		assert isinstance(script, Script) or isinstance(script, str) or isinstance(script, unicode)
@@ -59,13 +59,13 @@ class Player(Playable):
 			uuid = child
 
 		if index != -1:
-			c = self.childern[index]
+			c = self.children[index]
 			assert c.uuid == uuid
-			self.childern.pop(-1)
+			self.children.pop(-1)
 		else:
-			for c in self.childern:
+			for c in self.children:
 				if c.uuid == uuid:
-					self.childern.remove(c)
+					self.children.remove(c)
 					assert child == uuid or child == c, 'Two different objs own the same uuid?'
 					break
 
@@ -102,7 +102,7 @@ class Player(Playable):
 	def playmain(self, basescope):
 		for script in self.scripts:
 			script.execute(basescope)
-		for child in self.childern:
+		for child in self.children:
 			child.play(Scope(basescope))
 
 	def after(self, basescope = None):

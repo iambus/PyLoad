@@ -344,14 +344,14 @@ class FromXML:
 		self.packet = AMFPacket()
 		packet = self.packet
 
-		version_node, headers_node, messages_node = self.get_childern(root_node)
+		version_node, headers_node, messages_node = self.get_children(root_node)
 
 		packet.version = int(self.get_text(version_node))
 		assert packet.version == 3
 
-		for header_node in self.get_childern(headers_node):
+		for header_node in self.get_children(headers_node):
 			header = HeaderType()
-			name_node, must_understand_node, value_node = self.get_childern(header_node)
+			name_node, must_understand_node, value_node = self.get_children(header_node)
 			header.header_name = self.get_text(name_node)
 			header.must_understand = bool(self.get_text(must_understand_node))
 			header.value = self.get_value(value_node)
@@ -360,9 +360,9 @@ class FromXML:
 			self.complex_object_table = {}
 			self.trait_table = {}
 			
-		for message_node in self.get_childern(messages_node):
+		for message_node in self.get_children(messages_node):
 			message = MessageType()
-			target_uri_node, response_uri_node, value_node = self.get_childern(message_node)
+			target_uri_node, response_uri_node, value_node = self.get_children(message_node)
 			message.target_uri = self.get_text(target_uri_node)
 			message.response_uri = self.get_text(response_uri_node)
 			message.value = self.get_value(value_node)
@@ -371,8 +371,8 @@ class FromXML:
 			self.complex_object_table = {}
 			self.trait_table = {}
 
-	def get_childern(self, node):
-		return self.root.get_childern(node)
+	def get_children(self, node):
+		return self.root.get_children(node)
 
 	def get_text(self, node):
 		return self.root.get_text(node)
@@ -419,7 +419,7 @@ class FromXML:
 		return TRUE()
 
 	def get_strict_array(self, node):
-		items = self.get_childern(node)
+		items = self.get_children(node)
 		array = map(lambda n: self.get_value(n), items)
 		return StrictArray(array)
 
@@ -429,11 +429,11 @@ class FromXML:
 		if obj != None:
 			return ObjectRef(obj, refindex)
 		else:
-			trait_node, members_node = self.get_childern(node)
+			trait_node, members_node = self.get_children(node)
 			trait = self.get_trait(trait_node)
 			obj = StaticObject(trait)
 			self.complex_object_table[refindex] = obj
-			for member_node in self.get_childern(members_node):
+			for member_node in self.get_children(members_node):
 				obj.members.append(self.get_value(member_node))
 			assert len(trait.get_member_names()) == len(obj.members)
 			return ObjectRef(obj, refindex)
@@ -444,14 +444,14 @@ class FromXML:
 		if obj != None:
 			return ObjectRef(obj, refindex)
 		else:
-			trait_node, members_node, dynamic_members_node = self.get_childern(node)
+			trait_node, members_node, dynamic_members_node = self.get_children(node)
 			trait = self.get_trait(trait_node)
 			obj = DynamicObject(trait)
 			self.complex_object_table[refindex] = obj
-			for member_node in self.get_childern(members_node):
+			for member_node in self.get_children(members_node):
 				obj.members.append(self.get_value(member_node))
 			assert len(trait.get_member_names()) == len(obj.members)
-			for dynamic_member_node in self.get_childern(dynamic_members_node):
+			for dynamic_member_node in self.get_children(dynamic_members_node):
 				name = self.get_attribute(dynamic_member_node, 'name')
 				value = self.get_value(dynamic_member_node)
 				obj.dynamic_members.append((name, value))
@@ -463,7 +463,7 @@ class FromXML:
 		if obj != None:
 			return ObjectRef(obj, refindex)
 		else:
-			trait_node, value_node = self.get_childern(node)
+			trait_node, value_node = self.get_children(node)
 			trait = self.get_trait(trait_node)
 
 			ext_type = find_alias(trait.get_class_name())
@@ -506,7 +506,7 @@ class FromXML:
 		refindex = int(self.get_attribute(node, 'id'))
 		trait = StaticTrait(classname)
 		self.trait_table[refindex] = trait
-		for member_name_node in self.get_childern(node):
+		for member_name_node in self.get_children(node):
 			trait.member_names.append(self.get_attribute(member_name_node, 'name'))
 		return TraitRef(trait, refindex)
 
@@ -516,7 +516,7 @@ class FromXML:
 		refindex = int(self.get_attribute(node, 'id'))
 		trait = DynamicTrait(classname)
 		self.trait_table[refindex] = trait
-		for member_name_node in self.get_childern(node):
+		for member_name_node in self.get_children(node):
 			trait.member_names.append(self.get_attribute(member_name_node, 'name'))
 		return TraitRef(trait, refindex)
 
@@ -533,12 +533,12 @@ class FromXML:
 			array = self.complex_object_table[refindex]
 			return ArrayRef(array, refindex)
 		else:
-			list_node, assoc_node = self.get_childern(node)
+			list_node, assoc_node = self.get_children(node)
 			array = Array()
 			self.complex_object_table[refindex] = array
-			for item in self.get_childern(list_node):
+			for item in self.get_children(list_node):
 				array.list.append(self.get_value(item))
-			for item in self.get_childern(assoc_node):
+			for item in self.get_children(assoc_node):
 				name = self.get_attribute(item, 'key')
 				value = self.get_value(item)
 				array.assoc.append((name, value))

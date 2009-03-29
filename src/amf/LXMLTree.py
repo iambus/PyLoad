@@ -17,7 +17,7 @@ class LXMLTree(IXMLTree):
 	def create_child(self, parent, tag):
 		return etree.SubElement(parent, tag)
 
-	def get_childern(self, node):
+	def get_children(self, node):
 		return list(node)
 
 	def set_text(self, node, value):

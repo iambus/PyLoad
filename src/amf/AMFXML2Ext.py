@@ -61,7 +61,7 @@ class BlazeDSAbstractMessageXMLer:
 			to_xml_er.create_child(parent, tag)
 
 	def from_xml(self, from_xml_er, obj, value_node):
-		nodes = from_xml_er.get_childern(value_node)
+		nodes = from_xml_er.get_children(value_node)
 		node_iter = iter(nodes)
 
 		obj.flag1              = self.read_node(from_xml_er, node_iter.next())

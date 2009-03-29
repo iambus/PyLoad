@@ -21,7 +21,7 @@ class DomTree(IXMLTree):
 		parent.appendChild(node)
 		return node
 
-	def get_childern(self, node):
+	def get_children(self, node):
 		return filter(lambda n: isinstance(n, minidom.Element), node.childNodes)
 
 	def set_text(self, node, value):

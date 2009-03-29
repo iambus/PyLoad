@@ -75,6 +75,13 @@ class Project:
 		input = open(path, 'rb')
 		try:
 			p = pickle.load(input)
+			# For compatibility
+			# TODO: remove this migration trick after 2009-10!
+			for obj in p.repository_internal.mappings.values():
+				if hasattr(obj, 'childern') and not hasattr(obj, 'children'):
+					setattr(obj, 'children', getattr(obj, 'childern'))
+					delattr(obj, 'childern')
+			#
 			self.records = p.records
 			self.specials = p.specials
 			self.global_factory = p.global_factory

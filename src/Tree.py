@@ -45,8 +45,8 @@ class Tree(wx.TreeCtrl):
 		return data.label
 	
 	def GetChildren(self, data):
-		if hasattr(data, 'childern'):
-			return data.childern
+		if hasattr(data, 'children'):
+			return data.children
 		else:
 			return []
 
@@ -86,8 +86,8 @@ class Tree(wx.TreeCtrl):
 
 	def InsertTree(self, parent, prev, data):
 		node = self.InsertNode(parent, prev, data)
-		if hasattr(data, 'childern'):
-			for c in data.childern:
+		if hasattr(data, 'children'):
+			for c in data.children:
 				self.AddTree(node, c)
 			self.Expand(node)
 		return node

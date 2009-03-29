@@ -218,7 +218,7 @@ class RecordPanel(wx.Panel):
 
 		page = Record.Page('<None>')
 		page.label = 'New Page'
-		#XXX: pages, or childern?
+		#XXX: pages, or children?
 		record.pages.append(page)
 
 		self.tree.AddNode(recordItem, page)
@@ -246,12 +246,12 @@ class RecordPanel(wx.Panel):
 		parentItem = self.tree.GetItemParent(oldItem)
 
 		if parentData:
-			childern = parentData.childern
+			children = parentData.children
 		else:
-			childern = self.project.records
+			children = self.project.records
 
-		index = childern.index(oldData)
-		childern.insert(index+1, newData)
+		index = children.index(oldData)
+		children.insert(index+1, newData)
 
 		self.tree.InsertTree(parentItem, oldItem, newData)
 
@@ -483,12 +483,12 @@ class RecordPanel(wx.Panel):
 		self.DeleteItem(sourceItem)
 
 		if parentData:
-			childern = parentData.childern
+			children = parentData.children
 		else:
-			childern = self.project.records
+			children = self.project.records
 
-		index = childern.index(targetData)
-		childern.insert(index+1, sourceData)
+		index = children.index(targetData)
+		children.insert(index+1, sourceData)
 
 		self.tree.InsertTree(parentItem, targetItem, sourceData)
 		if parentData:
