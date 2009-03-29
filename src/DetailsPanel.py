@@ -82,7 +82,7 @@ class DetailsPanel(wx.Panel):
 		# Layout
 		self.SetAutoLayout(True)
 		self.nb.SetConstraints(
-				wx.lib.layoutf.Layoutf('t=t10#1;l=l10#1;b%b90#1;r=r10#1',(self,)))
+				wx.lib.layoutf.Layoutf('t=t10#1;l=l10#1;b_b40#1;r=r10#1',(self,)))
 		self.testButton.SetConstraints(
 				wx.lib.layoutf.Layoutf('t_10#2;l=l10#1;h*;w*',(self,self.nb)))
 		self.testButton.Hide()

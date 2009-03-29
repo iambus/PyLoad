@@ -17,57 +17,27 @@ log = Logger.getLogger()
 def WriteToConsole(text):
 	print text
 
-# FIXME: duplicated code in Main.py
 def SaveToFile(parent, text):
-	wildcard = "Text (*.txt)|*.txt|"     \
-			   "All files (*.*)|*.*"
-	dialog = wx.FileDialog(
-			parent, message="Save file as ...", defaultDir="",
-			defaultFile="", wildcard=wildcard, style=wx.SAVE
-			)
-	dialog.SetFilterIndex(0)
-	if dialog.ShowModal() == wx.ID_OK:
-		path = dialog.GetPath()
-	dialog.Destroy()
+	import Dialog
+	path = Dialog.SaveFile(parent, 'Text', 'txt')
 	if not path:
 		return
-
-	# Give a warning if file exists
-	import os.path
-	if os.path.exists(path):
-		dialog = wx.MessageDialog(parent, '%s exists. Do you want to overwrite it?' % path,
-				'Save Confirmation',
-				wx.YES_NO | wx.ICON_WARNING
-				)
-		selection = dialog.ShowModal()
-		dialog.Destroy()
-		if selection != wx.ID_YES:
-			return
-
 	fp = open(path, 'w')
 	try:
 		fp.write(text)
 	finally:
 		fp.close()
 
-# FIXME: duplicated code in Main.py
 def OpenFile(parent, ignore):
-	wildcard = "text (*.txt)|*.txt|"     \
-			   "All files (*.*)|*.*"
-	dialog = wx.FileDialog(
-			parent, message="Open File", defaultDir="",
-			defaultFile="", wildcard=wildcard, style=wx.OPEN
-			)
-	dialog.SetFilterIndex(0)
-	if dialog.ShowModal() == wx.ID_OK:
-		path = dialog.GetPath()
-	dialog.Destroy()
-	if path:
-		fp = open(path, 'r')
-		try:
-			return fp.read()
-		finally:
-			fp.close()
+	import Dialog
+	path = Dialog.OpenFile(parent, 'Text', 'txt')
+	if not path:
+		return
+	fp = open(path, 'r')
+	try:
+		return fp.read()
+	finally:
+		fp.close()
 
 from XMLViewer import FindAndShowXML
 # }}}

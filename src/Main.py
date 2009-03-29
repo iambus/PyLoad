@@ -8,6 +8,8 @@ from EditTab import EditTab
 from PlayTab import PlayTab
 from ReportTab import ReportTab
 
+import Dialog
+
 import Record
 from Project import Project
 from Report import Report
@@ -345,32 +347,12 @@ class MainFrame(wx.Frame):
 		raise NotImplementedError('New')
 
 	def OnOpen(self, event):
-		path = None
-		wildcard = "pickle (*.pkl)|*.pkl|"     \
-				   "All files (*.*)|*.*"
-		dialog = wx.FileDialog(
-				self, message="Open Project", defaultDir="",
-				defaultFile="", wildcard=wildcard, style=wx.OPEN
-				)
-		dialog.SetFilterIndex(0)
-		if dialog.ShowModal() == wx.ID_OK:
-			path = dialog.GetPath()
-		dialog.Destroy()
+		path = Dialog.OpenFile(self, 'pickle', 'pkl', "Open Project")
 		if path:
 			self.LoadProjectFrom(path)
 
 	def OnOpenReport(self, event):
-		path = None
-		wildcard = "sqlite3 (*.db)|*.db|"     \
-				   "All files (*.*)|*.*"
-		dialog = wx.FileDialog(
-				self, message="Open Report", defaultDir="",
-				defaultFile="", wildcard=wildcard, style=wx.OPEN
-				)
-		dialog.SetFilterIndex(0)
-		if dialog.ShowModal() == wx.ID_OK:
-			path = dialog.GetPath()
-		dialog.Destroy()
+		path = Dialog.OpenFile(self, 'sqlite3', 'db', "Open Report")
 		if path:
 			self.nb.reportTab.LoadReport(path)
 			self.nb.SetSelection(3)
@@ -435,40 +417,12 @@ class MainFrame(wx.Frame):
 
 	def SaveProjectTo(self, path):
 		if not path:
-			wildcard = "pickle (*.pkl)|*.pkl|"     \
-					   "All files (*.*)|*.*"
-			dialog = wx.FileDialog(
-					self, message="Save file as ...", defaultDir="",
-					defaultFile="", wildcard=wildcard, style=wx.SAVE
-					)
-			dialog.SetFilterIndex(0)
-			if dialog.ShowModal() == wx.ID_OK:
-				path = dialog.GetPath()
-			dialog.Destroy()
+			path = Dialog.SaveFile(self, 'pickle', 'pkl', 'Save project as')
 			if not path:
 				return
 
-			# Give a warning if file exists
-			import os.path
-			if os.path.exists(path):
-				dialog = wx.MessageDialog(self, '%s exists. Do you want to overwrite it?' % path,
-						'Save Confirmation',
-						wx.YES_NO | wx.ICON_WARNING
-						)
-				selection = dialog.ShowModal()
-				dialog.Destroy()
-				if selection != wx.ID_YES:
-					return
-
 		else:
-			# Give a warning if overwriting project
-			dialog = wx.MessageDialog(self, 'Do you want to overwrite %s?' % path,
-					'Save Confirmation',
-					wx.YES_NO | wx.ICON_WARNING
-					)
-			selection = dialog.ShowModal()
-			dialog.Destroy()
-			if selection != wx.ID_YES:
+			if not Dialog.OverwriteConfirm(self, path):
 				return
 
 		self.path = path
