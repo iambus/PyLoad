@@ -5,6 +5,7 @@ import Record
 from Tree import Tree
 from FlyFrame import fly
 from Changes import make_change, remove_change
+import Search
 
 
 # {{{ DropTarget
@@ -40,9 +41,28 @@ class RecordPanel(wx.Panel):
 
 		self.InitializeRoot()
 		
-		# layout
-		import Layout
-		Layout.SingleLayout(self, self.tree)
+#		# layout
+#		import Layout
+#		Layout.SingleLayout(self, self.tree)
+
+
+		self.search = wx.SearchCtrl(self, -1, style=wx.TE_PROCESS_ENTER)
+		self.search.ShowSearchButton(True)
+		self.search.ShowCancelButton(True)
+
+		self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnSearch, self.search)
+		self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancel, self.search)
+		self.Bind(wx.EVT_TEXT_ENTER, self.OnSearch, self.search)
+		self.Bind(wx.EVT_TEXT, self.OnIncrSearch, self.search)        
+
+
+		box = wx.BoxSizer(wx.VERTICAL)
+		box.Add(self.tree, 1, wx.EXPAND)
+		box.Add(wx.StaticText(self, label = "Search in tree"), 0, wx.TOP|wx.LEFT, 5)
+		box.Add(self.search, 0, wx.EXPAND|wx.ALL, 5)
+		self.SetSizer(box)
+
+
 
 		self.isMirror = isMirror
 		self.mirrors = set()
@@ -339,6 +359,22 @@ class RecordPanel(wx.Panel):
 	def OnFly(self, event):
 		item = self.tree.GetSelected()
 		fly(self, node = item, data = self.tree.GetPyData(item))
+
+
+	def OnSearch(self, event):
+		keyword = self.search.GetValue()
+		if keyword:
+			func = lambda data: Search.match(keyword, data)
+			self.tree.HighlightTree(func)
+		else:
+			self.tree.UnHighlightTree()
+
+	def OnIncrSearch(self, event):
+		self.OnSearch(event)
+
+	def OnCancel(self, event):
+		self.tree.UnHighlightTree()
+
 	# }}}
 
 	########################################

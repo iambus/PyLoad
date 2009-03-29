@@ -7,6 +7,7 @@ import Record
 from Tree import Tree
 from FlyFrame import fly
 from Changes import make_change, remove_change
+import Search
 
 import Logger
 log = Logger.getLogger()
@@ -63,9 +64,6 @@ class SpecialsPanel(wx.Panel):
 		self.SetDropTarget(MyDropTarget(self))
 		self.tree.Bind(wx.EVT_TREE_BEGIN_DRAG, self.OnBeginDrag)
 	
-		# layout
-		import Layout
-		Layout.SingleLayout(self, self.tree)
 
 		# bindings
 		self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginEdit, self.tree)
@@ -79,6 +77,30 @@ class SpecialsPanel(wx.Panel):
 		self.onSelChangedCallback = None
 
 		self.onNewSpecialCallback = None
+
+
+#		# layout
+#		import Layout
+#		Layout.SingleLayout(self, self.tree)
+
+
+		self.search = wx.SearchCtrl(self, -1, style=wx.TE_PROCESS_ENTER)
+		self.search.ShowSearchButton(True)
+		self.search.ShowCancelButton(True)
+
+		self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnSearch, self.search)
+		self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancel, self.search)
+		self.Bind(wx.EVT_TEXT_ENTER, self.OnSearch, self.search)
+		self.Bind(wx.EVT_TEXT, self.OnIncrSearch, self.search)        
+
+
+		box = wx.BoxSizer(wx.VERTICAL)
+		box.Add(self.tree, 1, wx.EXPAND)
+		box.Add(wx.StaticText(self, label = "Search in tree"), 0, wx.TOP|wx.LEFT, 5)
+		box.Add(self.search, 0, wx.EXPAND|wx.ALL, 5)
+		self.SetSizer(box)
+
+
 
 	def InitTree(self):
 		self.tree = Tree(self, multiple = True)
@@ -230,6 +252,22 @@ class SpecialsPanel(wx.Panel):
 		item = self.tree.GetSelected()
 		assert item
 		fly(self, node = item, data = self.tree.GetPyData(item))
+
+
+	def OnSearch(self, event):
+		keyword = self.search.GetValue()
+		if keyword:
+			func = lambda data: Search.match(keyword, data)
+			self.tree.HighlightTree(func)
+		else:
+			self.tree.UnHighlightTree()
+
+	def OnIncrSearch(self, event):
+		self.OnSearch(event)
+
+	def OnCancel(self, event):
+		self.tree.UnHighlightTree()
+
 	# }}}
 
 	# {{{ Add new nodes
@@ -449,6 +487,7 @@ class SpecialsPanel(wx.Panel):
 		self.tree.InsertTree(item, prev, data)
 
 	# }}}
+
 
 	##################################################
 

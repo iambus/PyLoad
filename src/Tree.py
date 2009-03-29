@@ -170,6 +170,7 @@ class Tree(wx.TreeCtrl):
 	# Highlight node
 
 	def HighlightTree(self, func, weakly = True):
+		self.UnHighlightTree()
 		def doThing(node):
 			self.SetItemTextColour(node, 'red')
 			self.SetItemBackgroundColour(node, '#ffffdd')

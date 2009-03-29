@@ -47,9 +47,6 @@ bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224:
 
 
 
-search text (highlight nodes or filter nodes) in tree (p1)
-
-
 loading big report is slow (p3)
 don't expand all tree nodes when something changed (p1)
 
