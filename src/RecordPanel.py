@@ -456,6 +456,7 @@ class RecordPanel(wx.Panel):
 		if record.add_hit(hit):
 			# Page already exits
 			pageItem = self.tree.GetLastChild(recordItem)
+			page = record.last_page()
 		else:
 			# New page
 			page = record.last_page()
