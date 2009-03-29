@@ -4,7 +4,10 @@ import wx.lib.layoutf
 from wx.lib.mixins.listctrl import CheckListCtrlMixin
 from Tree import Tree
 
-from xml.etree import ElementTree as etree
+try:
+	from lxml import etree
+except ImportError:
+	from xml.etree import ElementTree as etree
 import sys
 
 class XMLTree(Tree):
@@ -20,8 +23,11 @@ class XMLTree(Tree):
 		self.SetIcons(icons)
 
 	def SetXML(self, xml):
-		self.xmltree = etree.fromstring(xml)
-		self.AddTree(self.root, self.xmltree)
+		try:
+			self.xmltree = etree.fromstring(xml)
+			self.AddTree(self.root, self.xmltree)
+		except Exception, e:
+			print e
 
 	def GetLabel(self, element):
 		return element.tag
@@ -134,10 +140,10 @@ class XMLPanel(wx.Panel):
 		self.text = wx.TextCtrl(self.splitter2, style=wx.TE_MULTILINE)
 		self.text.SetEditable(False)
 
-		self.splitter.SetMinimumPaneSize(20)
+		self.splitter.SetMinimumPaneSize(120)
 		self.splitter.SplitVertically(leftPanel, self.splitter2, 180)
 
-		self.splitter2.SetMinimumPaneSize(20)
+		self.splitter2.SetMinimumPaneSize(160)
 		self.splitter2.SplitHorizontally(self.attr, self.text, 180)
 
 
@@ -203,8 +209,13 @@ class XMLPanel(wx.Panel):
 			if self.textMenuItem.IsChecked():
 				nodeFilter = lambda element: keyword in element.tag or keyword in element.text
 			else:
-				elements = self.tree.xmltree.findall(keyword)
-				nodeFilter = lambda element: element in elements
+				try:
+					elements = self.tree.xmltree.findall(keyword)
+					nodeFilter = lambda element: element in elements
+				except SyntaxError, e:
+					nodeFilter = lambda elements: False
+					print e
+					
 			self.tree.FilterTree(nodeFilter)
 		else:
 			self.tree.RestoreTree()
@@ -233,6 +244,10 @@ class XMLPanel(wx.Panel):
 		wx.TheClipboard.Open()
 		wx.TheClipboard.SetData(data)
 		wx.TheClipboard.Close()
+
+	def ResetSize(self):
+		self.splitter.SetSashPosition(100)
+		self.splitter2.SetSashPosition(100)
 
 
 

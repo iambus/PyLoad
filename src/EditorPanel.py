@@ -68,6 +68,8 @@ def OpenFile(parent, ignore):
 			return fp.read()
 		finally:
 			fp.close()
+
+from XMLViewer import FindAndShowXML
 # }}}
 
 EDITORS = [
@@ -77,6 +79,8 @@ EDITORS = [
 		('Print to Console', WriteToConsole),
 		('Save As...', SaveToFile),
 		('Open', OpenFile),
+		('',''),
+		('View XML', FindAndShowXML),
 ]
 
 ##################################################

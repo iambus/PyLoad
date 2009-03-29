@@ -20,19 +20,25 @@ class XMLViewer(wx.Panel):
 		self.nb.AddPage(self.viewPanel, "View")
 		self.nb.AddPage(self.sourcePanel, "Source")
 
+
 		import Layout
 		Layout.SingleLayout(self, self.nb)
 
 
+		self.viewPanel.ResetSize()
+
 
 class XMLFrame(wx.Frame):
 	def __init__(self, parent, xmlstr = ''):
-		wx.Frame.__init__(self, parent, -1, "XLM Viewer")
+		wx.Frame.__init__(self, parent, -1, "XLM Viewer", size = (540, 420))
 		
 		panel = XMLViewer(self, xmlstr)
 
+
 		# XXX: do we need this?
 		self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
+
+		panel.viewPanel.ResetSize()
 
 	def OnCloseWindow(self, event):
 		self.Destroy()
@@ -44,10 +50,22 @@ def ShowXML(parent, xmlstr = ''):
 	win.Show(True)
 
 
+def FindAndShowXML(parent, xmlstr):
+	index = xmlstr.find('<')
+	if index >= 0:
+		xmlstr = xmlstr[index:]
+	else:
+		index = ''
+	ShowXML(parent, xmlstr)
+
 if __name__ == '__main__':
 	xml = '''
 <list>
 	<item class='good'>Dream</item>
+	<item class='bad'>city</item>
+	<others class = 'any'>
+		<item>nothing</item>
+	</others>
 </list>
 '''
 	app = wx.PySimpleApp()
