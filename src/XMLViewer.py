@@ -96,6 +96,7 @@ def test():
 	<item class='bad'>city</item>
 	<others class = 'any'>
 		<item>nothing</item>
+		<item/>
 	</others>
 </list>
 '''

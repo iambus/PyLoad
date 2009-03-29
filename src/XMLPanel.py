@@ -211,7 +211,7 @@ class XMLPanel(wx.Panel):
 			item = self.tree.GetSelected()
 			data = self.tree.GetPyData(item)
 			self.attr.SetElement(data)
-			self.text.SetValue(data.text)
+			self.text.SetValue(data.text if data.text else '')
 			self.UpdateXPath(item)
 
 	def SearchByText(self, keyword):
@@ -283,6 +283,7 @@ if __name__ == '__main__':
 	<item class='bad'>city</item>
 	<others class = 'any'>
 		<item>nothing</item>
+		<item/>
 	</others>
 </list>
 '''
