@@ -286,7 +286,7 @@ class SpecialsPanel(wx.Panel):
 				# insert after
 				sourceData = self.GetDataFromUUID(uuid)
 				children = parentData.children
-				index = children.index(targetData)
+				index = self.tree.IndexOf(targetItem, parentItem)
 				children.insert(index+1, sourceData)
 				self.InsertData(parentItem, targetItem, sourceData)
 
@@ -376,7 +376,7 @@ class SpecialsPanel(wx.Panel):
 		else:
 			children = self.project.specials
 
-		index = children.index(targetData)
+		index = self.tree.IndexOf(targetItem, parentItem)
 		children.insert(index+1, sourceData)
 
 		self.InsertData(parentItem, targetItem, sourceData)
@@ -425,7 +425,7 @@ class SpecialsPanel(wx.Panel):
 		else:
 			children = self.project.specials
 
-		index = children.index(oldData)
+		index = self.tree.IndexOf(oldItem, parentItem)
 		children.insert(index+1, newData)
 
 		self.InsertData(parentItem, oldItem, newData)
