@@ -51,18 +51,23 @@ class Player(Playable):
 				assert uuid == script or s == script, 'Two different scripts own the same uuid?'
 				break
 
-	def remove_child(self, child):
+	def remove_child(self, child, index = -1):
 		assert isinstance(child, Playable) or isinstance(script, str) or isinstance(script, unicode)
 		if isinstance(child, Playable):
 			uuid = child.uuid
 		else:
 			uuid = child
 
-		for c in self.childern:
-			if c.uuid == uuid:
-				self.childern.remove(c)
-				assert uuid == child or c == child, 'Two different objs own the same uuid?'
-				break
+		if index != -1:
+			c = self.childern[index]
+			assert c.uuid == uuid
+			self.childern.pop(-1)
+		else:
+			for c in self.childern:
+				if c.uuid == uuid:
+					self.childern.remove(c)
+					assert child == uuid or child == c, 'Two different objs own the same uuid?'
+					break
 
 	
 	def execute_script(self, script, base = None):

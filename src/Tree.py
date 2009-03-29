@@ -218,6 +218,21 @@ class Tree(wx.TreeCtrl):
 				return True
 			child = self.GetItemParent(child)
 
+	def IndexOf(self, child, parent = None):
+		if parent is None:
+			parent = self.GetItemParent(child)
+
+		index = 0
+
+		(c, cookie) = self.GetFirstChild(parent)
+		while c.IsOk():
+			if c == child:
+				return index
+			index += 1
+			(c, cookie) = self.GetNextChild(parent, cookie)
+		return -1
+
+
 # {{{ main
 if __name__ == '__main__':
 	class P(wx.Panel):

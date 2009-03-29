@@ -69,5 +69,4 @@ bug fix: syntax highlight is wrong if JavaScript is embeded in HTML
 
 bug fix: "childern" should be "children"! (p1)
 
-buf fix: if a speical has [hit1, script, hit1], after deleting the second hit, special children becoms [script, hit1].
 

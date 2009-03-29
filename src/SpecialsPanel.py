@@ -395,9 +395,10 @@ class SpecialsPanel(wx.Panel):
 
 		if parentItem != self.root and self.tree.GetChildrenCount(parentItem, recursively = False) == 1:
 			self.tree.Collapse(parentItem)
+		index = self.tree.IndexOf(item, parentItem)
 		self.tree.Delete(item)
 		if parentData:
-			parentData.remove_child(data)
+			parentData.remove_child(data, index)
 		else:
 			# parent is root
 			assert parentItem == self.root
