@@ -119,6 +119,7 @@ class XMLPanel(wx.Panel):
 		wx.Panel.__init__(self, parent, -1)
 		
 		self.xml = xmlstr
+		self.lastXPath = ''
 
 		self.splitter = wx.SplitterWindow(self, style=wx.BORDER_NONE)
 		self.splitter2 = wx.SplitterWindow(self.splitter, style=wx.BORDER_NONE)
@@ -147,10 +148,13 @@ class XMLPanel(wx.Panel):
 		self.splitter2.SplitHorizontally(self.attr, self.text, 180)
 
 
-		xpathLabel = wx.StaticText(self, -1, "XPath")
-		self.xpath = wx.TextCtrl(self)
-		self.xpath.SetEditable(False)
-		self.copy = wx.Button(self, -1, 'Copy To Clipboard')
+		bottomPanel = wx.Panel(self, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
+
+		xpathLabel = wx.StaticText(bottomPanel, -1, "XPath")
+		self.xpath = wx.TextCtrl(bottomPanel)
+#		self.xpath.SetEditable(False)
+		self.filter = wx.Button(bottomPanel, -1, 'Filter')
+		self.copy = wx.Button(bottomPanel, -1, 'Copy To Clipboard')
 
 
 
@@ -160,16 +164,20 @@ class XMLPanel(wx.Panel):
 		leftBox.Add(self.search, 0, wx.EXPAND|wx.ALL, 5)
 		leftPanel.SetSizer(leftBox)
 
-		self.SetAutoLayout(True)
-		self.splitter.SetConstraints(
-			wx.lib.layoutf.Layoutf('t=t10#1;l=l10#1;b%b90#1;r=r10#1',(self,)))
-		xpathLabel.SetConstraints(
-			wx.lib.layoutf.Layoutf('t_10#2;l=l10#1;h*;w*',(self,self.splitter)))
-		self.xpath.SetConstraints(
-			wx.lib.layoutf.Layoutf('t_10#2;l>r10#3;h*;r=r150#1',(self,self.splitter, xpathLabel)))
-		self.copy.SetConstraints(
-			wx.lib.layoutf.Layoutf('t_10#2;l>r10#3;h*;r=r10#1',(self,self.splitter, self.xpath)))
 
+		bottomSizer = wx.FlexGridSizer(cols=4, hgap=4, vgap=10)
+		bottomSizer.AddGrowableCol(1)
+		bottomSizer.Add(xpathLabel, 1, wx.ALIGN_CENTER_VERTICAL)
+		bottomSizer.Add(self.xpath, 2, wx.EXPAND)
+		bottomSizer.Add(self.filter,3, wx.ALIGN_CENTER_VERTICAL)
+		bottomSizer.Add(self.copy,  4, wx.ALIGN_CENTER_VERTICAL)
+		bottomPanel.SetSizer(bottomSizer)
+
+
+		box = wx.BoxSizer(wx.VERTICAL)
+		box.Add(self.splitter, 1, wx.EXPAND, 10)
+		box.Add(bottomPanel,   0, wx.EXPAND, 10)
+		self.SetSizer(box)
 
 
 		self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
@@ -180,6 +188,7 @@ class XMLPanel(wx.Panel):
 		self.Bind(wx.EVT_TEXT, self.OnIncrSearch, self.search)        
 
 		self.attr.UpdateXPath = self.UpdateXPath
+		self.Bind(wx.EVT_BUTTON, self.OnFilter, self.filter)
 		self.Bind(wx.EVT_BUTTON, self.CopyToClipboard, self.copy)
 
 		if xmlstr.strip():
@@ -202,21 +211,26 @@ class XMLPanel(wx.Panel):
 			self.text.SetValue(data.text)
 			self.UpdateXPath(item)
 
+	def SearchByText(self, keyword):
+		nodeFilter = lambda element: keyword in element.tag or keyword in element.text
+		self.tree.FilterTree(nodeFilter)
+
+	def SearchByXPath(self, xpath):
+		try:
+			elements = self.tree.xmltree.findall(xpath)
+			nodeFilter = lambda element: element in elements
+		except SyntaxError, e:
+			nodeFilter = lambda elements: False
+			print e
+		self.tree.FilterTree(nodeFilter)
 
 	def Search(self):
 		keyword = self.search.GetValue()
 		if keyword:
 			if self.textMenuItem.IsChecked():
-				nodeFilter = lambda element: keyword in element.tag or keyword in element.text
+				self.SearchByText(keyword)
 			else:
-				try:
-					elements = self.tree.xmltree.findall(keyword)
-					nodeFilter = lambda element: element in elements
-				except SyntaxError, e:
-					nodeFilter = lambda elements: False
-					print e
-					
-			self.tree.FilterTree(nodeFilter)
+				self.SearchByXPath(keyword)
 		else:
 			self.tree.RestoreTree()
 
@@ -236,6 +250,14 @@ class XMLPanel(wx.Panel):
 		self.xpath.SetValue(xpath)
 
 
+	def OnFilter(self, event):
+		xpath = self.xpath.GetValue()
+		if self.lastXPath == xpath:
+			self.tree.RestoreTree()
+			self.lastXPath = ''
+		else:
+			self.SearchByXPath(xpath)
+			self.lastXPath = xpath
 
 	def CopyToClipboard(self, event = None):
 		xpath = self.xpath.GetValue()
