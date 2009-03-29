@@ -56,8 +56,6 @@ class XMLTree(Tree):
 		return xpath
 
 
-	def FilterTree(self, keyword):
-		pass
 
 
 class AttributeList(wx.ListCtrl, CheckListCtrlMixin):
@@ -79,7 +77,16 @@ class AttributeList(wx.ListCtrl, CheckListCtrlMixin):
 			
 	def SetElement(self, element):
 		self.element = element
-		self.SetAttributes(element.attrib)
+		self.SetAttributes(element.attrib if element else {})
+
+		if element and hasattr(element, 'attrTags'):
+			for index in range(self.GetItemCount()):
+				attr = self.GetItem(index, 0).GetText()
+				value = self.GetItem(index, 1).GetText()
+				if attr in element.attrTags:
+					assert value == element.attrTags[attr]
+					self.CheckItem(index)
+
 
 
 	def OnCheckItem(self, index, flag):
@@ -110,13 +117,25 @@ class XMLPanel(wx.Panel):
 		self.splitter = wx.SplitterWindow(self, style=wx.BORDER_NONE)
 		self.splitter2 = wx.SplitterWindow(self.splitter, style=wx.BORDER_NONE)
 
-		self.tree = XMLTree(self.splitter)
+
+		leftPanel = wx.Panel(self.splitter, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
+
+		self.tree = XMLTree(leftPanel)
+		self.search = wx.SearchCtrl(leftPanel, -1, style=wx.TE_PROCESS_ENTER)
+		self.search.ShowSearchButton(True)
+		self.search.ShowCancelButton(True)
+		menu = wx.Menu()
+		self.textMenuItem = menu.AppendRadioItem(-1, "Tag/Text")
+		self.xpathMenuItem = menu.AppendRadioItem(-1, "XPath")
+		self.search.SetMenu(menu)
+
+
 		self.attr = AttributeList(self.splitter2)
-		self.text = wx.TextCtrl(self.splitter2, style = wx.TE_MULTILINE)
+		self.text = wx.TextCtrl(self.splitter2, style=wx.TE_MULTILINE)
 		self.text.SetEditable(False)
 
 		self.splitter.SetMinimumPaneSize(20)
-		self.splitter.SplitVertically(self.tree, self.splitter2, 180)
+		self.splitter.SplitVertically(leftPanel, self.splitter2, 180)
 
 		self.splitter2.SetMinimumPaneSize(20)
 		self.splitter2.SplitHorizontally(self.attr, self.text, 180)
@@ -127,6 +146,13 @@ class XMLPanel(wx.Panel):
 		self.xpath.SetEditable(False)
 		self.copy = wx.Button(self, -1, 'Copy To Clipboard')
 
+
+
+		leftBox = wx.BoxSizer(wx.VERTICAL)
+		leftBox.Add(self.tree, 1, wx.EXPAND)
+		leftBox.Add(wx.StaticText(leftPanel, label = "Search in tree"), 0, wx.TOP|wx.LEFT, 5)
+		leftBox.Add(self.search, 0, wx.EXPAND|wx.ALL, 5)
+		leftPanel.SetSizer(leftBox)
 
 		self.SetAutoLayout(True)
 		self.splitter.SetConstraints(
@@ -141,6 +167,12 @@ class XMLPanel(wx.Panel):
 
 
 		self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
+
+#		self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnSearch, self.search)
+		self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancel, self.search)
+		self.Bind(wx.EVT_TEXT_ENTER, self.OnSearch, self.search)
+		self.Bind(wx.EVT_TEXT, self.OnIncrSearch, self.search)        
+
 		self.attr.UpdateXPath = self.UpdateXPath
 		self.Bind(wx.EVT_BUTTON, self.CopyToClipboard, self.copy)
 
@@ -157,12 +189,36 @@ class XMLPanel(wx.Panel):
 	def OnSelChanged(self, event):
 		# TODO: if unselected
 		item = event.GetItem()
-		if item:
+		if item and item != self.tree.root:
 			item = self.tree.GetSelected()
 			data = self.tree.GetPyData(item)
 			self.attr.SetElement(data)
 			self.text.SetValue(data.text)
 			self.UpdateXPath(item)
+
+
+	def Search(self):
+		keyword = self.search.GetValue()
+		if keyword:
+			if self.textMenuItem.IsChecked():
+				nodeFilter = lambda element: keyword in element.tag or keyword in element.text
+			else:
+				elements = self.tree.xmltree.findall(keyword)
+				nodeFilter = lambda element: element in elements
+			self.tree.FilterTree(nodeFilter)
+		else:
+			self.tree.RestoreTree()
+
+	def OnSearch(self, event):
+		self.Search()
+
+	def OnIncrSearch(self, event):
+		if self.xpathMenuItem.IsChecked():
+			return
+		self.Search()
+
+	def OnCancel(self, event):
+		self.tree.RestoreTree()
 
 	def UpdateXPath(self, node = None):
 		xpath = self.tree.GetXPath(node)

@@ -2,6 +2,11 @@
 import wx
 import sys
 
+class TreeNode:
+	def __init__(self, data, children):
+		self.data = data
+		self.children = children
+
 class Tree(wx.TreeCtrl):
 	def __init__(self, parent, multiple = False):
 		style = (wx.TR_DEFAULT_STYLE
@@ -18,6 +23,7 @@ class Tree(wx.TreeCtrl):
 		self.root = self.AddRoot("You can't see me:)")
 		self.SetPyData(self.root, None)
 
+		self.rootDatas = None
 
 		self.iconSize = (16, 16) if sys.platform != 'linux2' else (24, 24)
 
@@ -44,8 +50,14 @@ class Tree(wx.TreeCtrl):
 		else:
 			return []
 
+	def GetType(self, data):
+		return data.__class__
+	
 	def GetIcon(self, data):
-		return self.icons[data.__class__]
+		return self.icons[self.GetType(data)]
+
+
+	# Create nodes
 
 	def SetNode(self, node, data):
 		self.SetPyData(node, data)
@@ -80,6 +92,77 @@ class Tree(wx.TreeCtrl):
 			self.Expand(node)
 		return node
 
+
+	# Filter nodes
+
+	def FilterTree(self, func, weakly = True):
+		if self.rootDatas is None:
+			self.rootDatas = map(self.GetPyData, self.GetChildrenNodes(self.root))
+		self.DeleteChildren(self.root)
+		for data in self.rootDatas:
+			if weakly:
+				self.AddTreeWithWeakFilter(self.root, data, func)
+			else:
+				self.AddTreeWithFilter(self.root, data, func)
+
+	def AddTreeWithFilter(self, parent, data, func):
+		if not func(data):
+			return
+		node = self.AddNode(parent, data)
+		children = self.GetChildren(data)
+		if children:
+			expand = 0
+			for c in children:
+				if self.AddTreeWithFilter(node, c, func):
+					expand = 1
+			if expand:
+				self.Expand(node)
+		return node
+
+	def AddTreeWithWeakFilter(self, parent, data, func):
+		node = self.DataToTreeNode(data)
+		node = self.FilterTreeNodeWeakly(node, func)
+		if node:
+			self.AddTreeNode(parent, node)
+
+	def DataToTreeNode(self, data):
+		children = self.GetChildren(data)
+		return TreeNode(data, map(self.DataToTreeNode, children))
+
+	def AddTreeNode(self, parent, treeNode):
+		node = self.AddNode(parent, treeNode.data)
+		children = treeNode.children
+		if children:
+			for c in children:
+				self.AddTreeNode(node, c)
+			self.Expand(node)
+		return node
+
+	def FilterTreeNode(self, node, func):
+		if func(node):
+			children = map(lambda n: self.FilterTreeNodeWeakly(n, func), node.children)
+			children = filter(lambda n: n, children)
+			return TreeNode(node.data, children)
+
+
+	def FilterTreeNodeWeakly(self, node, func):
+		children = map(lambda n: self.FilterTreeNodeWeakly(n, func), node.children)
+		children = filter(lambda n: n, children)
+		if children or func(node.data):
+			return TreeNode(node.data, children)
+
+
+	def RestoreTree(self):
+		if self.rootDatas is None:
+			return
+		rootDatas = self.rootDatas
+		self.rootDatas = None
+		self.DeleteChildren(self.root)
+		for data in rootDatas:
+			self.AddTree(self.root, data)
+
+
+	# Get selected data
 
 	def SelectedData(self):
 		return self.GetPyData(self.GetSelected())
@@ -119,6 +202,15 @@ class Tree(wx.TreeCtrl):
 				nodes.extend(self.GetMultipleSelectedRoots(child))
 				(child, cookie) = self.GetNextChild(node, cookie)
 			return nodes
+
+	# Help methods
+	def GetChildrenNodes(self, parent):
+		children = []
+		(child, cookie) = self.GetFirstChild(parent)
+		while child.IsOk():
+			children.append(child)
+			(child, cookie) = self.GetNextChild(parent, cookie)
+		return children
 
 	def CanReach(self, child, parent):
 		while child != self.root:
