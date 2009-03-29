@@ -48,6 +48,9 @@ bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224:
 
 give test xpath panel to xml tree viewer (p1)
 
+search text (highlight nodes or filter nodes) in tree (p1)
+
+
 loading big report is slow (p3)
 don't expand all tree nodes when something changed (p1)
 
@@ -61,12 +64,9 @@ improve performance of parsing request (p3)
 
 adding request object in scope. (p2)
 
-search text in tree
-
 bug fix: syntax highlight is wrong if JavaScript is embeded in HTML
 
 
 
-bug fix: "childern" should be "children"! (p1)
 
 
