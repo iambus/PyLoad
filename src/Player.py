@@ -39,6 +39,7 @@ class Player(Playable):
 		self.children.append(child)
 
 	def remove_script(self, script):
+		raise NotImplementedError('Not reviewed yet!')
 		assert isinstance(script, Script) or isinstance(script, str) or isinstance(script, unicode)
 		if isinstance(script, Script):
 			uuid = script.uuid
@@ -61,7 +62,7 @@ class Player(Playable):
 		if index != -1:
 			c = self.children[index]
 			assert c.uuid == uuid
-			self.children.pop(-1)
+			self.children.pop(index)
 		else:
 			for c in self.children:
 				if c.uuid == uuid:
