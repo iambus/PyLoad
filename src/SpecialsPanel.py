@@ -96,7 +96,6 @@ class SpecialsPanel(wx.Panel):
 
 		box = wx.BoxSizer(wx.VERTICAL)
 		box.Add(self.tree, 1, wx.EXPAND)
-		box.Add(wx.StaticText(self, label = "Search in tree"), 0, wx.TOP|wx.LEFT, 5)
 		box.Add(self.search, 0, wx.EXPAND|wx.ALL, 5)
 		self.SetSizer(box)
 
