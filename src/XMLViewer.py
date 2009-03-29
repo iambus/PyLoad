@@ -24,16 +24,17 @@ class XMLViewer(wx.Panel):
 		import Layout
 		Layout.SingleLayout(self, self.nb)
 
-
 		self.viewPanel.ResetSize()
 
+	def SetXML(self, xmlstr):
+		self.viewPanel.SetXML(xmlstr)
+		self.sourcePanel.SetValue(xmlstr)
 
-class XMLFrame(wx.Frame):
+class SimpleFrame(wx.Frame):
 	def __init__(self, parent, xmlstr = ''):
 		wx.Frame.__init__(self, parent, -1, "XLM Viewer", size = (540, 420))
 		
 		panel = XMLViewer(self, xmlstr)
-
 
 		# XXX: do we need this?
 		self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
@@ -44,11 +45,9 @@ class XMLFrame(wx.Frame):
 		self.Destroy()
 
 
-
 def ShowXML(parent, xmlstr = ''):
-	win = XMLFrame(parent, xmlstr)
+	win = SimpleFrame(parent, xmlstr)
 	win.Show(True)
-
 
 def FindAndShowXML(parent, xmlstr):
 	index = xmlstr.find('<')
@@ -58,7 +57,39 @@ def FindAndShowXML(parent, xmlstr):
 		index = ''
 	ShowXML(parent, xmlstr)
 
-if __name__ == '__main__':
+
+class AppFrame(wx.Frame):
+	def __init__(self):
+		wx.Frame.__init__(self, None, -1, "XLM Viewer", size = (540, 420))
+
+		menuBar = wx.MenuBar()
+		menu = wx.Menu()
+		menuBar.Append(menu, 'File')
+		menuItem = menu.Append(wx.NewId(), 'Open')
+		self.SetMenuBar(menuBar)
+
+		self.Bind(wx.EVT_MENU, self.OnOpenFile, menuItem)
+		
+		self.viewer = XMLViewer(self)
+		self.viewer.viewPanel.ResetSize()
+
+	def OnOpenFile(self, event):
+		import Dialog
+		path = Dialog.OpenFile(self, 'XML', 'xml', 'Open XML File')
+		if path:
+			fp = open(path)
+			xml = fp.read()
+			fp.close()
+			self.viewer.SetXML(xml)
+
+def main():
+	app = wx.PySimpleApp()
+	win = AppFrame()
+	win.Center()
+	win.Show(True)
+	app.MainLoop()
+
+def test():
 	xml = '''
 <list>
 	<item class='good'>Dream</item>
@@ -73,4 +104,8 @@ if __name__ == '__main__':
 	app.MainLoop()
 #	import Test
 #	Test.TestPanel(XMLViewer)
+
+
+if __name__ == '__main__':
+	main()
 

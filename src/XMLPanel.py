@@ -25,6 +25,7 @@ class XMLTree(Tree):
 	def SetXML(self, xml):
 		try:
 			self.xmltree = etree.fromstring(xml)
+			self.DeleteChildren(self.root)
 			self.AddTree(self.root, self.xmltree)
 		except Exception, e:
 			print e
@@ -200,6 +201,8 @@ class XMLPanel(wx.Panel):
 			self.xml = xmlstr
 		self.tree.SetXML(self.xml)
 
+	def SetXML(self, xmlstr):
+		self.tree.SetXML(xmlstr)
 
 	def OnSelChanged(self, event):
 		# TODO: if unselected
