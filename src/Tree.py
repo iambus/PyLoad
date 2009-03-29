@@ -35,6 +35,15 @@ class Tree(wx.TreeCtrl):
 		self.iconList = iconList
 
 
+	def GetLabel(self, data):
+		return data.label
+	
+	def GetChildren(self, data):
+		if hasattr(data, 'childern'):
+			return data.childern
+		else:
+			return []
+
 	def SetNode(self, node, data):
 		self.SetPyData(node, data)
 		icons = self.icons[data.__class__]
@@ -42,20 +51,21 @@ class Tree(wx.TreeCtrl):
 		self.SetItemImage(node, icons[1], wx.TreeItemIcon_Expanded)
 
 	def AddNode(self, parent, data):
-		node = self.AppendItem(parent, data.label)
+		node = self.AppendItem(parent, self.GetLabel(data))
 		self.SetNode(node, data)
 		return node
 
 	def AddTree(self, parent, data):
 		node = self.AddNode(parent, data)
-		if hasattr(data, 'childern'):
-			for c in data.childern:
+		children = self.GetChildren(data)
+		if children:
+			for c in children:
 				self.AddTree(node, c)
 			self.Expand(node)
 		return node
 
 	def InsertNode(self, parent, prev, data):
-		node = self.InsertItem(parent, prev, data.label)
+		node = self.InsertItem(parent, prev, self.GetLabel(data))
 		self.SetNode(node, data)
 		return node
 
