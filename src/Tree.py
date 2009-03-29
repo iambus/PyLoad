@@ -44,9 +44,12 @@ class Tree(wx.TreeCtrl):
 		else:
 			return []
 
+	def GetIcon(self, data):
+		return self.icons[data.__class__]
+
 	def SetNode(self, node, data):
 		self.SetPyData(node, data)
-		icons = self.icons[data.__class__]
+		icons = self.GetIcon(data)
 		self.SetItemImage(node, icons[0], wx.TreeItemIcon_Normal)
 		self.SetItemImage(node, icons[1], wx.TreeItemIcon_Expanded)
 
