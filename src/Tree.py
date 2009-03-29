@@ -25,6 +25,8 @@ class Tree(wx.TreeCtrl):
 
 		self.rootDatas = None
 
+		self.background = self.GetBackgroundColour()
+
 		self.iconSize = (16, 16) if sys.platform != 'linux2' else (24, 24)
 
 	def SetIcons(self, icons, iconSize = None):
@@ -98,6 +100,7 @@ class Tree(wx.TreeCtrl):
 	def FilterTree(self, func, weakly = True):
 		if self.rootDatas is None:
 			self.rootDatas = map(self.GetPyData, self.GetChildrenNodes(self.root))
+		self.SetBackgroundColour('#ffffdd')
 		self.DeleteChildren(self.root)
 		for data in self.rootDatas:
 			if weakly:
@@ -160,6 +163,7 @@ class Tree(wx.TreeCtrl):
 		self.DeleteChildren(self.root)
 		for data in rootDatas:
 			self.AddTree(self.root, data)
+		self.SetBackgroundColour(self.background)
 
 
 	# Get selected data
