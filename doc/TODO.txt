@@ -66,3 +66,5 @@ bug fix: syntax highlight is wrong if JavaScript is embeded in HTML
 
 
 
+bug fix: "childern" should be "children"! (p1)
+
