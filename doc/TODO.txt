@@ -1,6 +1,8 @@
 
 Major:
 
+XML viewer: support modifying and writing XML
+
 extractor (p3)
 
 Memory Leak (p2)
@@ -61,8 +63,6 @@ improve performance of parsing request (p3)
 adding request object in scope. (p2)
 
 bug fix: syntax highlight is wrong if JavaScript is embeded in HTML
-
-
 
 
 
