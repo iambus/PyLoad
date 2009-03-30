@@ -24,7 +24,7 @@ def matchBeforeAfter(keyword, data):
 
 def matchRequest(keyword, hit):
 	return matchString(keyword, hit.reqstr) or\
-	       matchString(keyword, hit.respstr)
+	       (hit.respstr and matchString(keyword, hit.respstr))
 
 
 attrDict = {
