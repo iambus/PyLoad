@@ -56,8 +56,8 @@ class XMLTree(Tree):
 			return ''
 
 		attrs = node.attrs
-		exp = ', '.join(["@%s='%s'" %(k, v) for k, v in attrs.items()])
-		return '[%s]' % exp
+		exp = ''.join(["[@%s='%s']" %(k, v) for k, v in attrs.items()])
+		return exp
 
 	def GetXPath(self, node = None):
 		if not node:
