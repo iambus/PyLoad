@@ -101,13 +101,17 @@ class Tree(wx.TreeCtrl):
 	def FilterTree(self, func, weakly = True):
 		if self.rootDatas is None:
 			self.rootDatas = map(self.GetPyData, self.GetChildrenNodes(self.root))
-		self.SetBackgroundColour('#ffffdd')
-		self.DeleteChildren(self.root)
-		for data in self.rootDatas:
-			if weakly:
-				self.AddTreeWithWeakFilter(self.root, data, func)
-			else:
-				self.AddTreeWithFilter(self.root, data, func)
+		self.Freeze()
+		try:
+			self.SetBackgroundColour('#ffffdd')
+			self.DeleteChildren(self.root)
+			for data in self.rootDatas:
+				if weakly:
+					self.AddTreeWithWeakFilter(self.root, data, func)
+				else:
+					self.AddTreeWithFilter(self.root, data, func)
+		finally:
+			self.Thaw()
 
 	def AddTreeWithFilter(self, parent, data, func):
 		if not func(data):
@@ -161,31 +165,42 @@ class Tree(wx.TreeCtrl):
 			return
 		rootDatas = self.rootDatas
 		self.rootDatas = None
-		self.DeleteChildren(self.root)
-		for data in rootDatas:
-			self.AddTree(self.root, data)
-		self.SetBackgroundColour(self.background)
-
+		self.Freeze()
+		try:
+			self.DeleteChildren(self.root)
+			for data in rootDatas:
+				self.AddTree(self.root, data)
+			self.SetBackgroundColour(self.background)
+		finally:
+			self.Thaw()
 
 	# Highlight node
 
 	def HighlightTree(self, func, weakly = True):
-		self.UnHighlightTree()
-		def doThing(node):
-			self.SetItemTextColour(node, 'red')
-			self.SetItemBackgroundColour(node, '#ffffdd')
-		def when(node):
-			return func(self.GetPyData(node))
-		for node in self.GetChildrenNodes(self.root):
-			self.WalkTree(node, doThing, when, weakly)
+		self.Freeze()
+		try:
+			self.UnHighlightTree()
+			def doThing(node):
+				self.SetItemTextColour(node, 'red')
+				self.SetItemBackgroundColour(node, '#ffffdd')
+			def when(node):
+				return func(self.GetPyData(node))
+			for node in self.GetChildrenNodes(self.root):
+				self.WalkTree(node, doThing, when, weakly)
+		finally:
+			self.Thaw()
 
 	def UnHighlightTree(self):
-		def doThing(node):
-			self.SetItemTextColour(node, self.foreground)
-			self.SetItemBackgroundColour(node, self.background)
-		for node in self.GetChildrenNodes(self.root):
-			self.WalkTree(node, doThing)
-
+		self.Freeze()
+		try:
+			def doThing(node):
+				self.SetItemTextColour(node, self.foreground)
+				self.SetItemBackgroundColour(node, self.background)
+			for node in self.GetChildrenNodes(self.root):
+				self.WalkTree(node, doThing)
+		finally:
+			self.Thaw()
+	
 	def WalkTree(self, node, doThing, when = None, weakly = False):
 		hasChildrenMatched = False
 		for child in self.GetChildrenNodes(node):
