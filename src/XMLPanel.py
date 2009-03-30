@@ -87,28 +87,26 @@ class AttributeList(wx.ListCtrl, CheckListCtrlMixin):
 		self.SetColumnWidth(1, 200)
 
 
-	def SetAttributes(self, attributes):
-		self.DeleteAllItems()
-		for attr in sorted(attributes.keys()):
-			index = self.InsertStringItem(sys.maxint, attr)
-			self.SetStringItem(index, 1, attributes[attr])
-		self.attrs = {}
-			
 	def SetElement(self, node):
-		self.node = node
-		self.SetAttributes(node.element.attrib if node else {})
-
+		self.node = None
+		self.DeleteAllItems()
+		self.attrs = {}
 		if node:
-			for index in range(self.GetItemCount()):
-				attr = self.GetItem(index, 0).GetText()
-				value = self.GetItem(index, 1).GetText()
+			attrs = node.element.attrib
+			for attr in sorted(attrs.keys()):
+				value = attrs[attr]
+				index = self.InsertStringItem(sys.maxint, attr)
+				self.SetStringItem(index, 1, value)
 				if attr in node.attrs:
 					assert value == node.attrs[attr]
 					self.CheckItem(index)
-
-
+					self.attrs[attr] = value
+		self.node = node
 
 	def OnCheckItem(self, index, flag):
+		if not self.node:
+			return
+
 		attr = self.GetItem(index, 0).GetText()
 		value = self.GetItem(index, 1).GetText()
 		if flag:
