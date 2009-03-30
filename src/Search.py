@@ -23,7 +23,8 @@ def matchBeforeAfter(keyword, data):
 	       matchString(keyword, data.afterscript.script)
 
 def matchRequest(keyword, hit):
-	return matchString(keyword, hit.reqstr) or\
+	return matchString(keyword, hit.url) or \
+	       matchString(keyword, hit.reqstr) or\
 	       (hit.respstr and matchString(keyword, hit.respstr))
 
 
