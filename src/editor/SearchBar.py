@@ -1,6 +1,8 @@
 
 import wx
 
+import IconImages
+
 GLOBAL_HISTORY = []
 MAX_GLOBAL_HISTORY = 10
 
@@ -16,11 +18,11 @@ class SearchBar(wx.Panel):
 
 		iconSize = (16, 16)
 		#self.downButton = wx.Button(self, -1, 'Next')
-		downIcon = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN, wx.ART_OTHER, iconSize)
+		downIcon = IconImages.getDownBitmap()
 		self.downButton = wx.BitmapButton(self, -1, downIcon, iconSize, (26, 26))
 		self.downButton.SetToolTipString("Next")
 		#self.upButton = wx.Button(self, -1, 'Prev')
-		upIcon = wx.ArtProvider_GetBitmap(wx.ART_GO_UP, wx.ART_OTHER, iconSize)
+		upIcon = IconImages.getUpBitmap()
 		self.upButton = wx.BitmapButton(self, -1, upIcon, iconSize, (26, 26))
 		self.upButton.SetToolTipString("Prvious")
 
