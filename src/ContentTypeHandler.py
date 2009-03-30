@@ -3,6 +3,86 @@ import re
 import Coder
 import Validator
 
+
+class ContentType:
+	@property
+	def type(self):
+		raise NotImplementedError()
+
+	@property
+	def coder(self):
+		return Coder.EmptyCoder
+
+	@property
+	def syntax(self):
+		import editor.syntax.default
+		return editor.syntax.default
+
+	@property
+	def validator(self):
+		return Validator.DefaultResponseValidator
+
+class DefaultContentType(ContentType):
+	@property
+	def type(self):
+		return 'default'
+
+class HTMLContentType(ContentType):
+	@property
+	def type(self):
+		return 'html'
+
+	@property
+	def syntax(self):
+		import editor.syntax.html
+		return editor.syntax.html
+
+class XMLContentType(ContentType):
+	@property
+	def type(self):
+		return 'xml'
+
+	@property
+	def syntax(self):
+		import editor.syntax.xml
+		return editor.syntax.xml
+
+class AMFContentType(ContentType):
+	@property
+	def type(self):
+		return 'amf'
+
+	@property
+	def coder(self):
+		return Coder.AMFCoder
+
+	@property
+	def syntax(self):
+		import editor.syntax.xml
+		return editor.syntax.xml
+
+class PythonContentType(ContentType):
+	@property
+	def type(self):
+		return 'python'
+
+	@property
+	def syntax(self):
+		import editor.syntax.python
+		return editor.syntax.python
+
+
+class BinContentType(ContentType):
+	@property
+	def type(self):
+		return 'bin'
+
+	@property
+	def coder(self):
+		return Coder.BinCoder
+
+
+# TODO: Keep ContentTypeHandler for compatibility reason. Remove it in future
 # immutable: dirty hack
 # XXX: how to implement an immutable instance in Python?
 class ContentTypeHandler(tuple):
@@ -31,19 +111,17 @@ class ContentTypeHandler(tuple):
 		return ContentTypeHandler(self.coder, self.syntax, self.validator)
 
 
+mapping = {
+		'default' : DefaultContentType(),
+		'html' : HTMLContentType(),
+		'xml' : XMLContentType(),
+		'amf' : AMFContentType(),
+		'python' : PythonContentType(),
+		'bin' : BinContentType(),
+		}
+
+
 def get_handler(content):
-	import editor.syntax.default
-	import editor.syntax.html
-	import editor.syntax.xml
-	import editor.syntax.python
-	mapping = {
-			'default' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.default),
-			'html' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.html),
-			'xml' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.xml),
-			'amf' : ContentTypeHandler(Coder.AMFCoder, editor.syntax.xml, Validator.AMFResponseValidator),
-			'python' : ContentTypeHandler(Coder.EmptyCoder, editor.syntax.python),
-			'bin' : ContentTypeHandler(Coder.BinCoder, editor.syntax.python),
-			}
 
 	m = re.search(r'^content-type:\s*([^\r\n]*)', content, re.I|re.M)
 	if m:
