@@ -3,6 +3,7 @@ import wx
 import wx.lib.layoutf
 from wx.lib.mixins.listctrl import CheckListCtrlMixin
 from Tree import Tree
+import IconImages
 
 try:
 	from lxml import etree
@@ -22,9 +23,7 @@ class XMLTree(Tree):
 
 		iconSize = self.iconSize
 		icons = {
-			'node': (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
-					 wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize)),
-			'text': wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, iconSize),
+			'element': IconImages.getXMLElementBitmap(),
 			}
 		self.SetIcons(icons)
 
@@ -49,7 +48,7 @@ class XMLTree(Tree):
 		return node.children
 
 	def GetType(self, node):
-		return 'node'
+		return 'element'
 
 	def GetAttrPath(self, node):
 		if not node.attrs:
