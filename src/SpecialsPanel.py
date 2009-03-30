@@ -125,9 +125,9 @@ class SpecialsPanel(wx.Panel):
 				ContentTypeHandler.DefaultContentType : IconImages.getWebBitmap(),
 				ContentTypeHandler.AMFContentType     : IconImages.getFlexBitmap(),
 				ContentTypeHandler.HTMLContentType    : IconImages.getWebBitmap(),
-				ContentTypeHandler.XMLContentType     : IconImages.getWebBitmap(),
+				ContentTypeHandler.XMLContentType     : IconImages.getXMLBitmap(),
 				ContentTypeHandler.PythonContentType  : IconImages.getPythonBitmap(),
-				ContentTypeHandler.BinContentType     : IconImages.getWebBitmap(),
+				ContentTypeHandler.BinContentType     : IconImages.getBinaryBitmap(),
 				}
 		self.tree.SetIcons(icons)
 
