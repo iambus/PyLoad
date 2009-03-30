@@ -2,7 +2,7 @@
 import wx
 import Player
 import Controller
-
+import IconImages
 
 class ControllersPanel(wx.Panel):
 	def __init__(self, parent):
@@ -19,10 +19,10 @@ class ControllersPanel(wx.Panel):
 				| wx.LC_SINGLE_SEL
 				)
 		self.imagelist = wx.ImageList(16, 16)
-		self.imagelist.Add(wx.ArtProvider_GetBitmap(wx.ART_NEW, wx.ART_OTHER, (16,16)))
-		self.imagelist.Add(wx.ArtProvider_GetBitmap(wx.ART_QUESTION, wx.ART_OTHER, (16,16)))
-		self.imagelist.Add(wx.ArtProvider_GetBitmap(wx.ART_REDO, wx.ART_OTHER, (16,16)))
-		self.imagelist.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, (16,16)))
+		self.imagelist.Add(IconImages.getScriptBitmap())
+		self.imagelist.Add(IconImages.getIfBitmap())
+		self.imagelist.Add(IconImages.getLoopBitmap())
+		self.imagelist.Add(IconImages.getBlockBitmap())
 
 		self.list.SetImageList(self.imagelist, wx.IMAGE_LIST_SMALL)
 		self.list.InsertImageStringItem(0, 'SCRIPT', 0)

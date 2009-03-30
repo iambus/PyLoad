@@ -6,7 +6,7 @@ from Tree import Tree
 from FlyFrame import fly
 from Changes import make_change, remove_change
 import Search
-
+import IconImages
 
 # {{{ DropTarget
 class MyDropTarget(wx.PyDropTarget):
@@ -80,11 +80,9 @@ class RecordPanel(wx.Panel):
 
 		iconSize = self.tree.iconSize
 		icons = {
-			Record.Record : (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
-			                 wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize)),
-			Record.Page   : (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
-			                 wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize)),
-			Record.Hit    :  wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, iconSize), 
+			Record.Record : IconImages.getRecordBitmap(),
+			Record.Page   : IconImages.getPageBitmap(),
+			Record.Hit    : IconImages.getHitBitmap(),
 				}
 
 		self.tree.SetIcons(icons)

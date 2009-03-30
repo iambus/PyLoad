@@ -9,6 +9,8 @@ from FlyFrame import fly
 from Changes import make_change, remove_change
 import Search
 
+import IconImages
+
 import Logger
 log = Logger.getLogger()
 
@@ -106,24 +108,17 @@ class SpecialsPanel(wx.Panel):
 
 		iconSize = self.tree.iconSize
 		icons = {
-				Special: (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
-				          wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize)),
+				Special       : (IconImages.getSpecialOffBitmap(),
+								 IconImages.getSpecialBitmap()),
 
-				Record.Record: (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
-				                wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize)),
+				Record.Record : IconImages.getRecordBitmap(),
+				Record.Page   : IconImages.getPageBitmap(),
+				Record.Hit    : IconImages.getHitBitmap(),
 
-				Record.Page: (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
-				              wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, iconSize)),
-
-				Record.Hit: wx.ArtProvider_GetBitmap(wx.ART_NORMAL_FILE, wx.ART_OTHER, iconSize),
-
-				Controller.Script: wx.ArtProvider_GetBitmap(wx.ART_NEW, wx.ART_OTHER, iconSize),
-				Controller.If    : (wx.ArtProvider_GetBitmap(wx.ART_QUESTION,      wx.ART_OTHER, iconSize),
-				                    wx.ArtProvider_GetBitmap(wx.ART_QUESTION, wx.ART_OTHER, iconSize)),
-				Controller.Loop  : (wx.ArtProvider_GetBitmap(wx.ART_REDO,      wx.ART_OTHER, iconSize),
-				                    wx.ArtProvider_GetBitmap(wx.ART_REDO, wx.ART_OTHER, iconSize)),
-				Controller.Block : (wx.ArtProvider_GetBitmap(wx.ART_FOLDER,      wx.ART_OTHER, iconSize),
-				                    wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, iconSize)),
+				Controller.Script: IconImages.getScriptBitmap(),
+				Controller.If    : IconImages.getIfBitmap(),
+				Controller.Loop  : IconImages.getLoopBitmap(),
+				Controller.Block : IconImages.getBlockBitmap(),
 				}
 		self.tree.SetIcons(icons)
 
