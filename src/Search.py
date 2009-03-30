@@ -7,7 +7,7 @@ from Player import Script
 
 
 def matchString(keyword, text):
-	return keyword in text
+	return keyword.lower() in text.lower()
 
 def matchLabel(keyword, data):
 	return matchString(keyword, data.label) or matchString(keyword, data.uuid)

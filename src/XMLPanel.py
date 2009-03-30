@@ -227,7 +227,8 @@ class XMLPanel(wx.Panel):
 			self.UpdateXPath(item)
 
 	def SearchByText(self, keyword):
-		nodeFilter = lambda node: keyword in node.element.tag or (node.element.text and keyword in node.element.text)
+		keyword = keyword.lower()
+		nodeFilter = lambda node: keyword in node.element.tag.lower() or (node.element.text and keyword in node.element.text.lower())
 		self.tree.FilterTree(nodeFilter)
 
 	def SearchByXPath(self, xpath):
