@@ -1,7 +1,10 @@
 
 Major:
 
-XML viewer: support modifying and writing XML
+Distributed nodes (p3)
+Test button: no halting, diff responses (p3)
+
+XML viewer: support modifying and writing XML (p3)
 
 extractor (p3)
 
@@ -18,22 +21,24 @@ Variable Manager (p5)
 iteration util (p3)
 threading util (p3)
 
-unicode support/i18n (p4)
+unicode support/i18n (p3)
 
-support GZip coder
-support composite coder
-support stateful coder
+support GZip coder (p3)
+support composite coder (p3)
+support stateful coder (p3)
 
-support HTTPS proxy
+support HTTPS proxy (p3)
 
 Minor:
 
 editor loading it slow (p3)
+
+add record/hit to pop menu (p3)
 add script/if/loop to pop menu (p3)
 
 debug feature: reload modules (p4)
 
-naming conventions (p2)
+naming conventions (p3)
 
 Make InfoPanel editable (p3)
 
@@ -44,8 +49,6 @@ redirect stdout/stderr to log file (p3)
 100 users, why 200 threads? (p3)
 
 bug fix: UnicodeDecodeError: 'gbk' codec can't decode bytes in position 223-224: illegal multibyte sequence
-
-
 
 
 
@@ -62,7 +65,8 @@ improve performance of parsing request (p3)
 
 adding request object in scope. (p2)
 
-bug fix: syntax highlight is wrong if JavaScript is embeded in HTML
+bug fix: syntax highlight is wrong if JavaScript is embeded in HTML (p3)
 
 
+Code refactoring: controls/mixins folders for reusable UI components (p2)
 
