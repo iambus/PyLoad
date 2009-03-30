@@ -10,6 +10,12 @@ except ImportError:
 	from xml.etree import ElementTree as etree
 import sys
 
+class TreeNode:
+	def __init__(self, element, children):
+		self.element = element
+		self.children = children
+		self.attrs = {}
+
 class XMLTree(Tree):
 	def __init__(self, parent):
 		Tree.__init__(self, parent)
@@ -22,28 +28,34 @@ class XMLTree(Tree):
 			}
 		self.SetIcons(icons)
 
+
+	def ElementToTreeNode(self, element):
+		children = element.getchildren()
+		return TreeNode(element, map(self.ElementToTreeNode, children))
+
 	def SetXML(self, xml):
 		try:
-			self.xmltree = etree.fromstring(xml)
+			self.eroot = etree.fromstring(xml)
 			self.DeleteChildren(self.root)
-			self.AddTree(self.root, self.xmltree)
+			self.AddTree(self.root, self.ElementToTreeNode(self.eroot))
 		except Exception, e:
 			print e
+			raise
 
-	def GetLabel(self, element):
-		return element.tag
+	def GetLabel(self, node):
+		return node.element.tag
 
-	def GetChildren(self, element):
-		return element.getchildren()
+	def GetChildren(self, node):
+		return node.children
 
-	def GetType(self, element):
+	def GetType(self, node):
 		return 'node'
 
-	def GetAttrPath(self, element):
-		if not hasattr(element, 'attrTags') or not element.attrTags:
+	def GetAttrPath(self, node):
+		if not node.attrs:
 			return ''
 
-		attrs = element.attrTags
+		attrs = node.attrs
 		exp = ', '.join(["@%s='%s'" %(k, v) for k, v in attrs.items()])
 		return '[%s]' % exp
 
@@ -54,8 +66,8 @@ class XMLTree(Tree):
 			return ''
 		tokens = []
 		while node != self.root:
-			element = self.GetPyData(node)
-			tokens.append(element.tag + self.GetAttrPath(element))
+			n = self.GetPyData(node)
+			tokens.append(n.element.tag + self.GetAttrPath(n))
 			node = self.GetItemParent(node)
 		tokens.pop()
 		tokens.reverse()
@@ -82,16 +94,16 @@ class AttributeList(wx.ListCtrl, CheckListCtrlMixin):
 			self.SetStringItem(index, 1, attributes[attr])
 		self.attrs = {}
 			
-	def SetElement(self, element):
-		self.element = element
-		self.SetAttributes(element.attrib if element else {})
+	def SetElement(self, node):
+		self.node = node
+		self.SetAttributes(node.element.attrib if node else {})
 
-		if element and hasattr(element, 'attrTags'):
+		if node:
 			for index in range(self.GetItemCount()):
 				attr = self.GetItem(index, 0).GetText()
 				value = self.GetItem(index, 1).GetText()
-				if attr in element.attrTags:
-					assert value == element.attrTags[attr]
+				if attr in node.attrs:
+					assert value == node.attrs[attr]
 					self.CheckItem(index)
 
 
@@ -105,7 +117,7 @@ class AttributeList(wx.ListCtrl, CheckListCtrlMixin):
 			if attr in self.attrs:
 				del self.attrs[attr]
 
-		self.element.attrTags = self.attrs
+		self.node.attrs = self.attrs
 
 		self.UpdateXPath()
 				
@@ -211,20 +223,21 @@ class XMLPanel(wx.Panel):
 			item = self.tree.GetSelected()
 			data = self.tree.GetPyData(item)
 			self.attr.SetElement(data)
-			self.text.SetValue(data.text if data.text else '')
+			self.text.SetValue(data.element.text if data.element.text else '')
 			self.UpdateXPath(item)
 
 	def SearchByText(self, keyword):
-		nodeFilter = lambda element: keyword in element.tag or keyword in element.text
+		nodeFilter = lambda node: keyword in node.element.tag or (node.element.text and keyword in node.element.text)
 		self.tree.FilterTree(nodeFilter)
 
 	def SearchByXPath(self, xpath):
 		try:
-			elements = self.tree.xmltree.findall(xpath)
-			nodeFilter = lambda element: element in elements
+			elements = self.tree.eroot.findall(xpath)
+			nodeFilter = lambda node: node.element in elements
 		except SyntaxError, e:
 			nodeFilter = lambda elements: False
 			print e
+			raise
 		self.tree.FilterTree(nodeFilter)
 
 	def Search(self):
