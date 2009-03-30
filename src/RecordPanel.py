@@ -77,16 +77,39 @@ class RecordPanel(wx.Panel):
 
 	def InitializeRoot(self):
 		self.tree = Tree(self, multiple = True)
+		self.root = self.tree.root
 
-		iconSize = self.tree.iconSize
+		import ContentTypeHandler
 		icons = {
 			Record.Record : IconImages.getRecordBitmap(),
 			Record.Page   : IconImages.getPageBitmap(),
 			Record.Hit    : IconImages.getHitBitmap(),
+			ContentTypeHandler.DefaultContentType : IconImages.getWebBitmap(),
+			ContentTypeHandler.AMFContentType     : IconImages.getFlexBitmap(),
+			ContentTypeHandler.HTMLContentType    : IconImages.getWebBitmap(),
+			ContentTypeHandler.XMLContentType     : IconImages.getWebBitmap(),
+			ContentTypeHandler.PythonContentType  : IconImages.getWebBitmap(),
+			ContentTypeHandler.BinContentType     : IconImages.getWebBitmap(),
 				}
-
 		self.tree.SetIcons(icons)
-		self.root = self.tree.root
+
+
+		def GetType(data):
+			if isinstance(data, Record.Hit):
+				# TODO: this check is for compatibility, remove it in future
+				if isinstance(data.req_handler, ContentTypeHandler.ContentType):
+					return data.req_handler.__class__
+				else:
+					# You see, really dirty trick,  so remove it in future...
+					if 'AMF' in str(data.req_handler.coder):
+						return ContentTypeHandler.AMFContentType
+					else:
+						return data.__class__
+			else:
+				return data.__class__
+
+		self.tree.GetType = GetType
+
 
 
 	def InitSelf(self):
