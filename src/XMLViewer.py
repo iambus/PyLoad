@@ -65,7 +65,7 @@ class AppFrame(wx.Frame):
 		menuBar = wx.MenuBar()
 		menu = wx.Menu()
 		menuBar.Append(menu, 'File')
-		menuItem = menu.Append(wx.NewId(), 'Open')
+		menuItem = menu.Append(wx.NewId(), 'Open\tCtrl+O')
 		self.SetMenuBar(menuBar)
 
 		self.Bind(wx.EVT_MENU, self.OnOpenFile, menuItem)
