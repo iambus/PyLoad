@@ -156,6 +156,8 @@ class SearchBar(wx.Panel):
 		if not keyword:
 			return
 		global GLOBAL_HISTORY
+		if keyword in GLOBAL_HISTORY:
+			GLOBAL_HISTORY.remove(keyword)
 		GLOBAL_HISTORY.insert(0, keyword)
 		if len(GLOBAL_HISTORY) > MAX_GLOBAL_HISTORY:
 			GLOBAL_HISTORY.pop()
