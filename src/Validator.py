@@ -11,6 +11,12 @@ class ResponseValidator(Validator):
 	pass
 
 
+class EmptyValidator(Validator):
+	@classmethod
+	def validate(cls, x):
+		pass
+
+
 def validata_response_code(response):
 	if response.code == 404:
 		raise ValidationError('404 error: %s\n%s' % (response.url, repr(response.rawbody)))
