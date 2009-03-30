@@ -117,7 +117,7 @@ class SpecialsPanel(wx.Panel):
 				Record.Page   : IconImages.getPageBitmap(),
 				Record.Hit    : IconImages.getHitBitmap(),
 
-				Controller.Script: IconImages.getScriptBitmap(),
+				Controller.Script: IconImages.getPythonBitmap(),
 				Controller.If    : IconImages.getIfBitmap(),
 				Controller.Loop  : IconImages.getLoopBitmap(),
 				Controller.Block : IconImages.getBlockBitmap(),
@@ -126,7 +126,7 @@ class SpecialsPanel(wx.Panel):
 				ContentTypeHandler.AMFContentType     : IconImages.getFlexBitmap(),
 				ContentTypeHandler.HTMLContentType    : IconImages.getWebBitmap(),
 				ContentTypeHandler.XMLContentType     : IconImages.getWebBitmap(),
-				ContentTypeHandler.PythonContentType  : IconImages.getWebBitmap(),
+				ContentTypeHandler.PythonContentType  : IconImages.getPythonBitmap(),
 				ContentTypeHandler.BinContentType     : IconImages.getWebBitmap(),
 				}
 		self.tree.SetIcons(icons)

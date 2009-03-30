@@ -19,7 +19,7 @@ class ControllersPanel(wx.Panel):
 				| wx.LC_SINGLE_SEL
 				)
 		self.imagelist = wx.ImageList(16, 16)
-		self.imagelist.Add(IconImages.getScriptBitmap())
+		self.imagelist.Add(IconImages.getPythonBitmap())
 		self.imagelist.Add(IconImages.getIfBitmap())
 		self.imagelist.Add(IconImages.getLoopBitmap())
 		self.imagelist.Add(IconImages.getBlockBitmap())
