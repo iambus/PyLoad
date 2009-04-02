@@ -45,7 +45,7 @@ class EditTab(wx.Panel):
 
 	def OnPlay(self, event):
 		tree = self.specialsPanel.tree
-		player = tree.GetPyData(tree.GetSelection())
+		player = tree.GetPyData(tree.GetSelected())
 		player.play()
 
 	# XXX: why I need this?
