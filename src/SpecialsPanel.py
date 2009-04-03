@@ -4,7 +4,7 @@ from Special import Special
 import Controller
 import Player
 import Record
-from Tree import Tree
+from control.Tree import Tree
 from FlyFrame import fly
 from Changes import make_change, remove_change
 import Search

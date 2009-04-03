@@ -2,7 +2,7 @@
 import wx
 import wx.lib.layoutf
 from wx.lib.mixins.listctrl import CheckListCtrlMixin
-from Tree import Tree
+from control.Tree import Tree
 import IconImages
 
 try:
