@@ -104,17 +104,21 @@ class DetailsPanel(wx.Panel):
 
 
 	def Load(self, data, update = False):
-		if data == None:
-			# possible on Linux
-			# TODO: auto-select next node on Linux when a node is deleted (of course not here)
-			self.Unload()
-			return
+		self.Freeze()
+		try:
+			if data == None:
+				# possible on Linux
+				# TODO: auto-select next node on Linux when a node is deleted (of course not here)
+				self.Unload()
+				return
 
-		if update:
-			self.UpdateInfo(data)
-		else:
-			self.tabs.Load(data)
-			self.testButton.Show()
+			if update:
+				self.UpdateInfo(data)
+			else:
+				self.tabs.Load(data)
+				self.testButton.Show()
+		finally:
+			self.Thaw()
 
 	def ReLoad(self, data):
 		self.tabs.ReLoad(data)
