@@ -52,10 +52,6 @@ class SearchBar(wx.Panel):
 		self.Bind(wx.EVT_BUTTON, self.OnNext, self.downButton)
 		self.Bind(wx.EVT_BUTTON, self.OnPrev, self.upButton)
 
-		#
-		self.searchCallback = None
-		self.highlightCallback = None
-		self.cancelSearchCallback = None
 
 	def OnNext(self, event):
 		self.Next()
@@ -73,8 +69,7 @@ class SearchBar(wx.Panel):
 		# do incremental search only when 'regular expression' is not used
 		if not self.IsReChecked():
 			# Don't add incr search keyword to history
-			if self.searchCallback:
-				self.searchCallback(self.GetSearchText(), True, self.matchCase(), self.IsReChecked())
+			self.DoSearch(self.GetSearchText(), True, self.matchCase(), self.IsReChecked())
 
 	def OnUseHistory(self, event):
 		itemID = event.GetId()
@@ -109,14 +104,12 @@ class SearchBar(wx.Panel):
 	def Next(self):
 		keyword = self.GetSearchText()
 		self.UpdateSearchHistory(keyword)
-		if self.searchCallback:
-			self.searchCallback(keyword, True, self.matchCase(), self.IsReChecked())
+		self.DoSearch(keyword, True, self.matchCase(), self.IsReChecked())
 
 	def Prev(self):
 		keyword = self.GetSearchText()
 		self.UpdateSearchHistory(keyword)
-		if self.searchCallback:
-			self.searchCallback(keyword, False, self.matchCase(), self.IsReChecked())
+		self.DoSearch(keyword, False, self.matchCase(), self.IsReChecked())
 
 	def InitHistory(self):
 		self.useGlobalHistory = False
@@ -176,12 +169,23 @@ class SearchBar(wx.Panel):
 		return self.history
 
 	def CancelSearch(self, event):
-		if self.cancelSearchCallback:
-			self.cancelSearchCallback()
+		self.DoCancelSearch()
 
 	def Highlight(self):
-		if self.highlightCallback:
-			self.highlightCallback(self.GetSearchText())
+		self.DoHighlight(self.GetSearchText())
+
+
+	def DoSearch(text, forward, matchCase, regex):
+		# override me
+		pass
+
+	def DoCancel(self):
+		# override me
+		pass
+
+	def DoHighlight(self, text):
+		# override me
+		pass
 
 
 if __name__ == '__main__':

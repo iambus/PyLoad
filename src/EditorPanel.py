@@ -84,9 +84,9 @@ class EditorPanel(wx.Panel):
 		self.saveButton.Disable()
 
 		self.search = SearchBar(self)
-		self.search.searchCallback = self.editor.SearchText
-		self.search.highlightCallback = self.editor.HighlightText
-		self.search.cancelSearchCallback = self.editor.CancelSearch
+		self.search.DoSearch = self.editor.SearchText
+		self.search.DoHighlight = self.editor.HighlightText
+		self.search.DoCancelSearch = self.editor.CancelSearch
 
 
 		self.InitMenu()
