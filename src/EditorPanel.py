@@ -78,8 +78,10 @@ class EditorPanel(wx.Panel):
 		self.editor = CodeCtrl(self, -1,
                        size=(200, 100), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
 
+		# TODO: use icon button
 		self.viButton = wx.Button(self, -1, 'Edit in Vim')
 
+		# TODO: use icon button
 		self.saveButton = wx.Button(self, -1, 'Apply')
 		self.saveButton.Disable()
 
