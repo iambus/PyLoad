@@ -1,5 +1,6 @@
 
 import wx
+import wx.aui
 
 import InfoPanel
 import EditorPanel
@@ -19,35 +20,36 @@ class RecordTab(wx.Panel):
 		# Use the WANTS_CHARS style so the panel doesn't eat the Return key.
 		wx.Panel.__init__(self, parent, -1, style=wx.WANTS_CHARS)
 
-		#XXX: why can't I remove it?
-		self.Bind(wx.EVT_SIZE, self.OnSize)
-
-		self.splitter = wx.SplitterWindow(self, style=wx.BORDER_NONE)
-
-		self.tree = RecordPanel(self.splitter)
-		self.detailsPanel = DetailsPanel(self.splitter)
-
-		self.splitter.SetMinimumPaneSize(20)
-		self.splitter.SplitVertically(self.tree, self.detailsPanel, 180)
-
-		sizer = wx.BoxSizer()
-		sizer.Add(self.splitter, proportion=1, flag=wx.EXPAND)
-		self.SetSizer(sizer) 
+		self.tree = RecordPanel(self)
+		self.detailsPanel = DetailsPanel(self)
 
 		# Event Binding
 		self.Bind(wx.EVT_BUTTON, self.OnPlay, self.detailsPanel.testButton)
 		self.tree.onSelChangedCallback = self.detailsPanel.Load
 
-	########################################
 
-	# XXX: why I need this?
-	def ResetSize(self):
-		self.splitter.SetSashPosition(170)
+		self.mgr = wx.aui.AuiManager()
+		self.mgr.SetManagedWindow(self)
+
+		self.mgr.AddPane(self.tree,
+						 wx.aui.AuiPaneInfo().
+						 Left().
+						 BestSize((240,-1)).MinSize((160,-1)).FloatingSize((160, -1)).
+						 Caption("Records").
+						 MaximizeButton(True).
+						 MinimizeButton(True).
+						 PinButton(True).
+						 CloseButton(False))
+
+		self.mgr.AddPane(self.detailsPanel,
+						 wx.aui.AuiPaneInfo().
+						 CenterPane().
+						 MaximizeButton(True))
+
+		self.mgr.Update()
+
 
 	########################################
-	#XXX: why can't I remove it?
-	def OnSize(self, event):
-		event.Skip()
 
 	def OnExit(self):
 		self.tree.DeleteAllItems()

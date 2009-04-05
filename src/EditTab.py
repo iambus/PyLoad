@@ -1,5 +1,6 @@
 
 import wx
+import wx.aui
 from wx.lib.splitter import MultiSplitterWindow
 
 from ControllersPanel import ControllersPanel
@@ -17,27 +18,56 @@ class EditTab(wx.Panel):
 	def __init__(self, parent):
 		wx.Panel.__init__(self, parent, -1)
 
-		self.splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
-		self.leftsplitter = wx.SplitterWindow(self.splitter, style=wx.BORDER_NONE)
 
-		p1 = ControllersPanel(self.leftsplitter)
-		p2 = RecordPanel(self.leftsplitter, True)
-		self.leftsplitter.SplitHorizontally(p1, p2, -300)
+		p1 = ControllersPanel(self)
+		p2 = RecordPanel(self, isMirror = True)
+		p3 = SpecialsPanel(self)
+		p4 = DetailsPanel(self)
 
-		p3 = SpecialsPanel(self.splitter)
-		p4 = DetailsPanel(self.splitter)
-		self.splitter.AppendWindow(self.leftsplitter, 180)
-		self.splitter.AppendWindow(p3, 180)
-		self.splitter.AppendWindow(p4, 150)
+
+		self.mgr = wx.aui.AuiManager()
+		self.mgr.SetManagedWindow(self)
+
+
+		self.mgr.AddPane(p1,
+						 wx.aui.AuiPaneInfo().
+						 Top().Left().Layer(1).
+						 BestSize((240,-1)).MinSize((160,-1)).FloatingSize((160, -1)).
+						 Caption("Controllers").
+						 MaximizeButton(True).
+						 PinButton(True).
+						 CloseButton(False))
+
+		self.mgr.AddPane(p2,
+						 wx.aui.AuiPaneInfo().
+						 Bottom().Left().Layer(1).
+						 BestSize((240,-1)).MinSize((160,-1)).FloatingSize((160, -1)).
+						 Caption("Records").
+						 MaximizeButton(True).
+						 PinButton(True).
+						 CloseButton(False))
+
+		self.mgr.AddPane(p3,
+						 wx.aui.AuiPaneInfo().
+						 Left().
+						 BestSize((240,-1)).MinSize((160,-1)).FloatingSize((160, -1)).
+						 Caption("Specials").
+						 MaximizeButton(True).
+						 PinButton(True).
+						 CloseButton(False))
+
+		self.mgr.AddPane(p4,
+						  wx.aui.AuiPaneInfo().
+						  CenterPane())
+
+
+		self.mgr.Update()
+
 
 		self.controllersPanel = p1
 		self.specialsPanel = p3
 		self.detailsPanel = p4
 		self.recordPanel = p2
-
-		# layout
-		import Layout
-		Layout.SingleLayout(self, self.splitter)
 
 		# bindings
 		self.Bind(wx.EVT_BUTTON, self.OnPlay, self.detailsPanel.testButton)
@@ -47,10 +77,6 @@ class EditTab(wx.Panel):
 		tree = self.specialsPanel.tree
 		player = tree.GetPyData(tree.GetSelected())
 		player.play()
-
-	# XXX: why I need this?
-	def ResetSize(self):
-		self.leftsplitter.SetSashPosition(180)
 
 	def Unload(self):
 		self.specialsPanel.Unload()
@@ -69,7 +95,7 @@ if __name__ == '__main__':
 	import Project
 	p.specialsPanel.project = Project.NoneProject()
 	import Record
-	p.recordPanel.AppendRecord(Record.Record())
+#	p.recordPanel.AppendRecord(Record.Record())
 
 	frame.Center()
 	frame.Show(True)

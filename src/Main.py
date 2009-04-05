@@ -41,11 +41,9 @@ class NoteBook(wx.Toolbook):
 
 		self.recordTab = RecordTab(self)
 		self.AddPage(self.recordTab, 'Record', imageId=0)
-		self.recordTab.ResetSize()
 
 		self.editTab = EditTab(self)
 		self.AddPage(self.editTab, 'Edit', imageId=1)
-		self.editTab.ResetSize()
 
 		self.editTab.recordPanel.SetMirrorOf(self.recordTab.tree)
 		self.recordTab.tree.AddObserver(self.editTab.specialsPanel.UpdateSome)
