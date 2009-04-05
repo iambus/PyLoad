@@ -269,7 +269,11 @@ class RecordPanel(wx.Panel):
 	@make_change
 	def OnDeleteItems(self, event):
 		items = self.tree.GetSelectedRoots()
-		map(self.DeleteItem, items)
+		self.tree.Freeze()
+		try:
+			map(self.DeleteItem, items)
+		finally:
+			self.tree.Thaw()
 
 	@make_change
 	def OnDuplicateItem(self, event):
