@@ -2,6 +2,8 @@
 import wx
 import wx.lib.layoutf
 
+from control.Tabs import Tabs
+
 from InfoPanel import InfoPanel
 from EditorPanel import EditorPanel
 
@@ -72,42 +74,34 @@ ClassToTabs = {
 
 # main class
 
+class MyTabs(Tabs):
+	def GetTabNames(self, data):
+		return ClassToTabs[data.__class__]
+
+	def InitTab(self, tabName, tab, data):
+		TabToInitFuncs[tabName](tab, data)
+
+	def CreateTab(self, tabName):
+		return TabToPanel[tabName](self)
+
+	def GetTabType(self, tabName):
+		return TabToPanel[tabName]
+
 class DetailsPanel(wx.Panel):
 	def __init__(self, parent):
 		wx.Panel.__init__(self, parent, -1)
 
-		self.nb = wx.Notebook(self, -1)
+		self.tabs = MyTabs(self)
 		self.testButton = wx.Button(self, -1, "Test")
 
 		# Layout
 		self.SetAutoLayout(True)
-		self.nb.SetConstraints(
+		self.tabs.SetConstraints(
 				wx.lib.layoutf.Layoutf('t=t10#1;l=l10#1;b_b40#1;r=r10#1',(self,)))
 		self.testButton.SetConstraints(
-				wx.lib.layoutf.Layoutf('t_10#2;l=l10#1;h*;w*',(self,self.nb)))
+				wx.lib.layoutf.Layoutf('t_10#2;l=l10#1;h*;w*',(self,self.tabs)))
 		self.testButton.Hide()
 
-		#self.Bind(wx.EVT_BUTTON, self.testButton, self.OnPlay)
-
-	def RemoveAllPages(self):
-		self.nb.DeleteAllPages()
-	
-	def GiveSharedTabs(self, newTabNames):
-		'Avoid re-creating the same tabs'
-		currentTabNames = []
-		for i in range(self.nb.GetPageCount()):
-			currentTabNames.append(self.nb.GetPageText(i))
-		minlen = min( len(currentTabNames), len(newTabNames) )
-		n = 0
-		while n < minlen and TabToPanel[currentTabNames[n]] == TabToPanel[newTabNames[n]]:
-			n += 1
-		if n == 0:
-			self.nb.DeleteAllPages()
-			return 0
-		else:
-			for i in range(n, len(currentTabNames)):
-				self.nb.DeletePage(n)
-			return n
 
 	def Load(self, data, update = False):
 		if data == None:
@@ -119,52 +113,23 @@ class DetailsPanel(wx.Panel):
 		if update:
 			self.UpdateInfo(data)
 		else:
-			self.LoadData(data)
+			self.tabs.Load(data)
+			self.testButton.Show()
 
 	def ReLoad(self, data):
-		'Always create new tabs'
-		self.nb.DeleteAllPages()
-		c = data.__class__
-		tabNames = ClassToTabs[c]
-		for tabName in tabNames:
-			tab = TabToPanel[tabName](self.nb)
-			self.nb.AddPage(tab, tabName)
-			TabToInitFuncs[tabName](tab, data)
+		self.tabs.ReLoad(data)
 		self.testButton.Show()
 
 	def Unload(self):
-		self.nb.DeleteAllPages()
+		self.tabs.Unload()
 		self.testButton.Hide()
 
-	def LoadData(self, data):
-		self.Freeze()
-		try:
-			'Avoid re-creating the same tabs'
-			c = data.__class__
-			tabNames = ClassToTabs[c]
-
-			n = self.GiveSharedTabs(tabNames)
-
-			for i in range(n):
-				tab = self.nb.GetPage(i)
-				tabName = tabNames[i]
-				self.nb.SetPageText(i, tabName)
-				TabToInitFuncs[tabName](tab, data)
-
-			for i in range(n, len(tabNames)):
-				tabName = tabNames[i]
-				tab = TabToPanel[tabName](self.nb)
-				self.nb.AddPage(tab, tabName)
-				TabToInitFuncs[tabName](tab, data)
-			self.testButton.Show()
-		finally:
-			self.Thaw()
-
 	def UpdateInfo(self, data):
-		tabName = self.nb.GetPageText(0)
+		tabName = self.GetPageText(0)
 		assert tabName == 'Info'
-		tab = self.nb.GetPage(0)
+		tab = self.GetPage(0)
 		tab.Load(data)
+
 
 if __name__ == '__main__':
 	import Test

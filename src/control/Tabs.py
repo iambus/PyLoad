@@ -34,31 +34,8 @@ class Tabs(wx.Notebook):
 				self.DeletePage(n)
 			return n
 
-	def Load(self, data, update = False):
-		if data == None:
-			# possible on Linux
-			# TODO: auto-select next node on Linux when a node is deleted (of course not here)
-			self.Unload()
-			return
 
-		if update:
-			self.UpdateInfo(data)
-		else:
-			self.LoadData(data)
-
-	def ReLoad(self, data):
-		'Always create new tabs'
-		self.DeleteAllPages()
-		tabNames = self.GetTabNames(data)
-		for tabName in tabNames:
-			tab = self.CreateTab(tabName)
-			self.AddPage(tab, tabName)
-			self.InitTab(tabName, tab, data)
-
-	def Unload(self):
-		self.DeleteAllPages()
-
-	def LoadData(self, data):
+	def Load(self, data):
 		self.Freeze()
 		try:
 			'Avoid re-creating the same tabs'
@@ -80,11 +57,18 @@ class Tabs(wx.Notebook):
 		finally:
 			self.Thaw()
 
-	def UpdateInfo(self, data):
-		tabName = self.GetPageText(0)
-		assert tabName == 'Info'
-		tab = self.GetPage(0)
-		tab.Load(data)
+	def ReLoad(self, data):
+		'Always create new tabs'
+		self.DeleteAllPages()
+		tabNames = self.GetTabNames(data)
+		for tabName in tabNames:
+			tab = self.CreateTab(tabName)
+			self.AddPage(tab, tabName)
+			self.InitTab(tabName, tab, data)
+
+	def Unload(self):
+		self.DeleteAllPages()
+
 
 if __name__ == '__main__':
 	class InfoTab(wx.TextCtrl):
