@@ -93,9 +93,12 @@ if __name__ == '__main__':
 	p = EditTab(frame)
 
 	import Project
-	p.specialsPanel.project = Project.NoneProject()
+	project = Project.NoneProject()
 	import Record
-#	p.recordPanel.AppendRecord(Record.Record())
+	project.records.append(Record.Record())
+
+	p.specialsPanel.project = project
+	p.recordPanel.project = project
 
 	frame.Center()
 	frame.Show(True)
