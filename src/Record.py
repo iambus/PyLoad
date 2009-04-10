@@ -83,6 +83,7 @@ class Hit(Player, PropertyMixin):
 		if self.respstr:
 			self.respstr = self.decode_whole(self.respstr, self.resp_handler.coder)
 
+		self.compile()
 
 		self.set_label()
 
@@ -91,6 +92,7 @@ class Hit(Player, PropertyMixin):
 
 	def set_reqstr(self, reqstr):
 		self.reqstr = reqstr
+		self.compile()
 
 	def set_host(self, host):
 		protocol = None
@@ -179,6 +181,20 @@ class Hit(Player, PropertyMixin):
 		raw_request = self.encode_whole(reqstr, self.req_handler.coder)
 		return Requester(self.url, raw_request)
 
+	def compile(self):
+		try:
+			reqstr = Template.subst(self.reqstr, {})
+			raw_request = self.encode_whole(reqstr, self.req_handler.coder)
+			self.compiled_request = Requester(self.url, raw_request)
+		except:
+			self.compiled_request = None
+
+	def get_compiled_request(self, basescope):
+		if hasattr(self, 'compiled_request') and self.compiled_request:
+			return self.compiled_request
+		else:
+			return self.get_encoded_request(basescope)
+
 	# by default, always encode request
 	get_request = get_encoded_request
 
@@ -188,6 +204,10 @@ class Hit(Player, PropertyMixin):
 	# change to get_cached_request if the recorded request is not OK for you,
 	# but all requests sent during one test are exactly the same
 	#get_request = get_cached_request
+
+	# change to get_compiled_request if the request doesn't have variable
+	#get_request = get_compiled_request
+
 
 	# {{{ encode / decode
 	def decode_whole(self, raw, coder):
