@@ -16,19 +16,23 @@ class TestTemplate(unittest.TestCase):
 
 	def testSubst(self):
 		self.assertSubst('x', 'x')
-		self.assertSubst('$', '$')
+		self.assertBad('$')
 		self.assertSubst('$$', '$')
 		self.assertSubst('$x', '1')
 		self.assertSubst('${x}', '1')
 		self.assertSubst('$$$x', '$1')
 		self.assertSubst('$$$$x', '$$x')
-		self.assertSubst('a$xb', 'a$xb')
+		self.assertBad('a$xb')
 		self.assertSubst('a${x}b', 'a1b')
-		self.assertSubst('${x+y}', '${x+y}')
+		self.assertBad('${x+y}')
 	
 	def testEval(self):
 		#TODO: not impelemented eval
 		pass
+
+
+	def testBad(self):
+		self.assertBad('$xyz')
 
 	def testUnicode(self):
 		self.assertEqual(Template.escape('x'), u'x')
@@ -59,6 +63,9 @@ class TestTemplate(unittest.TestCase):
 
 	def assertSubst(self, source, target):
 		self.assertEqual(Template.subst(source, self.variables), target)
+
+	def assertBad(self, source):
+		self.assertRaises((ValueError, KeyError), lambda:Template.subst(source, self.variables))
 
 if __name__ == '__main__':
 	unittest.main()
