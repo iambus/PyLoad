@@ -81,6 +81,12 @@ class Project:
 				if hasattr(obj, 'childern') and not hasattr(obj, 'children'):
 					setattr(obj, 'children', getattr(obj, 'childern'))
 					delattr(obj, 'childern')
+			# For compatibility
+			# TODO: remove this migration trick after 2009-10!
+			import Record
+			for obj in p.repository_internal.mappings.values():
+				if isinstance(obj, Record.Hit) and not hasattr(obj, 'compiled_request'):
+					obj.compile()
 			#
 			self.records = p.records
 			self.specials = p.specials
