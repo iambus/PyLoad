@@ -48,10 +48,7 @@ def ReadMemoryInfo( processID ):
 	hProcess = SimpleOpenProcess( processID )
 	try:
 		SimpleGetProcessMemoryInfo( hProcess, pmc)
-		for attr in dir(pmc):
-			if not attr.startswith('_'):
-				print attr, getattr(pmc, attr)
-		return 0
+		return pmc.PagefileUsage, pmc.WorkingSetSize
 	finally:
 		SimpleCloseProcess( hProcess )
 

@@ -27,20 +27,21 @@ log = null_stream
 
 def record_loop(interval, pid):
     while True:
-        current_time, current_memory = now(), read_memory(pid)
-        log.write( '%s:%8d\n' % (current_time, current_memory) )
+        virtual_memory, phisical_memory = read_memory(pid)
+        current_time = now()
+        log.write( '%s:%8d:%8d\n' % (current_time, virtual_memory, phisical_memory) )
         log.flush()
-        console.write('%s   %d\n' % (current_time, current_memory))
+        console.write('%s   %d   %d\n' % (current_time, virtual_memory, phisical_memory))
 
         time.sleep(interval)
 
-def record(interval, pid = None):
+def record(interval, pid):
     try:
-        console.write('Recording... [Press Ctrl+C to terminate]\n')
+        console.write('Recording memory usage for process %d... [Press Ctrl+C to terminate]\n' %pid)
         record_loop(interval, pid)
     except KeyboardInterrupt:
         see_log_message = ' Log is saved in %s' % log.name if log.name else ''
-        console.write('Finished.%s\n' % see_log_message)
+        console.write('Finished memory recording for process %d.%s\n' % (pid, see_log_message))
 
 ##################################################
 ############  Command Line Interface  ############
