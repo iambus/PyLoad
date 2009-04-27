@@ -122,7 +122,7 @@ def SimpleOpenProcess(processID):
 		raise RuntimeError("WinAPI Error: OpenProcess failed; GetLastError: %s" % (GetLastError()))
 	return hProcess
 
-def SimpleCloseProcess(processID):
+def SimpleCloseProcess(hProcess):
 	windll.kernel32.CloseHandle( hProcess )
 
 def GetProcessMemoryInfo(Process, ppsmemCounters, cb):
@@ -148,4 +148,5 @@ def ReadMemoryInfo( processID ):
 
 
 def read_memory(pid):
+	assert type(pid) == int
 	return ReadMemoryInfo(pid)

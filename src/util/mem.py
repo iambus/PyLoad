@@ -84,7 +84,7 @@ def run_command(argv):
 
     if not args:
         sys.exit("Must specify pid")
-    pid = args.pop(0)
+    pid = int(args.pop(0))
     if args:
         sys.exit('Too many args given: %s' % args)
 
