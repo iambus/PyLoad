@@ -57,7 +57,7 @@ Options:
   -h, --help      Show this help.
   -l, --log       Log path
   -n, --no-log    When recording Memory information, don't write date to log file (simply print to stdout).
-  -i, --interval  Delay interval. Default to 3 seconds.
+  -i, --interval  Delay interval. Default to 10 minutes.
   -q, --quiet     No console output (log to file).
 
 Examples:
@@ -92,7 +92,7 @@ def run_command(argv):
     default_log_path = 'mem-usage.log'
     logpath = None
 
-    default_interval = 3
+    default_interval = 60 * 10
     interval = default_interval
 
     nolog = None
