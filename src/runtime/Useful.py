@@ -1,7 +1,7 @@
 
 import cookielib, urllib2
 
-__all__ = ['Cookie', 'Browser', 'sleep', 'randsleep']
+__all__ = ['Cookie', 'Browser', 'sleep', 'randsleep', 'uuid']
 
 def Cookie():
 	import URL
@@ -18,4 +18,7 @@ def randsleep(n, r = 0.5):
 	ms = randint((n - r) * 1000, (n + r) * 1000)
 	sleep(ms/1000.0)
 
+def uuid():
+	from uuid import uuid1
+	return uuid1()
 
