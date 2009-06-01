@@ -22,3 +22,9 @@ def uuid():
 	from uuid import uuid1
 	return uuid1()
 
+def log(message):
+	import Logger
+	logger = Logger.getLogger()
+	logger.info(message)
+
+
