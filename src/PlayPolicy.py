@@ -143,6 +143,7 @@ class IterationBasedPlayPolicy:
 		scope = Scope(scope)
 		scope['_USER_COUNT_'] = self.user_count
 		scope['_ITERATION_COUNT_'] = self.iteration_count
+		scope['_PLAYER_'] = self.player
 		if self.reporter:
 			scope['global_reporter'] = self.reporter
 		g.before(scope)
@@ -162,6 +163,7 @@ class IterationBasedPlayPolicy:
 		scope = Scope(scope)
 		scope['_USER_COUNT_'] = self.user_count
 		scope['_ITERATION_COUNT_'] = self.iteration_count
+		scope['_PLAYER_'] = self.player
 		if self.reporter:
 			scope['global_reporter'] = self.reporter
 		g.before(scope)
