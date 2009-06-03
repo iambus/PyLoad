@@ -44,6 +44,8 @@ class Hit(Player, PropertyMixin):
 		self.oreqstr = None
 		self.orespstr = None
 
+		self.compiled_requests = {}
+
 		#param_index = url.find('?')
 		#if param_index != -1:
 		#	self.page = url[:param_index]
@@ -195,6 +197,23 @@ class Hit(Player, PropertyMixin):
 		else:
 			return self.get_encoded_request(basescope)
 
+	def compile_with_key(self, key, variables):
+		if not hasattr(self, 'compiled_requests'):
+			self.compiled_requests = {}
+		try:
+			reqstr = Template.subst(self.reqstr, variables)
+			raw_request = self.encode_whole(reqstr, self.req_handler.coder)
+			self.compiled_requests[key] = Requester(self.url, raw_request)
+		except:
+			log.exception('Can not compile. Key: %s, Varaibles: %s, Reason: %s' % (key, variables, reason))
+
+	def get_compiled_request_with_key(self, basescope):
+		try:
+			cache_key = basescope.lookup('cache_key')
+			return self.compiled_requests[cache_key]
+		except:
+			return self.get_encoded_request(basescope)
+
 	# by default, always encode request
 	get_request = get_encoded_request
 
@@ -207,6 +226,9 @@ class Hit(Player, PropertyMixin):
 
 	# change to get_compiled_request if the request doesn't have variable
 	#get_request = get_compiled_request
+
+	# change to get_compiled_request_with_key if the requests have been compiled with key
+	#get_request = get_compiled_request_with_key
 
 
 	# {{{ encode / decode
