@@ -129,9 +129,9 @@ class DetailsPanel(wx.Panel):
 		self.testButton.Hide()
 
 	def UpdateInfo(self, data):
-		tabName = self.GetPageText(0)
+		tabName = self.tabs.GetPageText(0)
 		assert tabName == 'Info'
-		tab = self.GetPage(0)
+		tab = self.tabs.GetPage(0)
 		tab.Load(data)
 
 
