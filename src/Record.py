@@ -155,6 +155,9 @@ class Hit(Player, PropertyMixin):
 			if reporter:
 				reporter.post_error(self.uuid, start_time) # using start time
 			raise Errors.TerminateRequest('ValidationError: %s' % e)
+		finally:
+			# XXX: fix memory leak -- why I need this?
+			del response
 
 		return (start_time, end_time)
 

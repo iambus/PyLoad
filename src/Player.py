@@ -104,7 +104,12 @@ class Player(Playable):
 		for script in self.scripts:
 			script.execute(basescope)
 		for child in self.children:
-			child.play(Scope(basescope))
+			#child.play(Scope(basescope)) # this has memory leak, use below...
+
+			new_scope = Scope(basescope)
+			child.play(new_scope)
+			# XXX: fix memory leak -- why I need this?
+			new_scope.clear()
 
 	def after(self, basescope = None):
 		self.execute_script(self.afterscript, basescope)
