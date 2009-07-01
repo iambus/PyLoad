@@ -225,7 +225,15 @@ class XMLPanel(wx.Panel):
 
 	def SearchByText(self, keyword):
 		keyword = keyword.lower()
-		nodeFilter = lambda node: keyword in node.element.tag.lower() or (node.element.text and keyword in node.element.text.lower())
+		def nodeFilter(node):
+			if keyword in node.element.tag.lower():
+				return True
+			if node.element.text and keyword in node.element.text.lower():
+				return True
+			for attrib in node.element.attrib.values():
+				if keyword in attrib.lower():
+					return True
+			return False
 		self.tree.FilterTree(nodeFilter)
 
 	def SearchByXPath(self, xpath):
