@@ -61,6 +61,10 @@ class AMFContentType(ContentType):
 		import editor.syntax.xml
 		return editor.syntax.xml
 
+	@property
+	def validator(self):
+		return Validator.AMFResponseValidator
+
 class PythonContentType(ContentType):
 	@property
 	def type(self):
