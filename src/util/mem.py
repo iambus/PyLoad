@@ -83,12 +83,6 @@ def run_command(argv):
             'quiet',
         ])
 
-    if not args:
-        sys.exit("Must specify pid")
-    pid = int(args.pop(0))
-    if args:
-        sys.exit('Too many args given: %s' % args)
-
     default_log_path = 'mem-usage.log'
     logpath = None
 
@@ -112,6 +106,12 @@ def run_command(argv):
             quiet = True
         else:
             sys.exit('Unknown option %s' % o)
+
+    if not args:
+        sys.exit("Must specify pid")
+    pid = int(args.pop(0))
+    if args:
+        sys.exit('Too many args given: %s' % args)
 
     if not nolog and not logpath:
         logpath = default_log_path
