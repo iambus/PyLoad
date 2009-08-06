@@ -57,7 +57,7 @@ Options:
   -h, --help      Show this help.
   -l, --log       Log path
   -n, --no-log    When recording Memory information, don't write date to log file (simply print to stdout).
-  -i, --interval  Delay interval. Default to 10 minutes.
+  -i, --interval  Delay interval (by seconds). Default to 10 minutes.
   -q, --quiet     No console output (log to file).
 
 Examples:

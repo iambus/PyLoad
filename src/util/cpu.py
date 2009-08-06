@@ -128,7 +128,7 @@ Options:
   -r, --read      Compute the average CPU usage in log file.
   -a, --analysis  Display CPU information in log file.
   -n, --no-log    When recording CPU information, don't write date to log file (simply print to stdout).
-  -i, --interval  Delay interval. Default to 3 seconds.
+  -i, --interval  Delay interval (by seconds). Default to 3 seconds.
   -q, --quiet     No console output (log to file).
 
 Examples:
