@@ -54,5 +54,6 @@ def ReadMemoryInfo( processID ):
 
 
 def read_memory(pid):
+	''' return [virtual memory, physical memory] '''
 	assert type(pid) == int
 	return ReadMemoryInfo(pid)

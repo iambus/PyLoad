@@ -6,6 +6,7 @@ __all__ = ['read_memory']
 
 
 def read_memory(pid):
+    ''' return [virtual memory, physical memory] '''
     assert type(pid) == int
     import os
     fp = os.popen('ps u -p %d --no-heading' % pid)
