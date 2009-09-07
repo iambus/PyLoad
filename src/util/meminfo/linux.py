@@ -6,6 +6,12 @@ __all__ = ['read_memory']
 
 
 def read_memory(pid):
-	assert type(pid) == int
-	raise NotImplementedError()
+    assert type(pid) == int
+    import os
+    fp = os.popen('ps u -p %d --no-heading' % pid)
+    try:
+        memline = fp.read()
+    finally:
+        fp.close()
+    return map(int, memline.split()[4:6])
 
