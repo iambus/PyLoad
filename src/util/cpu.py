@@ -21,6 +21,9 @@ null_stream = NullStream()
 console = sys.stdout
 log = null_stream
 
+#time_format = '%Y-%m-%d %H:%M:%S'
+time_format = '%H:%M:%S'
+
 def read_current_time_and_cpu(pid = None):
     return time.time(), read_current_point(pid)
 
@@ -87,8 +90,7 @@ def compute_file(path):
 ##################################################
 
 def format_seconds(ts):
-    #return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ts))
-    return time.strftime('%H:%M:%S', time.localtime(ts))
+    return time.strftime(time_format, time.localtime(ts))
 
 def percentage_bits(u):
     n = int(u+0.5)
@@ -147,10 +149,11 @@ def main():
 
 def run_command(argv):
     import getopt
-    optlist, args = getopt.getopt(argv, 'hp:arni:q', [
+    optlist, args = getopt.getopt(argv, 'hp:adrni:q', [
             'help',
             'pid',
             'analysis',
+            'with-date',
             'read',
             'no-log',
             'interval',
@@ -179,6 +182,9 @@ def run_command(argv):
             read_mode = 'r'
         elif o in ('-a', 'Analysis'):
             read_mode = 'a'
+        elif o in ('-d', '--with-date'):
+            global time_format
+            time_format = '%Y-%m-%d %H:%M:%S'
         elif o in ('-n', 'no-log'):
             nolog = True
         elif o in ('-i', 'interval'):
