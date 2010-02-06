@@ -7,6 +7,18 @@ __all__ = ['get_core_number', 'CORE_NUMBER', 'read_current_point', 'cpu_percenta
 from ctypes import *
 from ctypes.wintypes import *
 
+
+##################################################
+import pdh
+
+pdh_processes = {}
+def read_current_process_point(pid):
+	if pid not in pdh_processes:
+		pdh_processes[pid] = pdh.QueryCPUUsage(pid)
+	q = pdh_processes[pid]
+	q.sample()
+	return q
+
 ##################################################
 
 SystemBasicInformation       = 0
@@ -97,11 +109,14 @@ def read_current_cpu_point():
 
 def read_current_point(pid = None):
 	if pid:
-		raise NotImplementedError('process CPU monitor is not supported')
+		return read_current_process_point(pid)
 	else:
 		return  read_current_cpu_point()
 
 def cpu_percentage_between_points(p1, p2):
+	if isinstance(p2, pdh.QueryCPUUsage):
+		return p2.getCPUUsage()
+
 	liOldSystemTime, liOldIdleTime = p1
 	liNewSystemTime, liNewIdleTime = p2
 

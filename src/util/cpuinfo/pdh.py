@@ -177,7 +177,7 @@ def getProcesses():
 
 def testCPU():
     from time import sleep
-    q = QueryCPUUsage()
+    q = QueryCPUUsage(0)
     while(True):
         q.sample()
         sleep(1);
