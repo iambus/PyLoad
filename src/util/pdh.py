@@ -12,6 +12,7 @@ pdh = ctypes.windll.pdh
 Error_Success = 0x00000000
 ERROR_SUCCESS = 0x00000000
 
+NULL = 0
 PDH_FMT_LONG = 0x00000100
 
 class PDH_Counter_Union(Union):
@@ -25,40 +26,102 @@ class PDH_FMT_COUNTERVALUE(Structure):
     _fields_ = [('CStatus', DWORD),
                 ('union', PDH_Counter_Union),]
 
+##################################################
+
+def PdhCollectQueryData(query):
+    status = pdh.PdhCollectQueryData(query)
+    if status != Error_Success:
+        raise RuntimeError('PdhCollectQueryData returns %s(0x%x)' % (status, 0xFFFFFFFF&status))
+    return status
+
+
+def PdhOpenQuery(query):
+    status = pdh.PdhOpenQueryW(None,
+                             0,
+                             byref(query))
+    if status != Error_Success:
+        raise RuntimeError('PdhOpenQuery returns %s(0x%x)' % (status, 0xFFFFFFFF&status))
+    return status
+
+def PdhCloseQuery(query):
+    pdh.PdhCloseQuery(query)
+
+def PdhAddCounter(query, counterPath, counter):
+    status = pdh.PdhAddCounterW(query, counterPath, 0, byref(counter))
+    if status != Error_Success:
+        raise RuntimeError('PdhAddCounter returns %s(0x%x)' % (status, 0xFFFFFFFF&status))
+    return status
+
+def PdhGetFormattedCounterValue(counter, format, value):
+    status = pdh.PdhGetFormattedCounterValue(counter, format, 0, byref(value))
+    if status != Error_Success:
+        raise RuntimeError('PdhGetFormattedCounterValue returns %s(0x%x)' % (status, 0xFFFFFFFF&status))
+    return status
+
+##################################################
 class QueryCPUUsage:
-    def __init__(self):
+    def __init__(self, process = None):
+        if isinstance(process, int):
+            process = getProcess(process)
+        self.process = process
+        if process:
+            self.counterPath = ur'\Process(%s)\%% Processor Time' % process
+        else:
+            self.counterPath = ur'\Processor(_Total)\% Processor Time'
+
         self.hQuery = HQUERY()
         self.hCounter = HCOUNTER()
-        if not pdh.PdhOpenQueryW(None,
-                                 0,
-                                 byref(self.hQuery)) == Error_Success:
-            raise Exception
-        if not pdh.PdhAddCounterW(self.hQuery,
-                                 ur'\Processor(_Total)\% Processor Time',
-                                 #ur'\Process(gvim)\% Processor Time',
-                                 0,
-                                 byref(self.hCounter)) == Error_Success:
-            raise Exception
+        PdhOpenQuery(self.hQuery)
+        PdhAddCounter(self.hQuery,
+                       self.counterPath,
+                       self.hCounter)
+
+        self.sample()
 
     def sample(self):
-        if not pdh.PdhCollectQueryData(self.hQuery) == Error_Success:
-            raise Exception
+        PdhCollectQueryData(self.hQuery)
 
     def getCPUUsage(self):
-        dwType = DWORD(0)
         value = PDH_FMT_COUNTERVALUE()
-        if not pdh.PdhGetFormattedCounterValue(self.hCounter,
-                                          PDH_FMT_LONG,
-                                          byref(dwType),
-                                          byref(value)) == Error_Success:
-            raise Exception
+        PdhGetFormattedCounterValue(self.hCounter, PDH_FMT_LONG, value)
 
         return value.union.longValue
 
+    def close(self):
+        PdhCloseQuery(self.hQuery)
 
-####################################################################################################
-def loopProcesses():
-    NULL = 0
+def getProcess(pid):
+    processes = set()
+    for p in getProcesses():
+        if p not in processes:
+            processes.add(p)
+        else:
+            n = 1
+            while '%s#%d' % (p, n) in processes:
+                n += 1
+            processes.add('%s#%d' % (p, n))
+    for p in processes:
+        if getPID(p) == pid:
+            return p
+
+def getPID(instance):
+    hQuery = HQUERY()
+    hCounter = HCOUNTER()
+    PdhOpenQuery(hQuery)
+    PdhAddCounter(hQuery,
+                 ur'\Process(%s)\ID Process' % instance,
+                 hCounter)
+
+    PdhCollectQueryData(hQuery)
+
+    dwType = DWORD(0)
+    value = PDH_FMT_COUNTERVALUE()
+    PdhGetFormattedCounterValue(hCounter, PDH_FMT_LONG, value)
+    PdhCloseQuery(hQuery)
+
+    return value.union.longValue
+
+def getProcesses():
     PERF_DETAIL_WIZARD = 400
     PDH_MORE_DATA = DWORD(0x800007D2L)
     COUNTER_OBJECT = u'Process'
@@ -101,21 +164,16 @@ def loopProcesses():
        0)
 
     if status != ERROR_SUCCESS:
-        raise RuntimeError("Second PdhEnumObjectItems failed with %0x%x" % status)
-
-    print "Counters that the Process objects defines:\n"
+        raise RuntimeError("Second PdhEnumObjectItems failed with 0x%x" % status)
 
     z = ''.join(pwsCounterListBuffer)
     counterList = z[:z.index('\x00\x00')].split('\x00')
-    print counterList
-
-    print "Instances of the Process object:\n"
 
     z = ''.join(pwsInstanceListBuffer)
     instanceList = z[:z.index('\x00\x00')].split('\x00')
-    print instanceList
+    return instanceList
 
-####################################################################################################
+##################################################
 
 def testCPU():
     from time import sleep
@@ -126,6 +184,5 @@ def testCPU():
         print q.getCPUUsage()
 
 if __name__=='__main__':
-    #testCPU()
-    loopProcesses()
+    testCPU()
 
