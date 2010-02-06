@@ -3,7 +3,8 @@
 import platform
 assert platform.uname()[0] == 'Linux', 'This module must be used under Linux'
 
-__all__ = ['get_core_number', 'read_current_point', 'cpu_percentage_between_points']
+__all__ = ['get_core_number', 'read_current_point', 'cpu_percentage_between_points',
+           'get_pid_by_name', 'get_pids_by_name']
 
 def get_core_number():
     fp = open('/proc/cpuinfo')
@@ -83,6 +84,12 @@ def cpu_percentage_between_points(p1, p2):
         pu = puser2 - puser1
         ps = psystem2 - psystem1
         return (pu + ps) * 100.0 / (u + s + i)
+
+def get_pid_by_name(process):
+    raise NotImplementedError()
+
+def get_pids_by_name(process):
+    raise NotImplementedError()
 
 if __name__ == '__main__':
     print read_current_cpu_point()
