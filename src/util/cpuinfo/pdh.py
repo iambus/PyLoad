@@ -1,10 +1,10 @@
+
+__all__ = []
+
 import ctypes
 from ctypes import *
-#from ctypes import byref
-#from ctypes import Structure, Union
 from ctypes.wintypes import *
 
-__author__ = 'Shao-chuan Wang'
 
 LONGLONG = ctypes.c_longlong
 HQUERY = HCOUNTER = HANDLE
@@ -59,69 +59,7 @@ def PdhGetFormattedCounterValue(counter, format, value):
     return status
 
 ##################################################
-class QueryCPUUsage:
-    def __init__(self, process = None):
-        if isinstance(process, int):
-            process = getProcess(process)
-        self.process = process
-        if process:
-            self.counterPath = ur'\Process(%s)\%% Processor Time' % process
-        else:
-            self.counterPath = ur'\Processor(_Total)\% Processor Time'
-
-        self.hQuery = HQUERY()
-        self.hCounter = HCOUNTER()
-        PdhOpenQuery(self.hQuery)
-        PdhAddCounter(self.hQuery,
-                       self.counterPath,
-                       self.hCounter)
-
-        self.sample()
-
-    def sample(self):
-        PdhCollectQueryData(self.hQuery)
-
-    def getCPUUsage(self):
-        value = PDH_FMT_COUNTERVALUE()
-        PdhGetFormattedCounterValue(self.hCounter, PDH_FMT_LONG, value)
-
-        return value.union.longValue
-
-    def close(self):
-        PdhCloseQuery(self.hQuery)
-
-def getProcess(pid):
-    processes = set()
-    for p in getProcesses():
-        if p not in processes:
-            processes.add(p)
-        else:
-            n = 1
-            while '%s#%d' % (p, n) in processes:
-                n += 1
-            processes.add('%s#%d' % (p, n))
-    for p in processes:
-        if getPID(p) == pid:
-            return p
-
-def getPID(instance):
-    hQuery = HQUERY()
-    hCounter = HCOUNTER()
-    PdhOpenQuery(hQuery)
-    PdhAddCounter(hQuery,
-                 ur'\Process(%s)\ID Process' % instance,
-                 hCounter)
-
-    PdhCollectQueryData(hQuery)
-
-    dwType = DWORD(0)
-    value = PDH_FMT_COUNTERVALUE()
-    PdhGetFormattedCounterValue(hCounter, PDH_FMT_LONG, value)
-    PdhCloseQuery(hQuery)
-
-    return value.union.longValue
-
-def getProcesses():
+def getProcessInstances():
     PERF_DETAIL_WIZARD = 400
     PDH_MORE_DATA = DWORD(0x800007D2L)
     COUNTER_OBJECT = u'Process'
@@ -173,6 +111,87 @@ def getProcesses():
     instanceList = z[:z.index('\x00\x00')].split('\x00')
     return instanceList
 
+def getProcess(pid):
+    processes = set()
+    for p in getProcessInstances():
+        if p not in processes:
+            processes.add(p)
+        else:
+            n = 1
+            while '%s#%d' % (p, n) in processes:
+                n += 1
+            processes.add('%s#%d' % (p, n))
+    for p in processes:
+        if getPID(p) == pid:
+            return p
+
+def getPID(instance):
+    hQuery = HQUERY()
+    hCounter = HCOUNTER()
+    PdhOpenQuery(hQuery)
+    PdhAddCounter(hQuery,
+                 ur'\Process(%s)\ID Process' % instance,
+                 hCounter)
+
+    PdhCollectQueryData(hQuery)
+
+    dwType = DWORD(0)
+    value = PDH_FMT_COUNTERVALUE()
+    PdhGetFormattedCounterValue(hCounter, PDH_FMT_LONG, value)
+    PdhCloseQuery(hQuery)
+
+    return value.union.longValue
+
+##################################################
+class QueryCPUUsage:
+    def __init__(self, process = None):
+        if isinstance(process, int):
+            process = getProcess(process)
+        self.process = process
+        if process:
+            self.counterPath = ur'\Process(%s)\%% Processor Time' % process
+        else:
+            self.counterPath = ur'\Processor(_Total)\% Processor Time'
+
+        self.hQuery = HQUERY()
+        self.hCounter = HCOUNTER()
+        PdhOpenQuery(self.hQuery)
+        PdhAddCounter(self.hQuery,
+                       self.counterPath,
+                       self.hCounter)
+
+        self.sample()
+
+    def sample(self):
+        PdhCollectQueryData(self.hQuery)
+
+    def getCPUUsage(self):
+        value = PDH_FMT_COUNTERVALUE()
+        PdhGetFormattedCounterValue(self.hCounter, PDH_FMT_LONG, value)
+
+        return value.union.longValue
+
+    def close(self):
+        PdhCloseQuery(self.hQuery)
+
+def GetPIDByName(process):
+	processes = getProcessInstances()
+	n = processes.count(process)
+	if n > 2:
+		raise RuntimeError("Don't know which %s pid to get. There are %d" % (process, n))
+	if n == 0:
+		raise RuntimeError("No %s found" % process)
+	return getPID(process)
+
+def GetPIDsByName(process):
+	processes = getProcessInstances()
+	n = processes.count(process)
+	if n == 0:
+		return []
+	if n == 1:
+		return [getPID(process)]
+	return map(getPID, ['%s#%d' % (process, i) for i in range(n)])
+
 ##################################################
 
 def testCPU():
@@ -184,5 +203,6 @@ def testCPU():
         print q.getCPUUsage()
 
 if __name__=='__main__':
-    testCPU()
+    #testCPU()
+	print GetPIDsByName('CMD')
 

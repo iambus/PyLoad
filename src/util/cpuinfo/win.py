@@ -2,7 +2,9 @@
 import platform
 assert platform.uname()[0] == 'Windows', 'This module must be used under Windows'
 
-__all__ = ['get_core_number', 'CORE_NUMBER', 'read_current_point', 'cpu_percentage_between_points']
+__all__ = ['get_core_number', 'CORE_NUMBER',
+           'read_current_point', 'cpu_percentage_between_points',
+           'get_pid_by_name', 'get_pids_by_name']
 
 from ctypes import *
 from ctypes.wintypes import *
@@ -18,6 +20,12 @@ def read_current_process_point(pid):
 	q = pdh_processes[pid]
 	q.sample()
 	return q
+
+def get_pid_by_name(process):
+	return pdh.GetPIDByName(process)
+
+def get_pids_by_name(process):
+	return pdh.GetPIDsByName(process)
 
 ##################################################
 
