@@ -124,6 +124,7 @@ def getProcess(pid):
     for p in processes:
         if getPID(p) == pid:
             return p
+    raise RuntimeError("No process with pid %d" % pid)
 
 def getPID(instance):
     hQuery = HQUERY()
@@ -196,13 +197,12 @@ def GetPIDsByName(process):
 
 def testCPU():
     from time import sleep
-    q = QueryCPUUsage(0)
+    q = QueryCPUUsage(19)
     while(True):
         q.sample()
         sleep(1);
         print q.getCPUUsage()
 
 if __name__=='__main__':
-    #testCPU()
-	print GetPIDsByName('CMD')
+    testCPU()
 
