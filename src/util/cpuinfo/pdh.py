@@ -109,24 +109,10 @@ def getProcessInstances():
 
     z = ''.join(pwsInstanceListBuffer)
     instanceList = z[:z.index('\x00\x00')].split('\x00')
+    instanceList = [i.lower() for i in instanceList]
     return instanceList
 
-def getProcess(pid):
-    processes = set()
-    for p in getProcessInstances():
-        if p not in processes:
-            processes.add(p)
-        else:
-            n = 1
-            while '%s#%d' % (p, n) in processes:
-                n += 1
-            processes.add('%s#%d' % (p, n))
-    for p in processes:
-        if getPID(p) == pid:
-            return p
-    raise RuntimeError("No process with pid %d" % pid)
-
-def getPID(instance):
+def getInstancePID(instance):
     hQuery = HQUERY()
     hCounter = HCOUNTER()
     PdhOpenQuery(hQuery)
@@ -143,11 +129,26 @@ def getPID(instance):
 
     return value.union.longValue
 
+def getProcessInstance(pid):
+    processes = set()
+    for p in getProcessInstances():
+        if p not in processes:
+            processes.add(p)
+        else:
+            n = 1
+            while '%s#%d' % (p, n) in processes:
+                n += 1
+            processes.add('%s#%d' % (p, n))
+    for p in processes:
+        if getInstancePID(p) == pid:
+            return p
+    raise RuntimeError("No process with pid %d" % pid)
+
 ##################################################
 class QueryCPUUsage:
     def __init__(self, process = None):
         if isinstance(process, int):
-            process = getProcess(process)
+            process = getProcessInstance(process)
         self.process = process
         if process:
             self.counterPath = ur'\Process(%s)\%% Processor Time' % process
@@ -176,28 +177,30 @@ class QueryCPUUsage:
         PdhCloseQuery(self.hQuery)
 
 def GetPIDByName(process):
-	processes = getProcessInstances()
-	n = processes.count(process)
-	if n > 2:
-		raise RuntimeError("Don't know which %s pid to get. There are %d" % (process, n))
-	if n == 0:
-		raise RuntimeError("No %s found" % process)
-	return getPID(process)
+    process = process.lower()
+    processes = getProcessInstances()
+    n = processes.count(process)
+    if n > 2:
+        raise RuntimeError("Don't know which %s pid to get. There are %d." % (process, n))
+    if n == 0:
+        raise RuntimeError("No %s found" % process)
+    return getInstancePID(process)
 
 def GetPIDsByName(process):
-	processes = getProcessInstances()
-	n = processes.count(process)
-	if n == 0:
-		return []
-	if n == 1:
-		return [getPID(process)]
-	return map(getPID, ['%s#%d' % (process, i) for i in range(n)])
+    process = process.lower()
+    processes = getProcessInstances()
+    n = processes.count(process)
+    if n == 0:
+        return []
+    if n == 1:
+        return [getInstancePID(process)]
+    return map(getInstancePID, ['%s#%d' % (process, i) for i in range(n)])
 
 ##################################################
 
 def testCPU():
     from time import sleep
-    q = QueryCPUUsage(19)
+    q = QueryCPUUsage('FIREFOX')
     while(True):
         q.sample()
         sleep(1);

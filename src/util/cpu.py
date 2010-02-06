@@ -3,7 +3,7 @@
 import time
 import sys
 
-from cpuinfo import read_current_point, cpu_percentage_between_points
+from cpuinfo import read_current_point, cpu_percentage_between_points, get_pid_by_name
 
 ##################################################
 ###################  Recording  ##################
@@ -177,7 +177,10 @@ def run_command(argv):
             usage()
             sys.exit(2)
         elif o in ('-p', 'pid'):
-            pid = int(a)
+            try:
+                pid = int(a)
+            except:
+                pid = get_pid_by_name(a)
         elif o in ('-r', 'read'):
             read_mode = 'r'
         elif o in ('-a', 'Analysis'):
