@@ -86,13 +86,25 @@ def cpu_percentage_between_points(p1, p2):
         return (pu + ps) * 100.0 / (u + s + i)
 
 def get_pid_by_name(process):
-    raise NotImplementedError()
+    pids = get_pids_by_name(process)
+    if len(pids) > 1:
+        raise RuntimeError("Don't know which %s pid to get. They are %s." % (process, pids))
+    if len(pids) == 0:
+        raise RuntimeError("No %s found" % process)
+    return pids[0]
 
 def get_pids_by_name(process):
-    raise NotImplementedError()
+    import os
+    fp = os.popen('pidof %s' % process)
+    try:
+        memline = fp.read()
+    finally:
+        fp.close()
+    return map(int, memline.split())
 
 if __name__ == '__main__':
-    print read_current_cpu_point()
-    print read_current_process_point(3864)
+    #print read_current_cpu_point()
+    #print read_current_process_point(3864)
+    print get_pid_by_name('firefox')
 
 # vim: expandtab:shiftwidth=4

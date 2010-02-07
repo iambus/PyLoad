@@ -180,7 +180,7 @@ def GetPIDByName(process):
     process = process.lower()
     processes = getProcessInstances()
     n = processes.count(process)
-    if n > 2:
+    if n > 1:
         raise RuntimeError("Don't know which %s pid to get. There are %d." % (process, n))
     if n == 0:
         raise RuntimeError("No %s found" % process)
