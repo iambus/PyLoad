@@ -123,7 +123,7 @@ def read_current_point(pid = None):
 
 def cpu_percentage_between_points(p1, p2):
 	if isinstance(p2, pdh.QueryCPUUsage):
-		return p2.getCPUUsage()
+		return p2.getCPUUsage() / CORE_NUMBER
 
 	liOldSystemTime, liOldIdleTime = p1
 	liNewSystemTime, liNewIdleTime = p2

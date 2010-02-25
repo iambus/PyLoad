@@ -6,6 +6,30 @@ import sys
 from cpuinfo import read_current_point, cpu_percentage_between_points, get_pid_by_name
 
 ##################################################
+####################  CPU Box  ###################
+##################################################
+
+class CPUBox:
+    def __init__(self, pid = None):
+        self.pid = pid
+        self.last_time = None
+        self.last_cpu = None
+        self.record_current_cpu()
+
+    def record_current_cpu(self):
+        self.last_time, self.last_cpu = read_current_time_and_cpu(self.pid)
+        return self.get_last_cpu()
+
+    def get_last_cpu(self):
+        return self.last_time, self.last_cpu
+
+    def get_cpu(self):
+        last_time, last_cpu = self.get_last_cpu()
+        current_time, current_cpu = self.record_current_cpu()
+        current_cpu_usage = cpu_percentage_between_points(last_cpu, current_cpu)
+        return current_cpu_usage
+
+##################################################
 ###################  Recording  ##################
 ##################################################
 

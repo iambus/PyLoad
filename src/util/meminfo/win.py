@@ -43,7 +43,6 @@ def SimpleGetProcessMemoryInfo(Process, psmemCounters):
 	GetProcessMemoryInfo(Process, byref(psmemCounters), sizeof(psmemCounters))
 
 def ReadMemoryInfo( processID ):
-	print processID
 	pmc = PROCESS_MEMORY_COUNTERS()
 	hProcess = SimpleOpenProcess( processID )
 	try:
