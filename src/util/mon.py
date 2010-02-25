@@ -104,26 +104,23 @@ class Monitor:
 def usage():
     print '''Usage: python mon.py [option] pid...
 
-When no option specified, start to record system CPU usage. (Press Ctrl+C to stop.)
-Default log file path is cpu-usage.log.
+When no pid specified, start to record system CPU usage. (Press Ctrl+C to stop.)
+Default log file path is pymon.log.
 
 Options:
-  -h, --help      Show this help.
-  -p, --pid       If pid is specified, it will record CPU usage for single process
-  -r, --read      Compute the average CPU usage in log file.
-  -a, --analysis  Display CPU information in log file.
-  -n, --no-log    When recording CPU information, don't write date to log file (simply print to stdout).
-  -i, --interval  Delay interval (by seconds). Default to 3 seconds.
-  -q, --quiet     No console output (log to file).
+  -h, --help        Show this help
+  -s, --system      Monitor system CPU (default)
+  -S, --non-system  Don't monitor system CPU
+  -l, --log         Specify log path
+  -i, --interval    Delay interval (by seconds). Default to 3 seconds
 
 Examples:
-  python cpu.py [logpath]
-  python cpu.py -p 5678 [logpath]
-  python cpu.py -r [logpath]
-  python cpu.py -a [logpath]
-  python cpu.py -n
-  python cpu.py -i 1
-  python cpu.py -h
+  python mon.py
+  python mon.py -l your-pymon-path.csv
+  python mon.py 1123 2234
+  python mon.py -S 7762
+  python mon.py -S java
+  python mon.py -h
 '''
 
 def main():
@@ -147,7 +144,7 @@ def run_command(argv):
     default_interval = 3
     interval = default_interval
 
-    monitor_system = False
+    monitor_system = True
     pids = []
 
     for o, a in optlist:
