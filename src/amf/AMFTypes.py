@@ -7,6 +7,12 @@ class AMF3Type:
 	def __init__(self):
 		self.version = 3
 
+class UNDEFINED:
+	def __str__(self):
+		return 'undefined'
+	def __repr__(self):
+		return str(self)
+
 class NULL:
 	def __str__(self):
 		return 'null'

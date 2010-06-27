@@ -26,6 +26,7 @@ class AMFDecoder:
 				#0x10: self.read_typed_object,
 			   }
 		self.read_value3_mappings = {
+				0x00: self.read_undefined,
 				0x01: self.read_null,
 				0x02: self.read_false,
 				0x03: self.read_true,
@@ -151,6 +152,9 @@ class AMFDecoder:
 			if string:
 				self.string_reference_table.append(string)
 			return string
+
+	def read_undefined(self):
+		return UNDEFINED()
 
 	def read_null(self):
 		return NULL()

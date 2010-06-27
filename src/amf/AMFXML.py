@@ -85,6 +85,7 @@ class ToXML:
 				unicode      : self.create_str_node,
 				int          : self.create_int_node,
 				float        : self.create_float_node,
+				UNDEFINED    : self.create_undefined_node,
 				NULL         : self.create_null_node,
 				FALSE        : self.create_false_node,
 				TRUE         : self.create_true_node,
@@ -267,6 +268,13 @@ class ToXML:
 		self.set_text(node, value)
 		return node
 
+	def create_undefined_node(self, parent, value, tag):
+		if tag == None:
+			tag = 'undefined'
+		node = self.create_child(parent, tag)
+		node.setAttribute('class', 'undefined')
+		return node
+
 	def create_null_node(self, parent, value, tag):
 		if tag == None:
 			tag = 'null'
@@ -369,6 +377,7 @@ class FromXML:
 				'str'           : self.get_str,
 				'int'           : self.get_int,
 				'float'         : self.get_float,
+				'undefined'     : self.get_undefined,
 				'null'          : self.get_null,
 				'false'         : self.get_false,
 				'true'          : self.get_true,
@@ -393,6 +402,9 @@ class FromXML:
 
 	def get_float(self, node):
 		return float(self.get_text(node))
+
+	def get_undefined(self, node):
+		return UNDEFINED()
 
 	def get_null(self, node):
 		return NULL()

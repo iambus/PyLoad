@@ -33,6 +33,7 @@ class AMFEncoder:
 				StrictArray: ('\x0a', self.write_strict_array),
 				}
 		self.write_value3_mappings = {
+				UNDEFINED   : ('\x00', self.write_undefined),
 				NULL        : ('\x01', self.write_null),
 				FALSE       : ('\x02', self.write_false),
 				TRUE        : ('\x03', self.write_true),
@@ -159,6 +160,10 @@ class AMFEncoder:
 			index = len(self.string_reference_table)
 			self.string_reference_table.append(utf8)
 			self.string_rref_table[utf8] = index
+
+	def write_undefined(self, ignore):
+		# Nothing to write
+		pass
 
 	def write_null(self, ignore):
 		# Nothing to write
