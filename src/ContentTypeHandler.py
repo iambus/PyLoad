@@ -125,8 +125,10 @@ mapping = {
 		}
 
 
-def get_handler(content):
+def get_default_handler():
+	return mapping['default']
 
+def get_handler(content):
 	m = re.search(r'^content-type:\s*([^\r\n]*)', content, re.I|re.M)
 	if m:
 		type = m.group(1)
@@ -144,7 +146,7 @@ def get_handler(content):
 			return mapping['bin']
 		else:
 			return mapping['default']
-	return ContentTypeHandler()
+	return mapping['default']
 
 if __name__ == '__main__':
 	h = ContentTypeHandler()

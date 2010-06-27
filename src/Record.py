@@ -60,8 +60,8 @@ class Hit(Player, PropertyMixin):
 
 		self.label = url
 
-		self.req_handler = ContentTypeHandler.ContentTypeHandler()
-		self.resp_handler = ContentTypeHandler.ContentTypeHandler()
+		self.req_handler = ContentTypeHandler.get_default_handler()
+		self.resp_handler = ContentTypeHandler.get_default_handler()
 
 	def finish(self):
 		assert self.oreqstr == None, 'finish twice!'
