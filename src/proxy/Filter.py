@@ -2,6 +2,10 @@
 '''
 A rule return True value if the rule matched.
 A filter return True value if the applied input should be ignored.
+
+For example, you could create a block.txt, and input below line to ignore http://your-host/amfpolling
+amfpolling
+
 '''
 
 import re
