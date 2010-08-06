@@ -5,8 +5,33 @@ from Special import Special
 from Player import Script
 
 
+def to_unicode(text):
+	if type(text) == unicode:
+		return text
+	encodings = ["utf-8", "gbk"]
+	try:
+		return unicode(text)
+	except:
+		pass
+	for encoding in encodings:
+		try:
+			return unicode(text, encoding)
+		except:
+			pass
+	return None
 
 def matchString(keyword, text):
+	if type(keyword) != type(text):
+		ukeyword = to_unicode(keyword)
+		utext = to_unicode(text)
+		if ukeyword == None:
+			print "Cannot decode keyword: ", keyword
+			return None
+		if utext == None:
+			print "Cannot decode text: ", text
+			return None
+		keyword = ukeyword
+		text = utext
 	return keyword.lower() in text.lower()
 
 def matchLabel(keyword, data):
