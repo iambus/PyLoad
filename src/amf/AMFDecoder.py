@@ -256,6 +256,7 @@ class AMFDecoder:
 			return objref
 		elif u & 4:
 			# XXXXXXXXXXXXXXXXXXXXXXXXXXX 111
+			# TODO: Sometimes the value is 1111
 			assert (u >> 3) == 0
 			# U29O-traits-ext
 			alias_name = self.read_utf8_vr()
