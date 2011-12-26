@@ -118,7 +118,7 @@ class Hit(Player, PropertyMixin):
 		import re
 		m = re.findall(r'<member [^<>]*name="operation">([^<>]+)</member>', self.reqstr)
 		if m:
-			self.label = '+'.join(m)
+			self.label = ', '.join(m)
 
 	def play(self, basescope = None):
 		if basescope == None:
