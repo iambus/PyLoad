@@ -116,9 +116,9 @@ class Hit(Player, PropertyMixin):
 	def set_label(self):
 		#TODO: generalize it
 		import re
-		m = re.search(r'<member [^<>]*name="operation">([^<>]+)</member>', self.reqstr)
+		m = re.findall(r'<member [^<>]*name="operation">([^<>]+)</member>', self.reqstr)
 		if m:
-			self.label = m.group(1)
+			self.label = '+'.join(m)
 
 	def play(self, basescope = None):
 		if basescope == None:
